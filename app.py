@@ -12,7 +12,7 @@ app.config.update({
     "SECRET_KEY": "6w_#w*~AVts3!*yd&C]jP0(x_1ssd]MVgzfAw8%fF+c@|ih0s1H&yZQC&-u~O[--"  # For the session
     })
 
-page_config = { }
+site_config = { }
 
 
 """
