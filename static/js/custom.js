@@ -10,6 +10,16 @@
 	"use strict";
 
 	$(document).ready(function() {
+		console.log("Document Ready!");
+
+/*
+		$(document).on({
+			ajaxStart: function() { $("body").addClass("page-loader-1"); },
+	    	ajaxStop: function() { $("body").removeClass("page-loader-1"); }
+		});
+*/
+		$("#loginButton").on("click", loginClickHandler);
+
 		if (($(".main-navigation.onclick").length>0) && $(window).width() > 991 ){
 			$.notify({
 				// options
@@ -42,3 +52,37 @@
 	}); // End document ready
 
 })(jQuery);
+
+
+function loginClickHandler() {
+	console.log("loginClickHandler()");
+
+	//TODO: Display Spinner
+	$("body").addClass("page-loader-2");
+
+	$.ajax({
+        url: "/login",
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify({"username": $("#username").val(), "password": $("#password").val()}),
+        success: data => {
+            console.log(data);
+            var authResponseJson = JSON.parse(data);
+
+            if(authResponseJson.success) {
+				location.href = authResponseJson.redirectUrl;
+            } else {
+            	//TODO: use modal popup
+            	$("body").removeClass("page-loader-2");
+            	alert(authResponseJson.errorMessage);
+            }
+        }
+    });
+}
+
+window.paceOptions = {
+  // Disable the 'elements' source
+  elements: false,
+  document: true,
+
+}
