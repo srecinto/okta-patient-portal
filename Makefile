@@ -3,7 +3,7 @@
 .PHONY: deploy
 deploy: ## Deploy to Heroku
 	@echo "+ $@"
-	@git push heroku master
+	@git push -f heroku master
 
 .PHONY: open
 open: ## Deploy to Heroku
