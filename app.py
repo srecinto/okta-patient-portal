@@ -107,7 +107,10 @@ def oidc():
 
     session.pop("state", None)
 
+    # return response
+    print(response)
     return response
+    # return render_template('index.html', user)
 
 
 @app.route('/login', methods=["POST"])
