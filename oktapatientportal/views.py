@@ -2,30 +2,13 @@ import os
 import json
 import uuid
 
-from oktapatientportal import app
+from oktapatientportal import app, default_settings, secure_settings
 
 from flask import request, session, send_from_directory, redirect, make_response, render_template
 
 from utils.okta import OktaAuth
 
-site_config = {
-    "skin": os.getenv("SITE_SKIN", "blue"),
-    "base_title": os.getenv("SITE_BASE_TITLE", "Medical Group"),
-    "current_title": "Patient Portal",
-    "app_title": os.getenv("SITE_APP_TITLE", "Patient Portal"),
-    "app_logo": os.getenv("SITE_APP_LOGO", "images/logo_{0}.png".format(os.getenv("SITE_SKIN", "blue"))),
-    "app_favicon": os.getenv("SITE_APP_FAVICON", "images/favicon.ico"),
-    "app_slogan": os.getenv("SITE_APP_SLOGAN", "Get Better Sooner"),
-}
-
-okta_config = {
-    "org_url": os.getenv("OKTA_ORG_URL", "<My Okta Org Here>"),
-    "client_id": os.getenv("OKTA_CLIENT_ID", "<Client Id in Okta App>"),
-    "client_secret": os.getenv("OKTA_CLIENT_SECRET", "<Client Secret in Okta App>"),
-    "redirect_uri": os.getenv("OKTA_OIDC_REDIRECT_URI", "<OIDC Auth Code Endpoint for your app>"),
-    "app_base_url": os.getenv("APP_BASE_URL", "<Default Landing URL for your app>"),
-    "auth_server_id": os.getenv("OKTA_AUTH_SERVER_ID", None)
-}
+# Access-Control-Allow-Origin: *
 
 
 @app.route('/<path:filename>')
@@ -41,18 +24,23 @@ def index():
     """ handler for the root url path of the app """
     print("index()")
 
-    site_config["current_title"] = "{0} | {1} Home".format(
-        site_config["base_title"],
-        site_config["app_title"])
+    default_settings["site_config"]["current_title"] = "{0} | {1} Home".format(
+        default_settings["site_config"]["base_title"],
+        default_settings["site_config"]["app_title"])
 
     response = make_response(
         render_template(
             "index.html",
-            site_config=site_config
+            site_config=default_settings["site_config"]
         )
     )
 
     return response
+
+
+@app.route('/.well-known/default-settings')
+def well_known_default_settings():
+    return json.dumps(default_settings);
 
 
 @app.route('/oidc', methods=["POST"])
@@ -67,17 +55,17 @@ def oidc():
     if session["state"] == request.form["state"]:
         oidc_code = request.form["code"]
         #  print("oidc_code: {0}".format(oidc_code))
-        okta_auth = OktaAuth(okta_config)
+        okta_auth = OktaAuth(default_settings["okta_config"])
         oauth_token = okta_auth.get_oauth_token(
             code=oidc_code,
             grant_type="authorization_code",
             auth_options={
-                "client_id": okta_config["client_id"],
-                "client_secret": okta_config["client_secret"],
+                "client_id": default_settings["okta_config"]["client_id"],
+                "client_secret": secure_settings["okta_config"]["client_secret"],
             }
         )
         #  print("oauth_token: {0}".format(json.dumps(oauth_token, indent=4, sort_keys=True)))
-        app_landing_page_url = okta_config["app_base_url"]
+        app_landing_page_url = default_settings["okta_config"]["app_base_url"]
         response = make_response(redirect(app_landing_page_url))
         response.set_cookie('token', oauth_token["access_token"])
         response.set_cookie('id_token', oauth_token["id_token"])
@@ -96,7 +84,7 @@ def login():
     print("login()")
     auth_response = {"success": False}
     login_form_data = request.get_json()
-    okta_auth = OktaAuth(okta_config)
+    okta_auth = OktaAuth(default_settings["okta_config"])
 
     #  print("login_form_data: {0}".format(json.dumps(login_form_data, indent=4, sort_keys=True)))
     authn_json_response = okta_auth.authenticate(
@@ -134,8 +122,8 @@ def logout():
     print("logout()")
 
     redirect_url = "{host}/login/signout?fromURI={redirect_path}".format(
-        host=okta_config["org_url"],
-        redirect_path=okta_config["app_base_url"]
+        host=default_settings["okta_config"]["org_url"],
+        redirect_path=default_settings["okta_config"]["app_base_url"]
     )
 
     print("redirect_url: {0}".format(redirect_url))
@@ -152,7 +140,7 @@ def test():
     print("test()")
 
     if("token" in request.cookies):
-        okta_auth = OktaAuth(okta_config)
+        okta_auth = OktaAuth(default_settings["okta_config"])
         introspection_results_json = okta_auth.introspect(
             token=request.cookies.get("token"),
             headers=request.headers
