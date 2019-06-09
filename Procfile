@@ -1,1 +1,1 @@
-web: gunicorn oktaparentportal:app
+web: gunicorn oktapatientportal:app
