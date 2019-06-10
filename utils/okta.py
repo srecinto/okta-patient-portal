@@ -111,11 +111,6 @@ class OktaUtil:
             "Content-Type": "application/json"
         }
 
-        RestUtil.map_attribute("User-Agent", headers, okta_default_headers)
-        RestUtil.map_attribute("X-Forwarded-For", headers, okta_default_headers)
-        RestUtil.map_attribute("X-Forwarded-Port", headers, okta_default_headers)
-        RestUtil.map_attribute("X-Forwarded-Proto", headers, okta_default_headers)
-
         return okta_default_headers
 
     @staticmethod
