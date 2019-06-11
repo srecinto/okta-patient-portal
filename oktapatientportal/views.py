@@ -85,7 +85,7 @@ def get_well_know_settings_url(udp_subdomain, demo_app_name):
 def map_config(config, session):
     print("map_config(config, session)")
 
-    session["client_id"] = config["clientId"]
+    session["client_id"] = config["client_id"]
     session["issuer"] = config["issuer"]
 
     session["app_base_url"] = config["settings"]["app_base_url"]
@@ -177,7 +177,6 @@ def login():
         headers=request.headers)
 
     # print("authn_json_response: {0}".format(json.dumps(authn_json_response, indent=4, sort_keys=True)))
-
     if "sessionToken" in authn_json_response:
         session["state"] = str(uuid.uuid4())
         oauth_authorize_url = okta_auth.create_oauth_authorize_url(
@@ -204,6 +203,7 @@ def login():
 
 
 @app.route("/logout", methods=["GET"])
+@apply_remote_config
 def logout():
     print("logout()")
 
@@ -251,4 +251,4 @@ def clear_session():
     session.clear()
     session["is_config_set"] = False
 
-    return make_response(redirect("/"))
+    return logout()

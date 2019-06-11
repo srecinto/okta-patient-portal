@@ -5,7 +5,7 @@ from flask import Flask
 
 default_settings = {
     "config": {
-        "clientId": os.getenv("OKTA_CLIENT_ID", "-Client Id in Okta App-"),
+        "client_id": os.getenv("OKTA_CLIENT_ID", "-Client Id in Okta App-"),
         "issuer": os.getenv("OKTA_ISSUER", None),
         "app_config": os.getenv("SITE_APP_CONFIG", "./well-known/default-settings"),
         "settings": {
