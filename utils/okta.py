@@ -17,7 +17,7 @@ class OktaAuth:
 
     def authenticate(self, username, password, additional_options=None, headers=None):
         print("OktaAuth.authenticate()")
-        url = "{host}/api/v1/authn".format(host=self.okta_config["org_url"])
+        url = "{host}/api/v1/authn".format(host=self.okta_config["base_url"])
         okta_headers = OktaUtil.get_default_okta_headers(headers)
 
         body = {
