@@ -87,6 +87,8 @@ def map_config(config, session):
 
     session["client_id"] = config["client_id"]
     session["issuer"] = config["issuer"]
+    session["base_url"] = config["base_url"]
+    session["redirect_uri"] = config["redirect_uri"]
 
     session["app_base_url"] = config["settings"]["app_base_url"]
     session["app_favicon"] = config["settings"]["app_favicon"]
@@ -95,8 +97,6 @@ def map_config(config, session):
     session["app_title"] = config["settings"]["app_title"]
     session["base_title"] = config["settings"]["base_title"]
     session["current_title"] = config["settings"]["current_title"]
-    session["org_url"] = config["settings"]["org_url"]
-    session["redirect_uri"] = config["settings"]["redirect_uri"]
     session["skin"] = config["settings"]["skin"]
 
 
@@ -207,7 +207,7 @@ def logout():
     print("logout()")
 
     redirect_url = "{host}/login/signout?fromURI={redirect_path}".format(
-        host=session["org_url"],
+        host=session["base_url"],
         redirect_path=session["app_base_url"]
     )
 
