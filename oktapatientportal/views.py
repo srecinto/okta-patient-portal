@@ -203,7 +203,6 @@ def login():
 
 
 @app.route("/logout", methods=["GET"])
-@apply_remote_config
 def logout():
     print("logout()")
 
@@ -251,4 +250,4 @@ def clear_session():
     session.clear()
     session["is_config_set"] = False
 
-    return logout()
+    return make_response(redirect("/"))
