@@ -7,7 +7,7 @@ from oktapatientportal import app, default_settings, secure_settings
 
 from functools import wraps
 
-from flask import request, session, send_from_directory, redirect, make_response, render_template, jsonify
+from flask import request, session, send_from_directory, redirect, make_response, render_template
 
 from utils.okta import OktaAuth
 from utils.rest import RestUtil
@@ -42,12 +42,16 @@ def apply_remote_config(f):
             config_json = RestUtil.execute_get(well_known_default_settings_url, {}, json_headers)
             print("config_json: {0}".format(json.dumps(config_json, indent=4, sort_keys=True)))
             # If invalid response, default to default / environment setting
-            if "org_url" in config_json:
-                print("Remote config success. Mapping config to session")
-                map_config(config_json, session)
+            if "config" in config_json:
+                if config_json["config"]["status"] == "ready":
+                    print("Remote config success. Mapping config to session")
+                    map_config(config_json["config"], session)
+                else:
+                    print("Remote config not ready. Default to the local container env and default config")
+                    map_config(default_settings["config"], session)
             else:
                 print("Remote config failed. Default to the local container env and default config")
-                map_config(default_settings["site_config"], session)
+                map_config(default_settings["config"], session)
 
             session["is_config_set"] = True
 
@@ -59,8 +63,8 @@ def get_domain_parts_from_request(request):
     print("get_domain_parts_from_request(request)")
 
     domain_parts = request.host.split(".")
-    demo_app_name = domain_parts[0]
-    udp_subdomain = domain_parts[1]
+    udp_subdomain = domain_parts[0]
+    demo_app_name = domain_parts[1]
 
     print("udp_subdomain: {0}".format(udp_subdomain))
     print("demo_app_name: {0}".format(demo_app_name))
@@ -70,10 +74,7 @@ def get_domain_parts_from_request(request):
 
 def get_well_know_settings_url(udp_subdomain, demo_app_name):
     print("get_well_know_settings_url()")
-    # https://ejemplo.muestra.udp.example/joel/.well-known/default-settings
-    # https://elasticbeanstalk-us-east-1-742228732524.s3.amazonaws.com/int-patient-portal/lilly/.well-known/default-settings
-    # https://elasticbeanstalk-us-east-1-742228732524.s3.amazonaws.com/{udp_subdomain}/{demo_app_name}/.well-known/default-settings
-    well_known_default_settings_url = default_settings["site_config"]["app_config"].format(
+    well_known_default_settings_url = default_settings["config"]["app_config"].format(
         udp_subdomain=udp_subdomain,
         demo_app_name=demo_app_name)
 
@@ -84,25 +85,19 @@ def get_well_know_settings_url(udp_subdomain, demo_app_name):
 def map_config(config, session):
     print("map_config(config, session)")
 
-    # Site/App Settings
-    session["app_base_url"] = config["app_base_url"]
-    session["app_config"] = config["app_config"]
-    session["app_favicon"] = config["app_favicon"]
-    session["app_logo"] = config["app_logo"]
-    session["app_slogan"] = config["app_slogan"]
-    session["app_title"] = config["app_title"]
-    session["auth_server_id"] = config["auth_server_id"]
-    session["base_title"] = config["base_title"]
     session["client_id"] = config["client_id"]
-    session["current_title"] = config["current_title"]
-    session["org_url"] = config["org_url"]
-    session["redirect_uri"] = config["redirect_uri"]
-    session["skin"] = config["skin"]
-    # Okta Settings
-    session["org_url"] = config["org_url"]
-    session["client_id"] = config["client_id"]
-    session["redirect_uri"] = config["redirect_uri"]
-    session["auth_server_id"] = config["auth_server_id"]
+    session["issuer"] = config["issuer"]
+
+    session["app_base_url"] = config["settings"]["app_base_url"]
+    session["app_favicon"] = config["settings"]["app_favicon"]
+    session["app_logo"] = config["settings"]["app_logo"]
+    session["app_slogan"] = config["settings"]["app_slogan"]
+    session["app_title"] = config["settings"]["app_title"]
+    session["base_title"] = config["settings"]["base_title"]
+    session["current_title"] = config["settings"]["current_title"]
+    session["org_url"] = config["settings"]["org_url"]
+    session["redirect_uri"] = config["settings"]["redirect_uri"]
+    session["skin"] = config["settings"]["skin"]
 
 
 @app.route('/<path:filename>')
@@ -121,6 +116,7 @@ def index():
 
     session["current_title"] = "{0} | {1} Home".format(session["base_title"], session["app_title"])
 
+    print("skin: {0}".format(session["skin"]))
     response = make_response(
         render_template(
             "index.html",
@@ -149,7 +145,7 @@ def oidc():
             grant_type="authorization_code",
             auth_options={
                 "client_id": session["client_id"],
-                "client_secret": secure_settings["okta_config"]["client_secret"],
+                "client_secret": secure_settings["config"]["client_secret"],
             }
         )
         #  print("oauth_token: {0}".format(json.dumps(oauth_token, indent=4, sort_keys=True)))
@@ -180,8 +176,7 @@ def login():
         password=login_form_data["password"],
         headers=request.headers)
 
-    #  print("authn_json_response: {0}".format(json.dumps(authn_json_response, indent=4, sort_keys=True)))
-
+    # print("authn_json_response: {0}".format(json.dumps(authn_json_response, indent=4, sort_keys=True)))
     if "sessionToken" in authn_json_response:
         session["state"] = str(uuid.uuid4())
         oauth_authorize_url = okta_auth.create_oauth_authorize_url(
@@ -197,6 +192,8 @@ def login():
 
         auth_response["redirectUrl"] = oauth_authorize_url
         auth_response["success"] = True
+
+        # print("oauth_authorize_url: {0}".format(oauth_authorize_url))
 
         #  return make_response(redirect(oauth_authorize_url))
     else:
@@ -254,23 +251,3 @@ def clear_session():
     session["is_config_set"] = False
 
     return make_response(redirect("/"))
-
-
-""" This is a test endpoint """
-
-
-@app.route('/.well-known/default-settings')
-def well_known_default_settings():
-    print("well_known_default_settings()")
-
-    return jsonify(default_settings)
-
-
-""" This is a test endpoint """
-
-
-@app.route('/api/config/<udp_subdomain>/secrets')
-def api_config_secrets(udp_subdomain):
-    print("well_known_default_settings()")
-
-    return jsonify(secure_settings)

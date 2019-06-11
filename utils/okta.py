@@ -11,6 +11,7 @@ class OktaAuth:
         print("OktaAuth init()")
         if okta_config:
             self.okta_config = okta_config
+            # print("self.okta_config: {0}".format(self.okta_config))
         else:
             raise Exception("Requires okta_config")
 
@@ -37,14 +38,13 @@ class OktaAuth:
         print("OktaAuth.create_oauth_authorize_url()")
 
         url = (
-            "{host}/oauth2{auth_server}/v1/authorize?"
+            "{issuer}/v1/authorize?"
             "response_type={response_type}&"
             "client_id={clint_id}&"
             "redirect_uri={redirect_uri}&"
             "state={state}"
         ).format(
-            host=self.okta_config["org_url"],
-            auth_server=OktaUtil.get_authserver_id(self.okta_config["auth_server_id"]),
+            issuer=self.okta_config["issuer"],
             clint_id=self.okta_config["client_id"],
             redirect_uri=self.okta_config["redirect_uri"],
             state=state,
@@ -62,13 +62,12 @@ class OktaAuth:
         okta_headers = OktaUtil.get_oauth_okta_headers(headers)
 
         url = (
-            "{host}/oauth2{auth_server}/v1/token?"
+            "{issuer}/v1/token?"
             "grant_type={grant_type}&"
             "code={code}&"
             "redirect_uri={redirect_uri}"
         ).format(
-            host=self.okta_config["org_url"],
-            auth_server=OktaUtil.get_authserver_id(self.okta_config["auth_server_id"]),
+            issuer=self.okta_config["issuer"],
             code=code,
             redirect_uri=self.okta_config["redirect_uri"],
             grant_type=grant_type
@@ -88,9 +87,8 @@ class OktaAuth:
         print("OktaAuth.introspect()")
         okta_headers = OktaUtil.get_oauth_okta_headers(headers, self.okta_config["client_id"], self.okta_config["client_secret"])
 
-        url = "{host}/oauth2{auth_server}/v1/introspect?token={token}".format(
-            host=self.okta_config["org_url"],
-            auth_server=OktaUtil.get_authserver_id(self.okta_config["auth_server_id"]),
+        url = "{issuer}/v1/introspect?token={token}".format(
+            issuer=self.okta_config["issuer"],
             token=token)
         body = {}
 
@@ -137,12 +135,3 @@ class OktaUtil:
         encoded_auth = base64.b64encode(bytes(auth_raw, 'UTF-8')).decode("UTF-8")
 
         return encoded_auth
-
-    @staticmethod
-    def get_authserver_id(auth_server_id):
-        auth_server = ""
-
-        if auth_server_id:
-            auth_server = "/{0}".format(auth_server_id)
-
-        return auth_server
