@@ -28,6 +28,7 @@ default_settings = {
 secure_settings = {
     "config": {
         "client_secret": os.getenv("OKTA_CLIENT_SECRET", "-Client Secret in Okta App-"),
+        "okta_api_token": os.getenv("OKTA_API_TOKEN", "-Okta API Token-"),
         "app_secret_key": os.getenv("SECRET_KEY", "-A GUID for your secret key-"),
     },
 }
