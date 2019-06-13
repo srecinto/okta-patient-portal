@@ -63,6 +63,8 @@ def apply_remote_config(f):
 
             session["is_config_set"] = True
 
+            print("Session Dump: {0}".format(session))
+
         return f(*args, **kws)
     return decorated_function
 
@@ -122,7 +124,7 @@ def map_secrets_config(config, session):
     print("map_secrets_config(config, session)")
     try:
         secret_data = config.content.decode('utf-8').splitlines()
-        # print("config: {0}".format(config))
+        print("config: {0}".format(config))
 
         for config_item in secret_data:
             split_config_item = config_item.split("=")
