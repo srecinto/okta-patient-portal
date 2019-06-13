@@ -1,6 +1,7 @@
 import os
 import json
 import uuid
+import requests
 
 
 from oktapatientportal import app, default_settings, secure_settings
@@ -37,7 +38,8 @@ def apply_remote_config(f):
             session["udp_subdomain"] = udp_subdomain
             session["demo_app_name"] = demo_app_name
 
-            well_known_default_settings_url = get_well_know_settings_url(udp_subdomain, demo_app_name)
+            well_known_default_settings_url, secrets_url = get_configs_url(udp_subdomain, demo_app_name)
+            # print("well_known_default_settings_url: {0}".format(well_known_default_settings_url))
 
             config_json = RestUtil.execute_get(well_known_default_settings_url, {}, json_headers)
             print("config_json: {0}".format(json.dumps(config_json, indent=4, sort_keys=True)))
@@ -46,12 +48,18 @@ def apply_remote_config(f):
                 if config_json["config"]["status"] == "ready":
                     print("Remote config success. Mapping config to session")
                     map_config(config_json["config"], session)
+
+                    print("Getting Secrets config")
+                    # print("secrets_url: {0}".format(secrets_url))
+                    map_secrets_config(requests.get(secrets_url), session)
+
                 else:
                     print("Remote config not ready. Default to the local container env and default config")
-                    map_config(default_settings["config"], session)
+                    set_default_env_secrets(session)
+
             else:
                 print("Remote config failed. Default to the local container env and default config")
-                map_config(default_settings["config"], session)
+                set_default_env_secrets(session)
 
             session["is_config_set"] = True
 
@@ -72,14 +80,24 @@ def get_domain_parts_from_request(request):
     return udp_subdomain, demo_app_name
 
 
-def get_well_know_settings_url(udp_subdomain, demo_app_name):
+def set_default_env_secrets(session):
+    print("set_default_env_secrets(session)")
+    map_config(default_settings["config"], session)
+
+    session["CLIENT_SECRET"] = secure_settings["config"]["client_secret"]
+    session["OKTA_API_TOKEN"] = secure_settings["config"]["okta_api_token"]
+
+
+def get_configs_url(udp_subdomain, demo_app_name):
     print("get_well_know_settings_url()")
-    well_known_default_settings_url = default_settings["config"]["app_config"].format(
+    config_url = default_settings["config"]["app_config"].format(
         udp_subdomain=udp_subdomain,
         demo_app_name=demo_app_name)
 
-    print("well_known_default_settings_url: {0}".format(well_known_default_settings_url))
-    return well_known_default_settings_url
+    well_known_default_settings_url = "{0}".format(config_url)
+    secrets_url = "{0}/secret".format(config_url)
+
+    return well_known_default_settings_url, secrets_url
 
 
 def map_config(config, session):
@@ -98,6 +116,24 @@ def map_config(config, session):
     session["base_title"] = config["settings"]["base_title"]
     session["current_title"] = config["settings"]["current_title"]
     session["skin"] = config["settings"]["skin"]
+
+
+def map_secrets_config(config, session):
+    print("map_secrets_config(config, session)")
+    try:
+        secret_data = config.content.decode('utf-8').splitlines()
+        # print("config: {0}".format(config))
+
+        for config_item in secret_data:
+            split_config_item = config_item.split("=")
+            if len(split_config_item) == 2:
+                env_key = split_config_item[0]
+                env_value = split_config_item[1]
+
+                session[env_key] = env_value
+    except Exception as ex:
+        print("Failed to map secrets, setting defaults instead.  Exception: {0}".format(ex))
+        set_default_env_secrets(session)
 
 
 @app.route('/<path:filename>')
@@ -145,7 +181,7 @@ def oidc():
             grant_type="authorization_code",
             auth_options={
                 "client_id": session["client_id"],
-                "client_secret": secure_settings["config"]["client_secret"],
+                "client_secret": session["CLIENT_SECRET"],
             }
         )
         #  print("oauth_token: {0}".format(json.dumps(oauth_token, indent=4, sort_keys=True)))
@@ -194,10 +230,11 @@ def login():
         auth_response["success"] = True
 
         # print("oauth_authorize_url: {0}".format(oauth_authorize_url))
-
-        #  return make_response(redirect(oauth_authorize_url))
-    else:
+    elif "errorSummary" in authn_json_response:
         auth_response["errorMessage"] = "Login Unsuccessful: {0}".format(authn_json_response["errorSummary"])
+    else:
+        # pass the message down for further processing like MFA
+        auth_response = authn_json_response
 
     return json.dumps(auth_response)
 
