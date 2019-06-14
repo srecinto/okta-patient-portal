@@ -1,7 +1,7 @@
 import os
 
 from flask import Flask
-from flask_sslify import SSLify
+# from flask_sslify import SSLify
 
 default_settings = {
     "config": {
@@ -36,7 +36,7 @@ secure_settings = {
 app = Flask(__name__)
 app.config["SECRET_KEY"] = secure_settings["config"]["app_secret_key"]
 
-sslify = SSLify(app, permanent=True, subdomains=True)
+# sslify = SSLify(app, permanent=True, subdomains=True)
 
 # This must go last to avoid the circular dependency issue
 
