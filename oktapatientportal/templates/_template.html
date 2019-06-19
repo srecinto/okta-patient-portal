@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <title>{% block title %}{% endblock %}</title>
+    <meta name="author" content="author">
+
+    <!-- Mobile Meta -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{{site_config.app_favicon}}">
+
+    <!-- Web Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Raleway:300,400,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet">
+
+    <!-- Bootstrap core CSS -->
+    <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
+
+    <!-- Font Awesome CSS -->
+    <link href="fonts/font-awesome/css/font-awesome.css" rel="stylesheet">
+
+    <!-- Plugins -->
+    <link href="plugins/magnific-popup/magnific-popup.css" rel="stylesheet">
+    <link href="plugins/rs-plugin-5/css/settings.css" rel="stylesheet">
+    <link href="plugins/rs-plugin-5/css/layers.css" rel="stylesheet">
+    <link href="plugins/rs-plugin-5/css/navigation.css" rel="stylesheet">
+    <link href="css/animations.css" rel="stylesheet">
+    <link href="plugins/slick/slick.css" rel="stylesheet">
+
+    <!-- The Project's core CSS file -->
+    <!-- Use css/rtl_style.css for RTL version -->
+    <link href="css/style.css" rel="stylesheet" >
+    <!-- The Project's Typography CSS file, includes used fonts -->
+    <!-- Used font for body: Roboto -->
+    <!-- Used font for headings: Raleway -->
+    <!-- Use css/rtl_typography-default.css for RTL version -->
+    <link href="css/typography-default.css" rel="stylesheet" >
+    <!-- Color Scheme (In order to change the color scheme, replace the blue.css with the color scheme that you prefer) -->
+    <link href="css/skins/{{site_config.skin}}.css" rel="stylesheet">
+
+
+
+
+    <!-- Custom css -->
+    <link href="css/custom.css" rel="stylesheet">
+
+  </head>
+
+  <!-- body classes:  -->
+  <!-- "boxed": boxed layout mode e.g. <body class="boxed"> -->
+  <!-- "pattern-1 ... pattern-9": background patterns for boxed layout mode e.g. <body class="boxed pattern-1"> -->
+  <!-- "transparent-header": makes the header transparent and pulls the banner to top -->
+  <!-- "gradient-background-header": applies gradient background to header -->
+  <!-- "page-loader-1 ... page-loader-6": add a page loader to the page (more info @components-page-loaders.html) -->
+  <body class="front-page ">
+
+    <!-- scrollToTop -->
+    <!-- ================ -->
+    <div class="scrollToTop circle"><i class="fa fa-angle-up"></i></div>
+
+    <!-- page wrapper start -->
+    <!-- ================ -->
+    <div class="page-wrapper">
+      <!-- header-container start -->
+      <div class="header-container">
+        <!-- header-top start -->
+        <!-- classes:  -->
+        <!-- "dark": dark version of header top e.g. class="header-top dark" -->
+        <!-- "colored": colored version of header top e.g. class="header-top colored" -->
+        <!-- ================ -->
+        <div class="header-top colored">
+          <div class="container">
+            <div class="row">
+              <div class="col-3 col-sm-6 col-lg-9">
+                <!-- header-top-first start -->
+                <!-- ================ -->
+                <div class="header-top-first clearfix">
+                  <ul class="social-links circle small clearfix hidden-sm-down">
+                    <li class="twitter"><a href="#"><i class="fa fa-twitter"></i></a></li>
+                    <li class="linkedin"><a href="#"><i class="fa fa-linkedin"></i></a></li>
+                    <li class="facebook"><a href="#"><i class="fa fa-facebook"></i></a></li>
+                  </ul>
+                  <div class="social-links hidden-md-up circle small">
+                    <div class="btn-group dropdown">
+                      <button id="header-top-drop-1" type="button" class="btn dropdown-toggle dropdown-toggle--no-caret" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-share-alt"></i></button>
+                      <ul class="dropdown-menu dropdown-animation" aria-labelledby="header-top-drop-1">
+                        <li class="twitter"><a href="#"><i class="fa fa-twitter"></i></a></li>
+                        <li class="linkedin"><a href="#"><i class="fa fa-linkedin"></i></a></li>
+                        <li class="facebook"><a href="#"><i class="fa fa-facebook"></i></a></li>
+                      </ul>
+                    </div>
+                  </div>
+                  <ul class="list-inline hidden-md-down">
+                    <li class="list-inline-item"><a class="link-light" href="#findadoctor"><i class="fa fa-user-md pr-1"></i>Find a Doctor</a></li>
+                    <li class="list-inline-item"><a class="link-light" href="#"><i class="fa fa-flask pr-1"></i>Researches</a></li>
+                    <li class="list-inline-item"><a class="link-light" href="#"><i class="fa fa-info-circle pr-1"></i>Information</a></li>
+                    <li class="list-inline-item hidden-md-down"><strong class="pl-1">Call Us:</strong> +00 123 123 123</li>
+                  </ul>
+                </div>
+                <!-- header-top-first end -->
+              </div>
+              <div class="col-9 col-sm-6 col-lg-3">
+
+                <!-- header-top-second start -->
+                <!-- ================ -->
+                <div id="header-top-second"  class="clearfix">
+
+                  <!-- header top dropdowns start -->
+                  <!-- ================ -->
+                  <div class="header-top-dropdown text-right">
+                    <div class="btn-group">
+                      <a href="page-signup.html" class="btn btn-default btn-sm"><i class="fa fa-user pr-2"></i> Sign Up</a>
+                    </div>
+                    <div class="btn-group">
+                      <button id="header-top-drop-2" type="button" class="btn dropdown-toggle btn-default btn-sm dropdown-toggle--no-caret" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-lock pr-2"></i> Login</button>
+                      <ul class="dropdown-menu dropdown-menu-right dropdown-animation" aria-labelledby="header-top-drop-2">
+                        <li>
+                          <form class="login-form margin-clear" id="loginForm">
+                            <div class="form-group has-feedback">
+                              <label class="control-label">Username</label>
+                              <input type="text" class="form-control" placeholder="" id="username">
+                              <i class="fa fa-user form-control-feedback"></i>
+                            </div>
+                            <div class="form-group has-feedback">
+                              <label class="control-label">Password</label>
+                              <input type="password" class="form-control" placeholder="" id="password">
+                              <i class="fa fa-lock form-control-feedback"></i>
+                            </div>
+                            <button type="button" class="btn btn-gray btn-sm" id="loginButton">Log In</button>
+                            <span class="pl-1 pr-1">or</span>
+                            <button type="button" class="btn btn-default btn-sm">Sign Up</button>
+                            <ul>
+                              <li><a href="#">Forgot your password?</a></li>
+                            </ul>
+                            <span class="text-center">Login with</span>
+                            <ul class="social-links circle small colored clearfix">
+                              <li class="facebook"><a href="#"><i class="fa fa-facebook"></i></a></li>
+                              <li class="twitter"><a href="#"><i class="fa fa-twitter"></i></a></li>
+                              <li class="googleplus"><a href="#"><i class="fa fa-google-plus"></i></a></li>
+                            </ul>
+                          </form>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <!--  header top dropdowns end -->
+                </div>
+                <!-- header-top-second end -->
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- header-top end -->
+
+
+        <!-- header start -->
+        <!-- classes:  -->
+        <!-- "fixed": enables fixed navigation mode (sticky menu) e.g. class="header fixed clearfix" -->
+        <!-- "fixed-desktop": enables fixed navigation only for desktop devices e.g. class="header fixed fixed-desktop clearfix" -->
+        <!-- "fixed-all": enables fixed navigation only for all devices desktop and mobile e.g. class="header fixed fixed-desktop clearfix" -->
+        <!-- "dark": dark version of header e.g. class="header dark clearfix" -->
+        <!-- "centered": mandatory class for the centered logo layout -->
+        <!-- ================ -->
+        <header class="header fixed fixed-desktop clearfix">
+          <div class="container">
+            <div class="row">
+              <div class="col-md-auto hidden-md-down pl-3">
+                <!-- header-first start -->
+                <!-- ================ -->
+                <div class="header-first clearfix">
+
+                  <!-- logo -->
+                  <div id="logo" class="logo">
+                    <a href="/index"><img id="logo_img" src="{{site_config.app_logo}}" alt="{{site_config.app_title}}"></a>
+                  </div>
+
+                  <!-- name-and-slogan -->
+                  <div class="site-slogan">
+                    {{site_config.app_slogan}}
+                  </div>
+
+                </div>
+                <!-- header-first end -->
+
+              </div>
+              <div class="col-lg-8 ml-lg-auto">
+
+                <!-- header-second start -->
+                <!-- ================ -->
+                <div class="header-second clearfix">
+
+                <!-- main-navigation start -->
+                <!-- classes: -->
+                <!-- "onclick": Makes the dropdowns open on click, this the default bootstrap behavior e.g. class="main-navigation onclick" -->
+                <!-- "animated": Enables animations on dropdowns opening e.g. class="main-navigation animated" -->
+                <!-- ================ -->
+                <div class="main-navigation main-navigation--mega-menu  animated">
+                  <nav class="navbar navbar-expand-lg navbar-light p-0">
+                    <div class="navbar-brand clearfix hidden-lg-up">
+
+                      <!-- logo -->
+                      <div id="logo-mobile" class="logo">
+                        <a href="index.html"><img id="logo-img-mobile" src="{{site_config.app_logo}}" alt="{{site_config.app_title}}"></a>
+                      </div>
+
+                      <!-- name-and-slogan -->
+                      <div class="site-slogan">
+                        {{site_config.app_slogan}}
+                      </div>
+
+                    </div>
+
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapse-1" aria-controls="navbar-collapse-1" aria-expanded="false" aria-label="Toggle navigation">
+                      <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse" id="navbar-collapse-1">
+                      <!-- main-menu -->
+
+                      <ul class="navbar-nav ml-xl-auto">
+
+                        <!-- home-menu -->
+                        <li class="nav-item dropdown ">
+                          <a href="/" class="nav-link dropdown-toggle" id="first-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Home</a>
+                          <ul class="dropdown-menu" aria-labelledby="first-dropdown">
+                            <li ><a href="/"><i class="fa fa-home pr-2"></i>Home</a></li>
+                            <li ><a href="/#findadoctor"><i class="fa fa-heartbeat pr-2"></i>Find a Doctor</a></li>
+                            <li ><a href="/#contactus"><i class="fa fa-envelope pr-2"></i>Contact Us</a></li>
+                          </ul>
+                        </li>
+
+                        <!-- tools-menu -->
+                        <li class="nav-item dropdown ">
+                          <a href="/" class="nav-link dropdown-toggle" id="second-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Tools</a>
+                          <ul class="dropdown-menu" aria-labelledby="second-dropdown">
+                            <li ><a href="/signin"><i class="fa fa-user pr-2"></i>Sign In</a></li>
+                          </ul>
+                        </li>
+
+                        <!-- about-menu -->
+                        <li class="nav-item dropdown ">
+                          <a href="/" class="nav-link dropdown-toggle" id="third-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">About Us</a>
+                          <ul class="dropdown-menu" aria-labelledby="third-dropdown">
+                            <li ><a href="/"><i class="fa fa-users pr-2"></i>About Us</a></li>
+                            <li ><a href="/"><i class="fa fa-heartbeat pr-2"></i>Our Doctors</a></li>
+                          </ul>
+                        </li>
+
+                        <!-- blog-menu -->
+                        <li class="nav-item dropdown ">
+                          <a href="/" class="nav-link dropdown-toggle" id="fourth-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Blog</a>
+                          <ul class="dropdown-menu" aria-labelledby="fourth-dropdown">
+                              <li ><a href="/"><i class="fa fa-pencil pr-2"></i>Our Latest</a></li>
+                              <li ><a href="/"><i class="fa fa-pencil pr-2"></i>About Us</a></li>
+                          </ul>
+                        </li>
+
+                      </ul>
+                      <!-- main-menu end -->
+                    </div>
+                  </nav>
+                </div>
+                <!-- main-navigation end -->
+                </div>
+                <!-- header-second end -->
+
+              </div>
+              <div class="col-auto hidden-md-down pl-0 pl-md-1">
+                <!-- header dropdown buttons -->
+                <div class="header-dropdown-buttons">
+                  <a href="page-contact.html" class="btn btn-sm hidden-xs btn-default">Appointment <i class="fa fa-hospital-o pl-1"></i></a>
+                </div>
+                <!-- header dropdown buttons end -->
+              </div>
+            </div>
+          </div>
+        </header>
+        <!-- header end -->
+      </div>
+      <!-- header-container end -->
+
+      <!-- banner start -->
+      {% block banner %}{% endblock %}
+      <!-- banner end -->
+
+      <div id="page-start"></div>
+
+      {% block content %}{% endblock %}
+
+      <!-- footer top start -->
+      <!-- ================ -->
+      <div class="dark-bg footer-top animated-text default-hovered">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="call-to-action text-center">
+                <div class="row">
+                  <div class="col-md-8">
+                    <h2 class="mt-4">Powerful Bootstrap Template</h2>
+                    <h2 class="mt-4">Waste no more time</h2>
+                  </div>
+                  <div class="col-md-4">
+                    <p class="mt-3"><a href="#" class="btn btn-animated btn-lg btn-gray-transparent">Purchase<i class="fa fa-cart-arrow-down pl-20"></i></a></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- footer top end -->
+      <!-- footer start (Add "dark" class to #footer in order to enable dark footer) -->
+      <!-- ================ -->
+      <footer id="footer" class="clearfix">
+
+        <!-- .footer start -->
+        <!-- ================ -->
+        <div class="footer">
+          <div class="container">
+            <div class="footer-inner">
+              <div class="row">
+                <div class="col-lg-8">
+                  <div class="footer-content">
+                    <div class="logo-footer"><img id="logo-footer" src="{{site_config.app_logo}}" alt="{{site_config.app_title}}"></div>
+                    <div class="row">
+                      <div class="col-lg-6">
+                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Necessitatibus illo vel dolorum soluta consectetur doloribus sit. Delectus non tenetur odit dicta vitae debitis suscipit doloribus. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sed dolore fugit vitae quia dicta inventore reiciendis. Ipsa, aut voluptas quaerat.</p>
+                        <ul class="social-links circle animated-effect-1">
+                          <li class="facebook"><a href="#"><i class="fa fa-facebook"></i></a></li>
+                          <li class="twitter"><a href="#"><i class="fa fa-twitter"></i></a></li>
+                          <li class="googleplus"><a href="#"><i class="fa fa-google-plus"></i></a></li>
+                          <li class="linkedin"><a href="#"><i class="fa fa-linkedin"></i></a></li>
+                          <li class="xing"><a href="#"><i class="fa fa-xing"></i></a></li>
+                          <li class="skype"><a href="#"><i class="fa fa-skype"></i></a></li>
+                          <li class="youtube"><a href="#"><i class="fa fa-youtube"></i></a></li>
+                        </ul>
+                        <ul class="list-icons">
+                          <li><i class="fa fa-map-marker pr-10 text-default"></i> Street Address No, City</li>
+                          <li><i class="fa fa-phone pr-10 text-default"></i> +00 1234567890</li>
+                          <li><a href="#"><i class="fa fa-envelope-o pr-10"></i>example@your_domain.com</a></li>
+                        </ul>
+                      </div>
+                      <div class="col-lg-6">
+                        <div id="map-canvas"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <a name="contactus"></a>
+                <div class="col-lg-4">
+                  <div class="footer-content">
+                    <h2 class="title">Contact Us</h2>
+                    <br>
+                    <form class="margin-clear">
+                      <div class="form-group has-feedback">
+                        <label class="sr-only" for="name2">Name</label>
+                        <input type="text" class="form-control" id="name2" placeholder="Name" required>
+                        <i class="fa fa-user form-control-feedback"></i>
+                      </div>
+                      <div class="form-group has-feedback">
+                        <label class="sr-only" for="email2">Email address</label>
+                        <input type="email" class="form-control" id="email2" placeholder="Enter email" required>
+                        <i class="fa fa-envelope form-control-feedback"></i>
+                      </div>
+                      <div class="form-group has-feedback">
+                        <label class="sr-only" for="message2">Message</label>
+                        <textarea class="form-control" rows="6" id="message2" placeholder="Message" required></textarea>
+                        <i class="fa fa-pencil form-control-feedback"></i>
+                      </div>
+                      <input type="submit" value="Send" class="margin-clear submit-button btn btn-default">
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- .footer end -->
+
+        <!-- .subfooter start -->
+        <!-- ================ -->
+        <div class="subfooter">
+          <div class="container">
+            <div class="subfooter-inner">
+              <div class="row">
+                <div class="col-md-12">
+                  <p class="text-center">Copyright © 2019. All rights reserved.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- .subfooter end -->
+
+      </footer>
+      <!-- footer end -->
+    </div>
+    <!-- page-wrapper end -->
+
+    <!-- JavaScript files placed at the end of the document so the pages load faster -->
+    <!-- ================================================== -->
+    <!-- Jquery and Bootstap core js files -->
+    <script src="plugins/jquery.min.js"></script>
+    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery Revolution Slider  -->
+    <script src="plugins/rs-plugin-5/js/jquery.themepunch.tools.min.js"></script>
+    <script src="plugins/rs-plugin-5/js/jquery.themepunch.revolution.min.js"></script>
+    <!-- Isotope javascript -->
+    <script src="plugins/isotope/imagesloaded.pkgd.min.js"></script>
+    <script src="plugins/isotope/isotope.pkgd.min.js"></script>
+    <!-- Magnific Popup javascript -->
+    <script src="plugins/magnific-popup/jquery.magnific-popup.min.js"></script>
+    <!-- Appear javascript -->
+    <script src="plugins/waypoints/jquery.waypoints.min.js"></script>
+    <script src="plugins/waypoints/sticky.min.js"></script>
+    <!-- Count To javascript -->
+    <script src="plugins/countTo/jquery.countTo.js"></script>
+    <!-- Google Maps javascript -->
+    <!--script src="https://maps.googleapis.com/maps/api/js?key=your_google_map_key"></script-->
+    <!--script src="js/google.map.config.js"></script-->
+    <!-- Slick carousel javascript -->
+    <script src="plugins/slick/slick.min.js"></script>
+    <!-- Initialization of Plugins -->
+    <script src="js/template.js"></script>
+    <!-- Custom Scripts -->
+    <script src="https://ok1static.oktacdn.com/assets/js/sdk/okta-auth-js/2.5.0/okta-auth-js.min.js" type="text/javascript"></script>
+    <script src="js/custom.js"></script>
+
+  </body>
+</html>
