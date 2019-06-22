@@ -85,7 +85,7 @@ class OktaAuth:
 
     def introspect(self, token, headers=None):
         print("OktaAuth.introspect()")
-        okta_headers = OktaUtil.get_oauth_okta_headers(headers, self.okta_config["client_id"], self.okta_config["client_secret"])
+        okta_headers = OktaUtil.get_oauth_okta_headers(headers, self.okta_config["client_id"], self.okta_config["CLIENT_SECRET"])
 
         url = "{issuer}/v1/introspect?token={token}".format(
             issuer=self.okta_config["issuer"],
@@ -135,3 +135,4 @@ class OktaUtil:
         encoded_auth = base64.b64encode(bytes(auth_raw, 'UTF-8')).decode("UTF-8")
 
         return encoded_auth
+
