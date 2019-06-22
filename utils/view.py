@@ -1,14 +1,14 @@
+import base64
 import json
 import requests
-
 
 from oktapatientportal import default_settings, secure_settings
 
 from functools import wraps
-
 from flask import request, session
 
 from utils.rest import RestUtil
+from utils.okta import OktaAuth
 
 json_headers = {
     "Accept": "application/json",
@@ -133,3 +133,57 @@ def map_secrets_config(config, session):
     except Exception as ex:
         print("Failed to map secrets, setting defaults instead.  Exception: {0}".format(ex))
         set_default_env_secrets(session)
+
+
+def is_token_valid_remote(token, session):
+        print("is_token_valid_remote(token)")
+        result = False
+
+        okta_auth = OktaAuth(session)
+        instrospect_response = okta_auth.introspect(token=token)
+        # print("instrospect_response: {0}".format(instrospect_response))
+
+        if "active" in instrospect_response:
+            result = instrospect_response["active"]
+
+        return result
+
+
+def handle_invalid_tokens(session, response):
+    print("handle_invalid_tokens()")
+
+    can_slear_token = True
+
+    if("token" in request.cookies and "id_token" in request.cookies):
+        token = request.cookies["token"]
+
+        if token:
+            if is_token_valid_remote(token, session):
+                can_slear_token = False  # don't clear tokens, they are valid
+
+        if can_slear_token:
+            response.set_cookie("token", "")
+            response.set_cookie("id_token", "")
+
+
+def get_claims_from_token(token):
+    print("get_claims_from_token(token)")
+    claims = None
+
+    if token:
+        jwt = token.encode("utf-8")
+
+        token_payload = jwt.decode().split(".")[1]
+
+        claims_string = decode_base64(token_payload)
+
+        claims = json.loads(claims_string)
+
+    return claims
+
+
+def decode_base64(data):
+    missing_padding = len(data) % 4
+    if missing_padding > 0:
+        data += "=" * (4 - missing_padding)
+    return base64.urlsafe_b64decode(data)

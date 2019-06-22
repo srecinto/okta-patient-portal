@@ -7,7 +7,7 @@ from oktapatientportal import app
 from flask import request, session, send_from_directory, redirect, make_response, render_template
 
 from utils.okta import OktaAuth
-from utils.view import apply_remote_config
+from utils.view import apply_remote_config, handle_invalid_tokens, get_claims_from_token
 
 
 @app.route('/<path:filename>')
@@ -23,16 +23,24 @@ def serve_static_html(filename):
 def index():
     """ handler for the root url path of the app """
     print("index()")
+    id_token_claims = None
 
     session["current_title"] = "{0} | {1} Home".format(session["base_title"], session["app_title"])
 
-    print("skin: {0}".format(session["skin"]))
+    # Get user Claims from Id Token for signed in display
+    if("token" in request.cookies and "id_token" in request.cookies):
+        id_token = request.cookies["id_token"]
+        id_token_claims = get_claims_from_token(id_token)
+
     response = make_response(
         render_template(
             "index.html",
-            site_config=session
+            site_config=session,
+            id_token_claims=id_token_claims
         )
     )
+
+    handle_invalid_tokens(session, response)
 
     return response
 
@@ -95,7 +103,7 @@ def login():
             auth_options={
                 "response_mode": "form_post",
                 "prompt": "none",
-                "scope": "openid",
+                "scope": "openid profile email",
                 "sessionToken": authn_json_response["sessionToken"],
             }
         )
@@ -117,9 +125,12 @@ def login():
 def logout():
     print("logout()")
 
+    if request.url_root.startswith('http://'):
+        app_base_url = request.url_root.replace('http://', 'https://', 1)
+
     redirect_url = "{host}/login/signout?fromURI={redirect_path}".format(
         host=session["base_url"],
-        redirect_path=session["app_base_url"]
+        redirect_path=app_base_url
     )
 
     print("redirect_url: {0}".format(redirect_url))
