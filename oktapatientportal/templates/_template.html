@@ -113,10 +113,16 @@
                   <!-- header top dropdowns start -->
                   <!-- ================ -->
                   <div class="header-top-dropdown text-right">
-                    <div class="btn-group">
+                    {% if id_token_claims %}
+                    <ul class="list-inline" id="loggedinMenu">
+                      <li class="list-inline-item"><a class="link-light" href="#"><i class="fa fa-user-md pr-1"></i>{{id_token_claims.name}}</li>
+                      <li class="list-inline-item"><a class="link-light" href="/logout"><i class="fa fa-user-md pr-1"></i>Sign Out</li>
+                    </ul>
+                    {% else %}
+                    <div class="btn-group" id="signUpButtonPane">
                       <a href="page-signup.html" class="btn btn-default btn-sm"><i class="fa fa-user pr-2"></i> Sign Up</a>
                     </div>
-                    <div class="btn-group">
+                    <div class="btn-group" id="loginButtonPane">
                       <button id="header-top-drop-2" type="button" class="btn dropdown-toggle btn-default btn-sm dropdown-toggle--no-caret" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-lock pr-2"></i> Login</button>
                       <ul class="dropdown-menu dropdown-menu-right dropdown-animation" aria-labelledby="header-top-drop-2">
                         <li>
@@ -147,6 +153,7 @@
                         </li>
                       </ul>
                     </div>
+                    {% endif %}
                   </div>
                   <!--  header top dropdowns end -->
                 </div>
@@ -428,7 +435,7 @@
     <!-- Initialization of Plugins -->
     <script src="js/template.js"></script>
     <!-- Custom Scripts -->
-    <script src="https://ok1static.oktacdn.com/assets/js/sdk/okta-auth-js/2.5.0/okta-auth-js.min.js" type="text/javascript"></script>
+    <script src="https://ok1static.oktacdn.com/assets/js/sdk/okta-auth-js/2.4.0/okta-auth-js.min.js" type="text/javascript"></script>
     <script src="js/custom.js"></script>
 
   </body>
