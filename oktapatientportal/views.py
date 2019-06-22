@@ -124,6 +124,7 @@ def login():
 @app.route("/logout", methods=["GET"])
 def logout():
     print("logout()")
+    app_base_url = request.url_root
 
     if request.url_root.startswith('http://'):
         app_base_url = request.url_root.replace('http://', 'https://', 1)

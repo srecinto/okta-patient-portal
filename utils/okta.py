@@ -135,4 +135,3 @@ class OktaUtil:
         encoded_auth = base64.b64encode(bytes(auth_raw, 'UTF-8')).decode("UTF-8")
 
         return encoded_auth
-
