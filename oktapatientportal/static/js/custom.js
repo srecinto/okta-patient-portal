@@ -20,6 +20,14 @@
 */
 		$("#loginButton").on("click", loginClickHandler);
 
+		$("#password").keypress(function (e) {
+			var key = e.which;
+			if(key == 13) {  // the enter key code
+				$("#loginButton").click();
+				return false;
+			}
+		});
+
 		if (($(".main-navigation.onclick").length>0) && $(window).width() > 991 ){
 			$.notify({
 				// options
