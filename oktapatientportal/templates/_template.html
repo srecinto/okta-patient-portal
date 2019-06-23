@@ -43,9 +43,6 @@
     <!-- Color Scheme (In order to change the color scheme, replace the blue.css with the color scheme that you prefer) -->
     <link href="css/skins/{{site_config.skin}}.css" rel="stylesheet">
 
-
-
-
     <!-- Custom css -->
     <link href="css/custom.css" rel="stylesheet">
 
@@ -408,6 +405,33 @@
       <!-- footer end -->
     </div>
     <!-- page-wrapper end -->
+
+    <!-- Modals -->
+    {% if modal_options %}
+    <!-- Consent -->
+    <input type="hidden" id="showConsent" value="{{modal_options.showConsent}}" />
+    <div class="modal fade" id="consentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel">Terms of Service</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          </div>
+          <div class="modal-body">
+            <p>Consectetur adipisicing elit. Nemo architecto debitis dolorum ullam in ut sint, odit maiores eaque explicabo, repellendus minima soluta sunt! Nisi minima blanditiis voluptate, ut atque.</p>
+            <p>Culpa expedita! Quisquam, itaque officiis nisi nam doloribus explicabo possimus, dolorum alias provident maxime temporibus, enim voluptatibus! Molestias, accusantium cum impedit sint velit exercitationem deserunt, corporis magni provident earum, ullam iusto voluptatem iste animi inventore ab cupiditate quod laborum quasi libero doloremque obcaecati eius. Ut, reprehenderit optio unde accusantium quia qui! Debitis delectus corporis aspernatur nemo aut, odio harum ea repellendus quidem, saepe, incidunt? Assumenda deserunt unde minima aspernatur ducimus velit molestiae, minus eius inventore, dolore temporibus odio distinctio optio.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="rejectConsent" class="btn btn-sm btn-dark" data-dismiss="modal">Reject</button>
+            <button type="button" id="acceptConsent" class="btn btn-sm btn-default">
+              I Accept
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% endif %}
 
     <!-- JavaScript files placed at the end of the document so the pages load faster -->
     <!-- ================================================== -->
