@@ -20,7 +20,6 @@ default_settings = {
             "app_favicon": os.getenv("SITE_APP_FAVICON", "images/favicon.ico"),
             "app_slogan": os.getenv("SITE_APP_SLOGAN", "Get Better Sooner"),
             "app_config": os.getenv("SITE_APP_CONFIG", "./well-known/default-settings")
-
         }
     }
 }

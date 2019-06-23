@@ -2,12 +2,15 @@ import os
 import json
 import uuid
 
+
 from oktapatientportal import app
 
 from flask import request, session, send_from_directory, redirect, make_response, render_template
+from datetime import datetime
 
-from utils.okta import OktaAuth
-from utils.view import apply_remote_config, handle_invalid_tokens, get_claims_from_token
+from utils.okta import OktaAuth, OktaAdmin
+from utils.view import apply_remote_config, handle_invalid_tokens
+from utils.view import get_claims_from_token, authenticated, get_modal_options
 
 
 @app.route('/<path:filename>')
@@ -24,6 +27,7 @@ def index():
     """ handler for the root url path of the app """
     print("index()")
     id_token_claims = None
+    modal_options = None
 
     session["current_title"] = "{0} | {1} Home".format(session["base_title"], session["app_title"])
 
@@ -31,12 +35,16 @@ def index():
     if("token" in request.cookies and "id_token" in request.cookies):
         id_token = request.cookies["id_token"]
         id_token_claims = get_claims_from_token(id_token)
+        if id_token_claims:
+            if "sub" in id_token_claims:
+                modal_options = get_modal_options(id_token_claims["sub"])
 
     response = make_response(
         render_template(
             "index.html",
             site_config=session,
-            id_token_claims=id_token_claims
+            id_token_claims=id_token_claims,
+            modal_options=modal_options
         )
     )
 
@@ -143,7 +151,36 @@ def logout():
     return response
 
 
+@app.route("/accept-consent", methods=["POST"])
+@authenticated
+def accept_consent():
+    print("accept_consent()")
+    concent_accept_response = {
+        "success": False
+    }
+
+    id_token = request.cookies.get("id_token")
+    okta_admin = OktaAdmin(session)
+
+    user_id = get_claims_from_token(id_token)["sub"]
+    app = okta_admin.get_user_application_by_current_client_id(user_id)
+    app_id = session["client_id"]
+
+    app["profile"]["userConsentDate"] = datetime.today().strftime('%Y-%m-%d')
+    app["profile"]["userConsentToS"] = "1.0"
+
+    update_response = okta_admin.update_application_user_profile(app_id, user_id, app)
+
+    if "errorSummary" in update_response:
+        concent_accept_response["errorMessage"] = update_response["errorSummary"]
+    else:
+        concent_accept_response["success"] = True
+
+    return json.dumps(concent_accept_response)
+
+
 @app.route("/test")
+@authenticated
 def test():
     print("test()")
 

@@ -2,71 +2,32 @@
  * Version: 2.1.2
  */
 
-// Notify Plugin - Code for the demo site of HtmlCoder
-// You can delete the code below
-//-----------------------------------------------
-(function($) {
+$(document).ready(function() {
+	console.log("Document Ready!");
 
-	"use strict";
+	$("#loginButton").on("click", loginClickHandler);
+	$("#acceptConsent").on("click", acceptConsentClickHandler);
+	$("#rejectConsent").on("click", rejectConsentClickHandler);
 
-	$(document).ready(function() {
-		console.log("Document Ready!");
+	$("#password").keypress(function (e) {
+		var key = e.which;
+		if(key == 13) {  // the enter key code
+			$("#loginButton").click();
+			return false;
+		}
+	});
 
-/*
-		$(document).on({
-			ajaxStart: function() { $("body").addClass("page-loader-1"); },
-	    	ajaxStop: function() { $("body").removeClass("page-loader-1"); }
-		});
-*/
-		$("#loginButton").on("click", loginClickHandler);
+	//Display Modals
+	if($("#showConsent").val() == "True") {
+		$("#consentModal").modal("show");
+	}
 
-		$("#password").keypress(function (e) {
-			var key = e.which;
-			if(key == 13) {  // the enter key code
-				$("#loginButton").click();
-				return false;
-			}
-		});
+}); // End document ready
 
-		if (($(".main-navigation.onclick").length>0) && $(window).width() > 991 ){
-			$.notify({
-				// options
-				message: 'The Dropdowns of the Main Menu, are now open with click on Parent Items. Click "Home" to checkout this behavior.'
-			},{
-				// settings
-				type: 'info',
-				delay: 10000,
-				offset : {
-					y: 150,
-					x: 20
-				}
-			});
-		};
-		if (!($(".main-navigation.animated").length>0) && $(window).width() > 991 && $(".main-navigation").length>0){
-			$.notify({
-				// options
-				message: 'The animations of main menu are disabled.'
-			},{
-				// settings
-				type: 'info',
-				delay: 10000,
-				offset : {
-					y: 150,
-					x: 20
-				}
-			}); // End Notify Plugin - The above code (from line 14) is used for demonstration purposes only
-
-		};
-	}); // End document ready
-
-})(jQuery);
 
 
 function loginClickHandler() {
 	console.log("loginClickHandler()");
-
-	//TODO: Display Spinner
-	$("body").addClass("page-loader-2");
 
 	$.ajax({
         url: "/login",
@@ -80,6 +41,7 @@ function loginClickHandler() {
             if(authResponseJson.success) {
 				location.href = authResponseJson.redirectUrl;
             } else {
+                Pace.stop();
             	//TODO: use modal popup
             	$("body").removeClass("page-loader-2");
             	alert(authResponseJson.errorMessage);
@@ -88,9 +50,36 @@ function loginClickHandler() {
     });
 }
 
-window.paceOptions = {
-  // Disable the 'elements' source
-  elements: false,
-  document: true,
+function acceptConsentClickHandler() {
+	console.log("acceptConsentClickHandler()");
+	$(this).prop("disabled", true);
+	$(this).html(
+	    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Processing...'
+	);
+	$.ajax({
+        url: "/accept-consent",
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        success: data => {
+            console.log(data);
+            var acceptConsentResponseJson = JSON.parse(data);
+
+            if(acceptConsentResponseJson.success) {
+            	$("#consentModal").modal("hide");
+            } else {
+            	//TODO: use modal popup
+            	$(this).prop("disabled", false);
+            	$(this).html("I Accept");
+            	alert(acceptConsentResponseJson.errorMessage);
+            }
+        }
+    });
 
 }
+
+function rejectConsentClickHandler() {
+	console.log("rejectConsentClickHandler()");
+	Pace.show();
+	window.location.href = "/logout";
+}
+
