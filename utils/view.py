@@ -5,10 +5,10 @@ import requests
 from oktapatientportal import default_settings, secure_settings
 
 from functools import wraps
-from flask import request, session
+from flask import request, session, make_response, redirect
 
 from utils.rest import RestUtil
-from utils.okta import OktaAuth
+from utils.okta import OktaAuth, OktaAdmin
 
 json_headers = {
     "Accept": "application/json",
@@ -63,6 +63,22 @@ def apply_remote_config(f):
             print("Session Dump: {0}".format(session))
 
         return f(*args, **kws)
+    return decorated_function
+
+
+def authenticated(f):
+    @wraps(f)
+    def decorated_function(*args, **kws):
+        print("authenticated()")
+
+        # Just validate they have a legit token.  Any additional access rules will be by another wrapper
+        token = request.cookies.get("token")
+        if is_token_valid_remote(token, session):
+            return f(*args, **kws)
+        else:
+            print("Access Denied")
+            return make_response(redirect("/"))
+
     return decorated_function
 
 
@@ -187,3 +203,32 @@ def decode_base64(data):
     if missing_padding > 0:
         data += "=" * (4 - missing_padding)
     return base64.urlsafe_b64decode(data)
+
+
+def get_modal_options(okta_user_id):
+    print("get_modal_options(okta_user_id)")
+
+    okta_admin = OktaAdmin(session)
+    user = okta_admin.get_user(okta_user_id)
+    curent_application = okta_admin.get_user_application_by_current_client_id(user["id"])
+    # print("curent_application: {0}".format(json.dumps(curent_application, indent=4, sort_keys=True)))
+    # print("user: {0}".format(json.dumps(user, indent=4, sort_keys=True)))
+    #  Apply Rules based on user and app combo
+    modal_options = {
+        "showConsent": show_user_consent(curent_application),
+        "showRegistrationA": True,
+        "showRegistrationB": True,
+        "showRegistrationC": True
+    }
+
+    return modal_options
+
+
+def show_user_consent(app):
+    print("show_user_consent()")
+    result = True
+    if "profile" in app:
+        if app["profile"]["userConsentDate"] and app["profile"]["userConsentToS"]:
+                result = False
+
+    return result

@@ -96,8 +96,64 @@ class OktaAuth:
 
 
 class OktaAdmin:
+
+    okta_config = None
+
     def __init__(self, okta_config):
         print("OktaAdmin init()")
+        if okta_config:
+            self.okta_config = okta_config
+        else:
+            raise Exception("Requires okta_config")
+
+    def get_user(self, user_id):
+        print("OktaAdmin.get_user(user_id)")
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
+        url = "{base_url}/api/v1/users/{user_id}".format(
+            base_url=self.okta_config["base_url"],
+            user_id=user_id)
+        body = {}
+
+        return RestUtil.execute_post(url, body, okta_headers)
+
+    def get_applications_by_user_id(self, user_id):
+        print("OktaAdmin.get_applications_by_user_id(user_id)")
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
+        url = "{base_url}/api/v1/apps/?filter=user.id+eq+\"{user_id}\"".format(
+            base_url=self.okta_config["base_url"],
+            user_id=user_id)
+        body = {}
+
+        return RestUtil.execute_get(url, body, okta_headers)
+
+    def get_user_application_by_current_client_id(self, user_id):
+        print("OktaAdmin.get_user_application_by_current_client_id(user_id)")
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
+
+        url = "{base_url}/api/v1/apps/{app_id}/users/{user_id}".format(
+            base_url=self.okta_config["base_url"],
+            app_id=self.okta_config["client_id"],
+            user_id=user_id)
+        body = {}
+
+        return RestUtil.execute_get(url, body, okta_headers)
+
+    def update_application_user_profile(self, app_id, user_id, app_user_profile):
+        print("OktaAdmin.update_application_user_profile(app_id, user_id, app_user_profile)")
+
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
+        url = "{base_url}/api/v1/apps/{app_id}/users/{user_id}".format(
+            base_url=self.okta_config["base_url"],
+            app_id=app_id,
+            user_id=user_id)
+
+        print("url: {0}".format(url))
+
+        body = {
+            "profile": app_user_profile["profile"]
+        }
+
+        return RestUtil.execute_post(url, body, okta_headers)
 
 
 class OktaUtil:
@@ -112,8 +168,18 @@ class OktaUtil:
         return okta_default_headers
 
     @staticmethod
-    def get_oauth_okta_headers(headers, client_id=None, client_secret=None):
+    def get_protected_okta_headers(okta_config):
+        okta_api_token = okta_config["OKTA_API_TOKEN"]
+        okta_protected_headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": "SSWS {0}".format(okta_api_token)
+        }
 
+        return okta_protected_headers
+
+    @staticmethod
+    def get_oauth_okta_headers(headers, client_id=None, client_secret=None):
         okta_oauth_headers = {
             "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded",
@@ -126,7 +192,6 @@ class OktaUtil:
 
     @staticmethod
     def get_encoded_auth(client_id, client_secret):
-        print("get_encoded_auth()")
         auth_raw = "{client_id}:{client_secret}".format(
             client_id=client_id,
             client_secret=client_secret
