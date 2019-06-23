@@ -207,7 +207,7 @@ def decode_base64(data):
 
 def get_modal_options(okta_user_id):
     print("get_modal_options(okta_user_id)")
-
+    print("okta_user_id: {0}".format(okta_user_id))
     okta_admin = OktaAdmin(session)
     user = okta_admin.get_user(okta_user_id)
     print("user: {0}".format(json.dumps(user, indent=4, sort_keys=True)))
