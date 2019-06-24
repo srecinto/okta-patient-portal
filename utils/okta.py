@@ -136,6 +136,15 @@ class OktaAdmin:
 
         return RestUtil.execute_post(url, user, okta_headers)
 
+    def update_user(self, user_id, user):
+        print("OktaAdmin.update_user()")
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
+        url = "{base_url}/api/v1/users/{user_id}".format(
+            base_url=self.okta_config["base_url"],
+            user_id=user_id)
+
+        return RestUtil.execute_post(url, user, okta_headers)
+
     def activate_user(self, user_id, send_email=True):
         print("OktaAdmin.activate_user(user_id)")
         okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)

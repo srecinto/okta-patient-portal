@@ -266,6 +266,47 @@ def register_basic():
     return json.dumps(register_basic_response)
 
 
+@app.route("/register-default", methods=["POST"])
+@authenticated
+def register_default():
+    print("register_default()")
+    user_form_data = request.get_json()
+
+    register_default_response = {
+        "success": False
+    }
+    id_token = request.cookies.get("id_token")
+    user_id = get_claims_from_token(id_token)["sub"]
+    okta_admin = OktaAdmin(session)
+    patient_group = okta_admin.get_groups_by_name("Patient")[0]  # Default to first found group by name
+
+    user = {
+        "profile": {
+            "firstName": user_form_data["firstName"],
+            "lastName": user_form_data["lastName"],
+            "height": user_form_data["height"],
+            "weight": user_form_data["weight"]
+        }
+    }
+
+    updated_user = okta_admin.update_user(user_id, user)
+    print("updated_user: {0}".format(json.dumps(updated_user, indent=4, sort_keys=True)))
+
+    if "errorSummary" in updated_user:
+        register_default_response["errorMessage"] = updated_user["errorSummary"]
+
+        if "errorCauses" in updated_user:
+            register_default_response["errorMessages"] = []
+            for error_cause in updated_user["errorCauses"]:
+                register_default_response["errorMessages"].append({
+                    "errorMessage": error_cause["errorSummary"]
+                })
+    else:
+        register_default_response["success"] = True
+
+    return json.dumps(register_default_response)
+
+
 @app.route("/activate/<user_id>", methods=["GET"])
 def activate(user_id):
     print("activate(user_id)")

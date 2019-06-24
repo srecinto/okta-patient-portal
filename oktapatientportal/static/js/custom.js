@@ -10,6 +10,7 @@ $(document).ready(function() {
 	$("#rejectConsent").on("click", rejectConsentClickHandler);
 	$("#signUpButton").on("click", () => { $("#basicRegistrationModal").modal("show"); });
 	$("#registerUser").on("click", registerUserClickHandler);
+	$("#submitRegistrationDefault").on("click", submitRegistrationDefaultClickHandler);
 
 	$("#password").keypress(function (e) {
 		var key = e.which;
@@ -22,6 +23,10 @@ $(document).ready(function() {
 	//Display Modals
 	if($("#showConsent").val() == "True") {
 		$("#consentModal").modal("show");
+	}else if($("#showRegistrationDefault").val() == "True") {
+	    $("#registrationDefaultModal").modal("show");
+	} else if($("#showRegistrationAlt1").val() == "True") {
+	    $("#registrationAlt1Modal").modal("show");
 	}
 
 }); // End document ready
@@ -67,6 +72,11 @@ function acceptConsentClickHandler() {
 
             if(acceptConsentResponseJson.success) {
             	$("#consentModal").modal("hide");
+            	if($("#showRegistrationDefault").val() == "True") {
+            	    $("#registrationDefaultModal").modal("show");
+            	} else if($("#showRegistrationAlt1").val() == "True") {
+            	    $("#registrationAlt1Modal").modal("show");
+            	}
             } else {
             	//TODO: use modal popup
             	$(this).prop("disabled", false);
@@ -143,3 +153,72 @@ function registerUserClickHandler() {
     }
 }
 
+function submitRegistrationDefaultClickHandler(){
+    console.log("submitRegistrationDefaultClickHandler()");
+
+    var isValid = true;
+    var errorMessage = "";
+
+    if($("#regDefaultFirstName").val() == "") {
+        isValid = false;
+        errorMessage += "First Name is Required\r\n";
+    }
+
+    if($("#regDefaultLastName").val() == "") {
+        isValid = false;
+        errorMessage += "Last Name is Required\r\n";
+    }
+
+    if($("#regDefaultHeight").val() == "") {
+        isValid = false;
+        errorMessage += "Height is Required\r\n";
+    }
+
+    if($("#regDefaultWeight").val() == "") {
+        isValid = false;
+        errorMessage += "Weight is Required\r\n";
+    }
+
+    if(isValid) {
+        $("#submitRegistrationDefault").prop("disabled", true);
+    	$("#submitRegistrationDefault").html(
+    	    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Processing...'
+    	);
+    	var json_post_data = {
+    	    "firstName": $("#regDefaultFirstName").val(),
+    	    "lastName": $("#regDefaultLastName").val(),
+    	    "height": $("#regDefaultHeight").val(),
+    	    "weight": $("#regDefaultWeight").val()
+    	}
+        $.ajax({
+            url: "/register-default",
+            type: "POST",
+            data: JSON.stringify(json_post_data),
+            contentType: "application/json; charset=utf-8",
+            success: data => {
+                console.log(data);
+                var responseJson = JSON.parse(data);
+
+                if(responseJson.success) {
+                	$("#registrationDefaultModal").modal("hide");
+                } else {
+                	//TODO: use modal popup
+                	$("#submitRegistrationDefault").prop("disabled", false);
+                	$("#submitRegistrationDefault").html("Save");
+
+                	errorMessage = responseJson.errorMessage + "\r\n";
+
+                	if(responseJson.errorMessages != undefined){
+                	    for(msgIdx in responseJson.errorMessages) {
+                	        errorMessage += responseJson.errorMessages[msgIdx].errorMessage + "\r\n";
+                	    }
+                	}
+
+                	alert(errorMessage);
+                }
+            }
+        });
+    } else {
+        alert(errorMessage);
+    }
+}

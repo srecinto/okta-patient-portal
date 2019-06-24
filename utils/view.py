@@ -220,16 +220,16 @@ def get_modal_options(okta_user_id):
     print("okta_user_id: {0}".format(okta_user_id))
     okta_admin = OktaAdmin(session)
     user = okta_admin.get_user(okta_user_id)
-    # print("user: {0}".format(json.dumps(user, indent=4, sort_keys=True)))
+    print("user: {0}".format(json.dumps(user, indent=4, sort_keys=True)))
     curent_application = okta_admin.get_user_application_by_current_client_id(user["id"])
-    # print("curent_application: {0}".format(json.dumps(curent_application, indent=4, sort_keys=True)))
+    print("curent_application: {0}".format(json.dumps(curent_application, indent=4, sort_keys=True)))
     # print("user: {0}".format(json.dumps(user, indent=4, sort_keys=True)))
     #  Apply Rules based on user and app combo
+
     modal_options = {
         "showConsent": show_user_consent(curent_application),
-        "showRegistrationA": True,
-        "showRegistrationB": True,
-        "showRegistrationC": True
+        "showRegistrationDefault": show_user_reg_form_default(user, curent_application),
+        "showRegistrationAlt1": show_user_reg_form_alt1(user, curent_application)
     }
 
     return modal_options
@@ -241,6 +241,29 @@ def show_user_consent(app):
     if "profile" in app:
         if app["profile"]["userConsentDate"] and app["profile"]["userConsentToS"]:
                 result = False
+
+    return result
+
+
+def show_user_reg_form_default(user, app):
+    print("show_user_reg_form_default()")
+    result = False
+
+    if ("height" not in user["profile"] and
+        "weight" not in user["profile"] and
+        app["profile"]["registrationForm"] == "DEFAULT"):
+        result = True
+
+    return result
+
+
+def show_user_reg_form_alt1(user, app):
+    print("show_user_reg_form_alt1()")
+    result = False
+
+    if ("dob" not in user["profile"] and
+        app["profile"]["registrationForm"] == "ALT1"):
+        result = True
 
     return result
 
