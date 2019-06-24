@@ -43,7 +43,6 @@ function loginClickHandler() {
             if(authResponseJson.success) {
 				location.href = authResponseJson.redirectUrl;
             } else {
-                Pace.stop();
             	//TODO: use modal popup
             	$("body").removeClass("page-loader-2");
             	alert(authResponseJson.errorMessage);
