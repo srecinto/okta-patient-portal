@@ -34,6 +34,17 @@ class OktaAuth:
 
         return RestUtil.execute_post(url, body, okta_headers)
 
+    def authenticate_with_activation_token(self, token, headers=None):
+        print("OktaAuth.authenticate_with_activation_token()")
+        url = "{host}/api/v1/authn".format(host=self.okta_config["base_url"])
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
+
+        body = {
+            "token": token
+        }
+
+        return RestUtil.execute_post(url, body, okta_headers)
+
     def create_oauth_authorize_url(self, response_type, state, auth_options):
         print("OktaAuth.create_oauth_authorize_url()")
 
@@ -114,7 +125,49 @@ class OktaAdmin:
             user_id=user_id)
         body = {}
 
+        return RestUtil.execute_get(url, body, okta_headers)
+
+    def create_user(self, user, activate_user=False):
+        print("OktaAdmin.create_user(user)")
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
+        url = "{base_url}/api/v1/users?activate={activate_user}".format(
+            base_url=self.okta_config["base_url"],
+            activate_user=activate_user)
+
+        return RestUtil.execute_post(url, user, okta_headers)
+
+    def activate_user(self, user_id, send_email=True):
+        print("OktaAdmin.activate_user(user_id)")
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
+        url = "{base_url}/api/v1/users/{user_id}/lifecycle/activate/?sendEmail={send_email}".format(
+            base_url=self.okta_config["base_url"],
+            user_id=user_id,
+            send_email=str(send_email).lower())
+        body = {}
+        print("url: {0}".format(url))
+
         return RestUtil.execute_post(url, body, okta_headers)
+
+    def get_groups_by_name(self, name):
+        print("OktaAdmin.get_groups_by_name(user_id)")
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
+        url = "{base_url}/api/v1/groups?q={name}".format(
+            base_url=self.okta_config["base_url"],
+            name=name)
+        body = {}
+
+        return RestUtil.execute_get(url, body, okta_headers)
+
+    def assign_user_to_group(self, group_id, user_id):
+        print("OktaAdmin.assign_user_to_group(user_id)")
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
+        url = "{base_url}/api/v1//groups/{group_id}/users/{user_id}".format(
+            base_url=self.okta_config["base_url"],
+            group_id=group_id,
+            user_id=user_id)
+        body = {}
+
+        return RestUtil.execute_put(url, body, okta_headers)
 
     def get_applications_by_user_id(self, user_id):
         print("OktaAdmin.get_applications_by_user_id(user_id)")
