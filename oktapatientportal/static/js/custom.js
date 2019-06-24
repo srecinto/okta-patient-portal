@@ -8,6 +8,8 @@ $(document).ready(function() {
 	$("#loginButton").on("click", loginClickHandler);
 	$("#acceptConsent").on("click", acceptConsentClickHandler);
 	$("#rejectConsent").on("click", rejectConsentClickHandler);
+	$("#signUpButton").on("click", () => { $("#basicRegistrationModal").modal("show"); });
+	$("#registerUser").on("click", registerUserClickHandler);
 
 	$("#password").keypress(function (e) {
 		var key = e.which;
@@ -79,7 +81,65 @@ function acceptConsentClickHandler() {
 
 function rejectConsentClickHandler() {
 	console.log("rejectConsentClickHandler()");
-	Pace.show();
 	window.location.href = "/logout";
+}
+
+function registerUserClickHandler() {
+    console.log("registerUserClickHandler()");
+
+    var isValid = true;
+    var errorMessage = "";
+
+    if($("#registraionEmail").val() == "") {
+        isValid = false;
+        errorMessage += "Email is Required\r\n";
+    }
+
+    if($("#registrationPassword").val() == "") {
+        isValid = false;
+        errorMessage += "Password is Required\r\n";
+    }
+
+    if($("#registrationPassword").val() != $("#registrationConfirmPassword").val()) {
+        isValid = false;
+        errorMessage += "Passwords must match\r\n";
+    }
+
+    if(isValid) {
+        $("#registerUser").prop("disabled", true);
+    	$("#registerUser").html(
+    	    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Processing...'
+    	);
+        $.ajax({
+            url: "/register-basic",
+            type: "POST",
+            data: JSON.stringify({"username": $("#registraionEmail").val(), "password": $("#registrationPassword").val()}),
+            contentType: "application/json; charset=utf-8",
+            success: data => {
+                console.log(data);
+                var acceptConsentResponseJson = JSON.parse(data);
+
+                if(acceptConsentResponseJson.success) {
+                	$("#basicRegistrationModal").modal("hide");
+                } else {
+                	//TODO: use modal popup
+                	$("#registerUser").prop("disabled", false);
+                	$("#registerUser").html("Sign Me Up!");
+
+                	errorMessage = acceptConsentResponseJson.errorMessage + "\r\n";
+
+                	if(acceptConsentResponseJson.errorMessages != undefined){
+                	    for(msgIdx in acceptConsentResponseJson.errorMessages) {
+                	        errorMessage += acceptConsentResponseJson.errorMessages[msgIdx].errorMessage + "\r\n";
+                	    }
+                	}
+
+                	alert(errorMessage);
+                }
+            }
+        });
+    } else {
+        alert(errorMessage);
+    }
 }
 
