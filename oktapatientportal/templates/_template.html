@@ -117,7 +117,7 @@
                     </ul>
                     {% else %}
                     <div class="btn-group" id="signUpButtonPane">
-                      <a href="page-signup.html" class="btn btn-default btn-sm"><i class="fa fa-user pr-2"></i> Sign Up</a>
+                      <button id="signUpButton" aria-haspopup="true" aria-expanded="false" type="button" class="btn btn-default btn-sm"><i class="fa fa-user pr-2"></i> Sign Up</button>
                     </div>
                     <div class="btn-group" id="loginButtonPane">
                       <button id="header-top-drop-2" type="button" class="btn dropdown-toggle btn-default btn-sm dropdown-toggle--no-caret" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-lock pr-2"></i> Login</button>
@@ -432,6 +432,41 @@
     </div>
 
     {% endif %}
+
+    <!-- Basic Registraion -->
+    <div class="modal fade" id="basicRegistrationModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel">Create My Account</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          </div>
+          <div class="modal-body">
+            <p>Consectetur adipisicing elit. Nemo architecto debitis dolorum ullam in ut sint, odit maiores eaque explicabo, repellendus minima soluta sunt! Nisi minima blanditiis voluptate, ut atque.</p>
+            <p>
+              <div class="form-group">
+                <label for="registraionEmail">Email address</label>
+                <input type="email" class="form-control" id="registraionEmail" aria-describedby="emailHelp" placeholder="Enter email">
+                <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+              </div>
+              <div class="form-group">
+                <label for="registrationPassword">Password</label>
+                <input type="password" class="form-control" id="registrationPassword" placeholder="Password">
+              </div>
+              <div class="form-group">
+                <label for="registrationConfirmPassword">Confirm Password</label>
+                <input type="password" class="form-control" id="registrationConfirmPassword" placeholder="Password">
+              </div>
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="registerUser" class="btn btn-sm btn-default">
+              Sign Me Up!
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- JavaScript files placed at the end of the document so the pages load faster -->
     <!-- ================================================== -->

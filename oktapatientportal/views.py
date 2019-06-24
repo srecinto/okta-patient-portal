@@ -9,7 +9,7 @@ from flask import request, session, send_from_directory, redirect, make_response
 from datetime import datetime
 
 from utils.okta import OktaAuth, OktaAdmin
-from utils.view import apply_remote_config, handle_invalid_tokens
+from utils.view import apply_remote_config, handle_invalid_tokens, send_mail
 from utils.view import get_claims_from_token, authenticated, get_modal_options
 
 
@@ -129,6 +129,31 @@ def login():
     return json.dumps(auth_response)
 
 
+@app.route('/login-token/<token>', methods=["POST"])
+def login_token(token):
+    """ Handle either full form post redirect or a json response with redirect url """
+    print("login_token()")
+    redirect_url = "/"
+
+    # print("authn_json_response: {0}".format(json.dumps(authn_json_response, indent=4, sort_keys=True)))
+    if token:
+        okta_auth = OktaAuth(session)
+        session["state"] = str(uuid.uuid4())
+        redirect_url = okta_auth.create_oauth_authorize_url(
+            response_type="code",
+            state=session["state"],
+            auth_options={
+                "response_mode": "form_post",
+                "prompt": "none",
+                "scope": "openid profile email",
+                "sessionToken": token,
+            }
+        )
+        # print("redirect_url: {0}".format(redirect_url))
+
+    return make_response(redirect(redirect_url))
+
+
 @app.route("/logout", methods=["GET"])
 def logout():
     print("logout()")
@@ -177,6 +202,86 @@ def accept_consent():
         concent_accept_response["success"] = True
 
     return json.dumps(concent_accept_response)
+
+
+@app.route("/register-basic", methods=["POST"])
+def register_basic():
+    print("register_basic()")
+    login_form_data = request.get_json()
+
+    register_basic_response = {
+        "success": False
+    }
+
+    okta_admin = OktaAdmin(session)
+    patient_group = okta_admin.get_groups_by_name("Patient")[0]  # Default to first found group by name
+
+    user = {
+        "profile": {
+            "firstName": "NOT_SET",
+            "lastName": "NOT_SET",
+            "email": login_form_data["username"],
+            "login": login_form_data["username"]
+        },
+        "credentials": {
+            "password": {"value": login_form_data["password"]}
+        },
+        "groupIds": [
+            patient_group["id"]
+        ]
+    }
+
+    created_user = okta_admin.create_user(user)
+    # print("created_user: {0}".format(json.dumps(created_user, indent=4, sort_keys=True)))
+
+    if "errorSummary" in created_user:
+        register_basic_response["errorMessage"] = created_user["errorSummary"]
+
+        if "errorCauses" in created_user:
+            register_basic_response["errorMessages"] = []
+            for error_cause in created_user["errorCauses"]:
+                register_basic_response["errorMessages"].append({
+                    "errorMessage": error_cause["errorSummary"]
+                })
+    else:
+        #  Send activation email
+        recipients = [{"address": {"email": created_user["profile"]["email"]}}]
+        substitution = {
+            "activation_email": created_user["profile"]["email"],
+            "activation_key": created_user["id"],
+            "udp_subdomain": session["udp_subdomain"],
+            "udp_app_name": session["demo_app_name"],
+            "domain": session["remaining_domain"],
+            "logo_url": session["app_logo"]
+        }
+
+        send_mail(
+            session["spark_post_activate_template_id"],
+            recipients,
+            session["spark_post_api_key"],
+            substitution)
+
+    return json.dumps(register_basic_response)
+
+
+@app.route("/activate/<user_id>", methods=["GET"])
+def activate(user_id):
+    print("activate(user_id)")
+
+    auth_response = make_response(redirect("/"))
+
+    okta_admin = OktaAdmin(session)
+    activation_response = okta_admin.activate_user(user_id, send_email=False)
+    print("activation_response: {0}".format(json.dumps(activation_response, indent=4, sort_keys=True)))
+
+    if "activationToken" in activation_response:
+        okta_auth = OktaAuth(session)
+        auth_response = okta_auth.authenticate_with_activation_token(activation_response["activationToken"])
+        # print("auth_response: {0}".format(json.dumps(auth_response, indent=4, sort_keys=True)))
+        if "sessionToken" in auth_response:
+            auth_response = login_token(auth_response["sessionToken"])
+
+    return auth_response
 
 
 @app.route("/test")

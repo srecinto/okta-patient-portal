@@ -31,11 +31,12 @@ def apply_remote_config(f):
             print("No session set")
 
             # Assumes the first two components are what we need
-            udp_subdomain, demo_app_name = get_domain_parts_from_request(request)
-            session["udp_subdomain"] = udp_subdomain
-            session["demo_app_name"] = demo_app_name
+            split_domain_parts = get_domain_parts_from_request(request)
+            session["udp_subdomain"] = split_domain_parts["udp_subdomain"]
+            session["demo_app_name"] = split_domain_parts["demo_app_name"]
+            session["remaining_domain"] = split_domain_parts["remaining_domain"]
 
-            well_known_default_settings_url, secrets_url = get_configs_url(udp_subdomain, demo_app_name)
+            well_known_default_settings_url, secrets_url = get_configs_url(session["udp_subdomain"], session["demo_app_name"])
             # print("well_known_default_settings_url: {0}".format(well_known_default_settings_url))
 
             config_json = RestUtil.execute_get(well_known_default_settings_url, {}, json_headers)
@@ -88,11 +89,18 @@ def get_domain_parts_from_request(request):
     domain_parts = request.host.split(".")
     udp_subdomain = domain_parts[0]
     demo_app_name = domain_parts[1]
+    remaining_domain = ".".join(domain_parts[2:])
 
     print("udp_subdomain: {0}".format(udp_subdomain))
     print("demo_app_name: {0}".format(demo_app_name))
 
-    return udp_subdomain, demo_app_name
+    split_domain_parts = {
+        "udp_subdomain": udp_subdomain,
+        "demo_app_name": demo_app_name,
+        "remaining_domain": remaining_domain
+    }
+
+    return split_domain_parts
 
 
 def set_default_env_secrets(session):
@@ -131,6 +139,8 @@ def map_config(config, session):
     session["base_title"] = config["settings"]["base_title"]
     session["current_title"] = config["settings"]["current_title"]
     session["skin"] = config["settings"]["skin"]
+    session["spark_post_api_key"] = config["settings"]["spark_post_api_key"]
+    session["spark_post_activate_template_id"] = config["settings"]["spark_post_activate_template_id"]
 
 
 def map_secrets_config(config, session):
@@ -233,3 +243,27 @@ def show_user_consent(app):
                 result = False
 
     return result
+
+
+def send_mail(template_id, recipients, spark_post_api_key, substitution=None):
+    print("send_mail()")
+    url = "https://api.sparkpost.com/api/v1/transmissions"
+    headers = {
+        "Authorization": spark_post_api_key,
+        "Content-Type": "application/json"
+    }
+    body = {
+        "options": {
+            "sandbox": False
+        },
+        "content": {
+            "template_id": template_id,
+            "use_draft_template": False
+        },
+        "recipients": recipients
+    }
+
+    if substitution:
+        body["substitution_data"] = substitution
+
+    return RestUtil.execute_post(url, body, headers=headers)

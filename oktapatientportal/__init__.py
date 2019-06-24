@@ -19,7 +19,9 @@ default_settings = {
             "app_logo": os.getenv("SITE_APP_LOGO", "images/logo_{0}.png".format(os.getenv("SITE_SKIN", "blue"))),
             "app_favicon": os.getenv("SITE_APP_FAVICON", "images/favicon.ico"),
             "app_slogan": os.getenv("SITE_APP_SLOGAN", "Get Better Sooner"),
-            "app_config": os.getenv("SITE_APP_CONFIG", "./well-known/default-settings")
+            "app_config": os.getenv("SITE_APP_CONFIG", "./well-known/default-settings"),
+            "spark_post_api_key": os.getenv("SPARKPOST_API_KEY", "-Sparkpost API Key-"),
+            "spark_post_activate_template_id": os.getenv("SPARKPOST_ACTIVATE_TEMPLATE_ID", "-Sparkpost activate email tempate id-"),
         }
     }
 }
