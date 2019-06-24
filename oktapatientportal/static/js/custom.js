@@ -120,6 +120,7 @@ function registerUserClickHandler() {
 
                 if(acceptConsentResponseJson.success) {
                 	$("#basicRegistrationModal").modal("hide");
+                	$("#basicRegistrationCompleteModal").modal("show");
                 } else {
                 	//TODO: use modal popup
                 	$("#registerUser").prop("disabled", false);
