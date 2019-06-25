@@ -508,6 +508,12 @@
                   <input type="text" class="form-control" id="regAlt1DOB" placeholder="Date Of Birth"{% if user %} value="{{user.profile.dob}}"{% endif %}>
                 </div>
               </div>
+              <div class="form-group row">
+                <label for="regAlt1DOB" class="col-sm-2 col-form-label">Mobile Number</label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" id="regAlt1MobileNumber" placeholder="Mobile Number"{% if user %} value="{{user.profile.mobilePhone}}"{% endif %}>
+                </div>
+              </div>
             </p>
           </div>
           <div class="modal-footer">

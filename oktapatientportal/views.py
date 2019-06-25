@@ -325,6 +325,7 @@ def register_alt():
             "firstName": user_form_data["firstName"],
             "lastName": user_form_data["lastName"],
             "dob": user_form_data["dob"],
+            "mobileNumber": user_form_data["mobileNumber"],
         }
     }
 
