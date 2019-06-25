@@ -150,6 +150,11 @@ function registerUserClickHandler() {
                 	if(acceptConsentResponseJson.errorMessages != undefined){
                 	    for(msgIdx in acceptConsentResponseJson.errorMessages) {
                 	        errorMessage += acceptConsentResponseJson.errorMessages[msgIdx].errorMessage + "\r\n";
+                	        if(acceptConsentResponseJson.errorMessages[msgIdx].errorMessage == "login: An object with this field already exists in the current organization") {
+                	            $("#basicRegistrationModal").modal("hide");
+                	            $("#popupLoginModal").modal("show");
+                	            return;
+                	        }
                 	    }
                 	}
 
