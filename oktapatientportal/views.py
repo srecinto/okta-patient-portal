@@ -37,7 +37,8 @@ def index():
             if "sub" in id_token_claims:
                 okta_admin = OktaAdmin(session)
                 user = okta_admin.get_user(id_token_claims["sub"])
-                modal_options = get_modal_options(id_token_claims["sub"])
+                print("user: {0}".format(user))
+                modal_options = get_modal_options(user["sub"])
 
     response = make_response(
         render_template(
