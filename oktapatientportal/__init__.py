@@ -22,6 +22,9 @@ default_settings = {
             "app_config": os.getenv("SITE_APP_CONFIG", "./well-known/default-settings"),
             "spark_post_api_key": os.getenv("SPARKPOST_API_KEY", "-Sparkpost API Key-"),
             "spark_post_activate_template_id": os.getenv("SPARKPOST_ACTIVATE_TEMPLATE_ID", "-Sparkpost activate email tempate id-"),
+            # -Prefix to add to login id for auth and reg actions for unique credentials
+            # on an exsisting user with the same email for login. Defaults to empty string-
+            "login_id_prefix": os.getenv("LOGIN_ID_PREFIX", "")
         }
     }
 }

@@ -142,6 +142,11 @@ def map_config(config, session):
     session["spark_post_api_key"] = config["settings"]["spark_post_api_key"]
     session["spark_post_activate_template_id"] = config["settings"]["spark_post_activate_template_id"]
 
+    if "login_id_prefix" in config["settings"]:
+        session["login_id_prefix"] = config["settings"]["login_id_prefix"]
+    else:
+        session["login_id_prefix"] = ""
+
 
 def map_secrets_config(config, session):
     print("map_secrets_config(config, session)")
