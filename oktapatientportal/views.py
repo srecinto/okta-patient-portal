@@ -37,8 +37,8 @@ def index():
             if "sub" in id_token_claims:
                 okta_admin = OktaAdmin(session)
                 user = okta_admin.get_user(id_token_claims["sub"])
-                print("user: {0}".format(user))
-                modal_options = get_modal_options(user["sub"])
+                # print("user: {0}".format(user))
+                modal_options = get_modal_options(id_token_claims["sub"])
 
     response = make_response(
         render_template(
@@ -80,9 +80,6 @@ def oidc():
     response = make_response(redirect(app_landing_page_url))
     response.set_cookie('token', oauth_token["access_token"])
     response.set_cookie('id_token', oauth_token["id_token"])
-    # else:
-        # print("FAILED TO MATCH STATE!!!")
-        # response = make_response(redirect("/"))
 
     session.pop("state", None)
 
@@ -99,7 +96,7 @@ def login():
 
     #  print("login_form_data: {0}".format(json.dumps(login_form_data, indent=4, sort_keys=True)))
     authn_json_response = okta_auth.authenticate(
-        username=login_form_data["username"],
+        username=session["login_id_prefix"] + login_form_data["username"],
         password=login_form_data["password"],
         headers=request.headers)
 
@@ -222,7 +219,7 @@ def register_basic():
             "firstName": "NOT_SET",
             "lastName": "NOT_SET",
             "email": login_form_data["username"],
-            "login": login_form_data["username"]
+            "login": session["login_id_prefix"] + login_form_data["username"]
         },
         "credentials": {
             "password": {"value": login_form_data["password"]}
