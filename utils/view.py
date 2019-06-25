@@ -273,7 +273,7 @@ def show_user_reg_form_alt1(user, app):
             app["profile"]["registrationForm"] == "ALT1"):
         result = True
     else:
-        if (user["profile"]["dob"] == "" or user["profile"]["mobilePhone"]):
+        if (user["profile"]["dob"] == "" or user["profile"]["mobilePhone"] == ""):
             result = True
 
     return result
