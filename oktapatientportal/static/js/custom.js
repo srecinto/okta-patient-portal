@@ -255,6 +255,11 @@ function submitRegistrationAlt1ClickHandler() {
         errorMessage += "Date of Birth is Required\r\n";
     }
 
+    if($("#regAlt1MobileNumber").val() == "") {
+        isValid = false;
+        errorMessage += "Mobile Number is Required\r\n";
+    }
+
     if(isValid) {
         $("#submitRegistrationAlt1").prop("disabled", true);
     	$("#submitRegistrationAlt1").html(
@@ -263,7 +268,8 @@ function submitRegistrationAlt1ClickHandler() {
     	var json_post_data = {
     	    "firstName": $("#regAlt1FirstName").val(),
     	    "lastName": $("#regAlt1LastName").val(),
-    	    "dob": $("#regAlt1DOB").val()
+    	    "dob": $("#regAlt1DOB").val(),
+    	    "mobileNumber": $("#regAlt1MobileNumber").val()
     	}
         $.ajax({
             url: "/register-alt1",
