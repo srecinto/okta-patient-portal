@@ -217,12 +217,12 @@ def decode_base64(data):
 
 def get_modal_options(okta_user_id):
     print("get_modal_options(okta_user_id)")
-    print("okta_user_id: {0}".format(okta_user_id))
+    # print("okta_user_id: {0}".format(okta_user_id))
     okta_admin = OktaAdmin(session)
     user = okta_admin.get_user(okta_user_id)
-    print("user: {0}".format(json.dumps(user, indent=4, sort_keys=True)))
+    # print("user: {0}".format(json.dumps(user, indent=4, sort_keys=True)))
     curent_application = okta_admin.get_user_application_by_current_client_id(user["id"])
-    print("curent_application: {0}".format(json.dumps(curent_application, indent=4, sort_keys=True)))
+    # print("curent_application: {0}".format(json.dumps(curent_application, indent=4, sort_keys=True)))
     # print("user: {0}".format(json.dumps(user, indent=4, sort_keys=True)))
     #  Apply Rules based on user and app combo
 
@@ -250,8 +250,8 @@ def show_user_reg_form_default(user, app):
     result = False
 
     if ("height" not in user["profile"] and
-        "weight" not in user["profile"] and
-        app["profile"]["registrationForm"] == "DEFAULT"):
+            "weight" not in user["profile"] and
+            app["profile"]["registrationForm"] == "DEFAULT"):
         result = True
 
     return result
@@ -262,7 +262,7 @@ def show_user_reg_form_alt1(user, app):
     result = False
 
     if ("dob" not in user["profile"] and
-        app["profile"]["registrationForm"] == "ALT1"):
+            app["profile"]["registrationForm"] == "ALT1"):
         result = True
 
     return result

@@ -2,7 +2,6 @@ import os
 import json
 import uuid
 
-
 from oktapatientportal import app
 
 from flask import request, session, send_from_directory, redirect, make_response, render_template
@@ -26,24 +25,25 @@ def serve_static_html(filename):
 def index():
     """ handler for the root url path of the app """
     print("index()")
-    id_token_claims = None
+    user = None
     modal_options = None
 
     session["current_title"] = "{0} | {1} Home".format(session["base_title"], session["app_title"])
 
     # Get user Claims from Id Token for signed in display
     if("token" in request.cookies and "id_token" in request.cookies):
-        id_token = request.cookies["id_token"]
-        id_token_claims = get_claims_from_token(id_token)
+        id_token_claims = get_claims_from_token(request.cookies["id_token"])
         if id_token_claims:
             if "sub" in id_token_claims:
+                okta_admin = OktaAdmin(session)
+                user = okta_admin.get_user(id_token_claims["sub"])
                 modal_options = get_modal_options(id_token_claims["sub"])
 
     response = make_response(
         render_template(
             "index.html",
             site_config=session,
-            id_token_claims=id_token_claims,
+            user=user,
             modal_options=modal_options
         )
     )
@@ -278,7 +278,6 @@ def register_default():
     id_token = request.cookies.get("id_token")
     user_id = get_claims_from_token(id_token)["sub"]
     okta_admin = OktaAdmin(session)
-    patient_group = okta_admin.get_groups_by_name("Patient")[0]  # Default to first found group by name
 
     user = {
         "profile": {
@@ -290,7 +289,7 @@ def register_default():
     }
 
     updated_user = okta_admin.update_user(user_id, user)
-    print("updated_user: {0}".format(json.dumps(updated_user, indent=4, sort_keys=True)))
+    # print("updated_user: {0}".format(json.dumps(updated_user, indent=4, sort_keys=True)))
 
     if "errorSummary" in updated_user:
         register_default_response["errorMessage"] = updated_user["errorSummary"]
@@ -303,8 +302,49 @@ def register_default():
                 })
     else:
         register_default_response["success"] = True
+        register_default_response["user"] = updated_user
 
     return json.dumps(register_default_response)
+
+
+@app.route("/register-alt1", methods=["POST"])
+@authenticated
+def register_alt():
+    print("register_alt()")
+    user_form_data = request.get_json()
+
+    register_alt1_response = {
+        "success": False
+    }
+    id_token = request.cookies.get("id_token")
+    user_id = get_claims_from_token(id_token)["sub"]
+    okta_admin = OktaAdmin(session)
+
+    user = {
+        "profile": {
+            "firstName": user_form_data["firstName"],
+            "lastName": user_form_data["lastName"],
+            "dob": user_form_data["dob"],
+        }
+    }
+
+    updated_user = okta_admin.update_user(user_id, user)
+    # print("updated_user: {0}".format(json.dumps(updated_user, indent=4, sort_keys=True)))
+
+    if "errorSummary" in updated_user:
+        register_alt1_response["errorMessage"] = updated_user["errorSummary"]
+
+        if "errorCauses" in updated_user:
+            register_alt1_response["errorMessages"] = []
+            for error_cause in updated_user["errorCauses"]:
+                register_alt1_response["errorMessages"].append({
+                    "errorMessage": error_cause["errorSummary"]
+                })
+    else:
+        register_alt1_response["success"] = True
+        register_alt1_response["user"] = updated_user
+
+    return json.dumps(register_alt1_response)
 
 
 @app.route("/activate/<user_id>", methods=["GET"])

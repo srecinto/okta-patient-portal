@@ -11,11 +11,20 @@ $(document).ready(function() {
 	$("#signUpButton").on("click", () => { $("#basicRegistrationModal").modal("show"); });
 	$("#registerUser").on("click", registerUserClickHandler);
 	$("#submitRegistrationDefault").on("click", submitRegistrationDefaultClickHandler);
+	$("#submitRegistrationAlt1").on("click", submitRegistrationAlt1ClickHandler);
 
 	$("#password").keypress(function (e) {
 		var key = e.which;
 		if(key == 13) {  // the enter key code
 			$("#loginButton").click();
+			return false;
+		}
+	});
+
+	$("#registrationConfirmPassword").keypress(function (e) {
+		var key = e.which;
+		if(key == 13) {  // the enter key code
+			$("#registerUser").click();
 			return false;
 		}
 	});
@@ -200,11 +209,79 @@ function submitRegistrationDefaultClickHandler(){
                 var responseJson = JSON.parse(data);
 
                 if(responseJson.success) {
+                	$("#userNameLabel").html(responseJson.user.profile.firstName + " " + responseJson.user.profile.lastName);
                 	$("#registrationDefaultModal").modal("hide");
+                	$("#finalRegistrationCompleteModal").modal("show");
                 } else {
                 	//TODO: use modal popup
                 	$("#submitRegistrationDefault").prop("disabled", false);
                 	$("#submitRegistrationDefault").html("Save");
+
+                	errorMessage = responseJson.errorMessage + "\r\n";
+
+                	if(responseJson.errorMessages != undefined){
+                	    for(msgIdx in responseJson.errorMessages) {
+                	        errorMessage += responseJson.errorMessages[msgIdx].errorMessage + "\r\n";
+                	    }
+                	}
+
+                	alert(errorMessage);
+                }
+            }
+        });
+    } else {
+        alert(errorMessage);
+    }
+}
+
+function submitRegistrationAlt1ClickHandler() {
+    console.log("submitRegistrationAlt1()");
+
+    var isValid = true;
+    var errorMessage = "";
+
+    if($("#regAlt1FirstName").val() == "") {
+        isValid = false;
+        errorMessage += "First Name is Required\r\n";
+    }
+
+    if($("#regAlt1LastName").val() == "") {
+        isValid = false;
+        errorMessage += "Last Name is Required\r\n";
+    }
+
+    if($("#regAlt1DOB").val() == "") {
+        isValid = false;
+        errorMessage += "Date of Birth is Required\r\n";
+    }
+
+    if(isValid) {
+        $("#submitRegistrationAlt1").prop("disabled", true);
+    	$("#submitRegistrationAlt1").html(
+    	    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Processing...'
+    	);
+    	var json_post_data = {
+    	    "firstName": $("#regAlt1FirstName").val(),
+    	    "lastName": $("#regAlt1LastName").val(),
+    	    "dob": $("#regAlt1DOB").val()
+    	}
+        $.ajax({
+            url: "/register-alt1",
+            type: "POST",
+            data: JSON.stringify(json_post_data),
+            contentType: "application/json; charset=utf-8",
+            success: data => {
+                console.log(data);
+                var responseJson = JSON.parse(data);
+
+                if(responseJson.success) {
+                	$("#userNameLabel").html(responseJson.user.profile.firstName + " " + responseJson.user.profile.lastName);
+                	$("#registrationAlt1Modal").modal("hide");
+                	$("#finalRegistrationCompleteModal").modal("show");
+                } else {
+                	//TODO: use modal popup
+                	$("#submitRegistrationAlt1").prop("disabled", false);
+                	$("#submitRegistrationAlt1").html("Save");
 
                 	errorMessage = responseJson.errorMessage + "\r\n";
 
