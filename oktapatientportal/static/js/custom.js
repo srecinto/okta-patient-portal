@@ -269,7 +269,7 @@ function submitRegistrationAlt1ClickHandler() {
     	    "firstName": $("#regAlt1FirstName").val(),
     	    "lastName": $("#regAlt1LastName").val(),
     	    "dob": $("#regAlt1DOB").val(),
-    	    "mobileNumber": $("#regAlt1MobileNumber").val()
+    	    "mobilePhone": $("#regAlt1MobileNumber").val()
     	}
         $.ajax({
             url: "/register-alt1",
