@@ -62,26 +62,26 @@ def oidc():
     if "error" in request.form:
         print("ERROR: {0}, MESSAGE: {1}".format(request.form["error"], request.form["error_description"]))
 
-    if session["state"] == request.form["state"]:
-        oidc_code = request.form["code"]
-        #  print("oidc_code: {0}".format(oidc_code))
-        okta_auth = OktaAuth(session)
-        oauth_token = okta_auth.get_oauth_token(
-            code=oidc_code,
-            grant_type="authorization_code",
-            auth_options={
-                "client_id": session["client_id"],
-                "client_secret": session["CLIENT_SECRET"],
-            }
-        )
-        #  print("oauth_token: {0}".format(json.dumps(oauth_token, indent=4, sort_keys=True)))
-        app_landing_page_url = session["app_base_url"]
-        response = make_response(redirect(app_landing_page_url))
-        response.set_cookie('token', oauth_token["access_token"])
-        response.set_cookie('id_token', oauth_token["id_token"])
-    else:
-        print("FAILED TO MATCH STATE!!!")
-        response = make_response(redirect("/"))
+    # if session["state"] == request.form["state"]:
+    oidc_code = request.form["code"]
+    #  print("oidc_code: {0}".format(oidc_code))
+    okta_auth = OktaAuth(session)
+    oauth_token = okta_auth.get_oauth_token(
+        code=oidc_code,
+        grant_type="authorization_code",
+        auth_options={
+            "client_id": session["client_id"],
+            "client_secret": session["CLIENT_SECRET"],
+        }
+    )
+    #  print("oauth_token: {0}".format(json.dumps(oauth_token, indent=4, sort_keys=True)))
+    app_landing_page_url = session["app_base_url"]
+    response = make_response(redirect(app_landing_page_url))
+    response.set_cookie('token', oauth_token["access_token"])
+    response.set_cookie('id_token', oauth_token["id_token"])
+    # else:
+        # print("FAILED TO MATCH STATE!!!")
+        # response = make_response(redirect("/"))
 
     session.pop("state", None)
 
@@ -236,13 +236,13 @@ def register_basic():
 
     if "errorSummary" in created_user:
         register_basic_response["errorMessage"] = created_user["errorSummary"]
-
         if "errorCauses" in created_user:
             register_basic_response["errorMessages"] = []
             for error_cause in created_user["errorCauses"]:
                 register_basic_response["errorMessages"].append({
                     "errorMessage": error_cause["errorSummary"]
                 })
+
     else:
         #  Send activation email
         recipients = [{"address": {"email": created_user["profile"]["email"]}}]

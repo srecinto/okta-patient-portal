@@ -46,6 +46,20 @@
     <!-- Custom css -->
     <link href="css/custom.css" rel="stylesheet">
 
+    <!-- Latest CDN production Javascript and CSS -->
+    <script
+      src="https://ok1static.oktacdn.com/assets/js/sdk/okta-signin-widget/2.16.0/js/okta-sign-in.min.js"
+      type="text/javascript"></script>
+    <link
+      href="https://ok1static.oktacdn.com/assets/js/sdk/okta-signin-widget/2.16.0/css/okta-sign-in.min.css"
+      type="text/css"
+      rel="stylesheet"/>
+
+    <!-- Theme file: Customize or replace this file if you want to override our default styles -->
+    <link
+      href="https://ok1static.oktacdn.com/assets/js/sdk/okta-signin-widget/2.16.0/css/okta-theme.css"
+      type="text/css"
+      rel="stylesheet"/>
   </head>
 
   <!-- body classes:  -->
@@ -598,6 +612,27 @@
       </div>
     </div>
 
+    <!-- Popup Login -->
+    <div class="modal fade" id="popupLoginModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Sign In</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          </div>
+          <div class="modal-body">
+            <p>Looks like your account already exsists.  Please sign in to access this application.</p>
+            <p>
+              <div id="okta-login-container"></div>
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-sm btn-dark" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- JavaScript files placed at the end of the document so the pages load faster -->
     <!-- ================================================== -->
     <!-- Jquery and Bootstap core js files -->
@@ -626,6 +661,51 @@
     <!-- Custom Scripts -->
     <script src="https://ok1static.oktacdn.com/assets/js/sdk/okta-auth-js/2.4.0/okta-auth-js.min.js" type="text/javascript"></script>
     <script src="js/custom.js"></script>
+
+    <script type="text/javascript">
+      //<![CDATA[
+      $(document).ready(function() {
+
+        var orgUrl = "{{site_config.base_url}}";
+        var redirect = "{{site_config.redirect_uri}}";
+        var oktaSignIn = new OktaSignIn({
+          baseUrl: orgUrl,
+          // logo: "{{site_config.app_logo}}",
+          // OpenID Connect options
+          clientId: "{{site_config.client_id}}",
+          redirectUri: redirect,
+          authScheme: "OAUTH2",
+          authParams: {
+            display: "page",
+            responseType: "code",
+            responseMode: "form_post",
+            issuer: "{{site_config.issuer}}",
+            authorizeUrl: "{{site_config.issuer}}/v1/authorize",
+            scopes: [
+              "openid",
+              "profile"
+            ]
+          },
+          features: {
+            multiOptionalFactorEnroll: true,
+            smsRecovery: true,
+            callRecovery: true,
+            deviceFingerprinting: true,
+            //idpDiscovery: true
+          }
+        });
+
+        oktaSignIn.renderEl({ el: '#okta-login-container' },
+          function(res) {
+            if (res.status === 'SUCCESS') {
+              console.log("data: %s", JSON.stringify(res));
+            }
+          }
+        );
+
+      });
+      //]]>
+    </script>
 
   </body>
 </html>
