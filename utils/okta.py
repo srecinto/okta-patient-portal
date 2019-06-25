@@ -105,6 +105,17 @@ class OktaAuth:
 
         return RestUtil.execute_post(url, body, okta_headers)
 
+    def userinfo(self, token, headers=None):
+        print("OktaAuth.userinfo()")
+        okta_headers = OktaUtil.get_oauth_okta_bearer_token_headers(headers, token)
+
+        url = "{issuer}/v1/userinfo?token={token}".format(
+            issuer=self.okta_config["issuer"],
+            token=token)
+        body = {}
+
+        return RestUtil.execute_post(url, body, okta_headers)
+
 
 class OktaAdmin:
 
@@ -133,6 +144,15 @@ class OktaAdmin:
         url = "{base_url}/api/v1/users?activate={activate_user}".format(
             base_url=self.okta_config["base_url"],
             activate_user=activate_user)
+
+        return RestUtil.execute_post(url, user, okta_headers)
+
+    def update_user(self, user_id, user):
+        print("OktaAdmin.update_user()")
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
+        url = "{base_url}/api/v1/users/{user_id}".format(
+            base_url=self.okta_config["base_url"],
+            user_id=user_id)
 
         return RestUtil.execute_post(url, user, okta_headers)
 
@@ -240,6 +260,12 @@ class OktaUtil:
 
         if client_id and client_secret:
             okta_oauth_headers["Authorization"] = "Basic {0}".format(OktaUtil.get_encoded_auth(client_id, client_secret))
+
+        return okta_oauth_headers
+
+    @staticmethod
+    def get_oauth_okta_bearer_token_headers(headers, token):
+        okta_oauth_headers = {"Authorization": "Bearer {0}".format(token)}
 
         return okta_oauth_headers
 
