@@ -1,6 +1,7 @@
 import os
 import json
 import uuid
+import csv
 
 from oktapatientportal import app
 
@@ -364,6 +365,46 @@ def activate(user_id):
             auth_response = login_token(auth_response["sessionToken"])
 
     return auth_response
+
+
+@app.route("/load_users", methods=["GET"])
+def load_users():
+    print("load_users()")
+
+    response = {
+        "status": "success",
+        "number_of_users_created": 0
+    }
+
+    with open("./test_users.csv", mode='r', encoding='utf-8-sig') as csv_file:
+        csv_reader = csv.DictReader(csv_file)
+        line_count = 0
+        okta_admin = OktaAdmin(session)
+
+        for row in csv_reader:
+            print(row)
+            exsisting_user = okta_admin.get_user(row["email"])
+            if "id" not in exsisting_user:
+                print("user: '{0}' not found. Creating.".format(row["email"]))
+                new_user = {
+                    "profile": {
+                        "login": row["email"],
+                        "email": row["email"],
+                        "firstName": row["first_name"],
+                        "lastName": row["last_name"],
+                        "dob": row["dob"]
+                    }
+                }
+                created_user = okta_admin.create_user(new_user, activate_user=False)
+                if "id" in created_user:
+                    response["number_of_users_created"] += 1
+                else:
+                    print("Failed to created user: '{0}' reason: {1}".format(
+                        row["email"],
+                        json.dumps(created_user, indent=4, sort_keys=True)
+                    ))
+
+    return json.dumps(response)
 
 
 @app.route("/test")
