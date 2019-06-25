@@ -258,6 +258,9 @@ def show_user_reg_form_default(user, app):
             "weight" not in user["profile"] and
             app["profile"]["registrationForm"] == "DEFAULT"):
         result = True
+    else:
+        if (user["profile"]["weight"] == "" or user["profile"]["height"] == ""):
+            result = True
 
     return result
 
@@ -269,6 +272,9 @@ def show_user_reg_form_alt1(user, app):
     if ("dob" not in user["profile"] and
             app["profile"]["registrationForm"] == "ALT1"):
         result = True
+    else:
+        if (user["profile"]["dob"] == "" or user["profile"]["mobilePhone"]):
+            result = True
 
     return result
 
