@@ -45,6 +45,29 @@ class OktaAuth:
 
         return RestUtil.execute_post(url, body, okta_headers)
 
+    def get_transaction_state(self, token, headers=None):
+        print("OktaAuth.authenticate_with_activation_token()")
+        url = "{host}/api/v1/authn".format(host=self.okta_config["base_url"])
+        okta_headers = OktaUtil.get_default_okta_headers(self.okta_config)
+
+        body = {
+            "stateToken": token
+        }
+
+        return RestUtil.execute_post(url, body, okta_headers)
+
+    def reset_password_with_state_token(self, token, password, headers=None):
+        print("OktaAuth.reset_password_with_state_token()")
+        url = "{host}/api/v1/authn/credentials/reset_password".format(host=self.okta_config["base_url"])
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
+
+        body = {
+            "stateToken": token,
+            "newPassword": password
+        }
+
+        return RestUtil.execute_post(url, body, okta_headers)
+
     def create_oauth_authorize_url(self, response_type, state, auth_options):
         print("OktaAuth.create_oauth_authorize_url()")
 

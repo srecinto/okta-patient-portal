@@ -1,7 +1,7 @@
 import os
 import json
-import uuid
 import csv
+import uuid
 
 from oktapatientportal import app
 
@@ -9,7 +9,7 @@ from flask import request, session, send_from_directory, redirect, make_response
 from datetime import datetime
 
 from utils.okta import OktaAuth, OktaAdmin
-from utils.view import apply_remote_config, handle_invalid_tokens, send_mail
+from utils.view import apply_remote_config, handle_invalid_tokens, send_mail, create_login_response
 from utils.view import get_claims_from_token, authenticated, get_modal_options
 
 
@@ -28,8 +28,16 @@ def index():
     print("index()")
     user = None
     modal_options = None
+    state_token = request.args.get("stateToken")
+    print("state_token: {0}".format(state_token))
 
     session["current_title"] = "{0} | {1} Home".format(session["base_title"], session["app_title"])
+
+    if(state_token):
+        print("User needs to set credentials and prove who they are")
+        okta_auth = OktaAuth(session)
+        token_state = okta_auth.get_transaction_state(state_token)
+        print("token_state: {0}".format(json.dumps(token_state, indent=4, sort_keys=True)))
 
     # Get user Claims from Id Token for signed in display
     if("token" in request.cookies and "id_token" in request.cookies):
@@ -46,7 +54,8 @@ def index():
             "index.html",
             site_config=session,
             user=user,
-            modal_options=modal_options
+            modal_options=modal_options,
+            state_token=state_token
         )
     )
 
@@ -91,41 +100,9 @@ def oidc():
 def login():
     """ Handle either full form post redirect or a json response with redirect url """
     print("login()")
-    auth_response = {"success": False}
     login_form_data = request.get_json()
-    okta_auth = OktaAuth(session)
 
-    #  print("login_form_data: {0}".format(json.dumps(login_form_data, indent=4, sort_keys=True)))
-    authn_json_response = okta_auth.authenticate(
-        username=session["login_id_prefix"] + login_form_data["username"],
-        password=login_form_data["password"],
-        headers=request.headers)
-
-    # print("authn_json_response: {0}".format(json.dumps(authn_json_response, indent=4, sort_keys=True)))
-    if "sessionToken" in authn_json_response:
-        session["state"] = str(uuid.uuid4())
-        oauth_authorize_url = okta_auth.create_oauth_authorize_url(
-            response_type="code",
-            state=session["state"],
-            auth_options={
-                "response_mode": "form_post",
-                "prompt": "none",
-                "scope": "openid profile email",
-                "sessionToken": authn_json_response["sessionToken"],
-            }
-        )
-
-        auth_response["redirectUrl"] = oauth_authorize_url
-        auth_response["success"] = True
-
-        #  print("oauth_authorize_url: {0}".format(oauth_authorize_url))
-    elif "errorSummary" in authn_json_response:
-        auth_response["errorMessage"] = "Login Unsuccessful: {0}".format(authn_json_response["errorSummary"])
-    else:
-        # pass the message down for further processing like MFA
-        auth_response = authn_json_response
-
-    return json.dumps(auth_response)
+    return json.dumps(create_login_response(login_form_data["username"], login_form_data["password"], session))
 
 
 @app.route('/login-token/<token>', methods=["POST"])
@@ -363,8 +340,77 @@ def activate(user_id):
         # print("auth_response: {0}".format(json.dumps(auth_response, indent=4, sort_keys=True)))
         if "sessionToken" in auth_response:
             auth_response = login_token(auth_response["sessionToken"])
+        elif "stateToken" in auth_response:
+            auth_response = make_response(redirect("/?stateToken={0}".format(auth_response["stateToken"])))
 
     return auth_response
+
+
+@app.route("/verify-dob", methods=["POST"])
+def verify_dob():
+    print("verify_dob()")
+    json_data = request.get_json()
+    # print(json_data)
+
+    verify_dob_response = {
+        "success": False
+    }
+
+    okta_auth = OktaAuth(session)
+    token_state = okta_auth.get_transaction_state(json_data["stateToken"])
+    # print("token_state: {0}".format(json.dumps(token_state, indent=4, sort_keys=True)))
+
+    if "errorSummary" in token_state:
+        verify_dob_response["errorMessage"] = token_state["errorSummary"]
+    else:
+        okta_admin = OktaAdmin(session)
+        user = okta_admin.get_user(token_state["_embedded"]["user"]["id"])
+        # print("user: {0}".format(json.dumps(user, indent=4, sort_keys=True)))
+
+        if "errorSummary" in user:
+            verify_dob_response["errorMessage"] = user["errorSummary"]
+            if "errorCauses" in user:
+                verify_dob_response["errorMessages"] = []
+                for error_cause in user["errorCauses"]:
+                    verify_dob_response["errorMessages"].append({
+                        "errorMessage": user["errorSummary"]
+                    })
+        else:
+            if user["profile"]["dob"] == json_data["dob"]:
+                verify_dob_response["user"] = user
+                verify_dob_response["success"] = True,
+            else:
+                verify_dob_response["errorMessage"] = "Your date of birth does not match our records"
+
+    return json.dumps(verify_dob_response)
+
+
+@app.route("/pre-reg-password-set", methods=["POST"])
+def pre_reg_password_set():
+    print("pre_reg_password_set()")
+    json_data = request.get_json()
+    print(json_data)
+
+    password_set_response = {
+        "success": False
+    }
+
+    okta_auth = OktaAuth(session)
+    reset_response = okta_auth.reset_password_with_state_token(json_data["stateToken"], json_data["newPassword"])
+    print("reset_response: {0}".format(json.dumps(reset_response, indent=4, sort_keys=True)))
+
+    if "errorSummary" in reset_response:
+        password_set_response["errorMessage"] = reset_response["errorSummary"]
+        if "errorCauses" in reset_response:
+            password_set_response["errorMessages"] = []
+            for error_cause in reset_response["errorCauses"]:
+                password_set_response["errorMessages"].append({
+                    "errorMessage": reset_response["errorSummary"]
+                })
+    else:
+        password_set_response = create_login_response(json_data["username"], json_data["newPassword"], session)
+
+    return json.dumps(password_set_response)
 
 
 @app.route("/load_users", methods=["GET"])
@@ -380,6 +426,7 @@ def load_users():
         csv_reader = csv.DictReader(csv_file)
         line_count = 0
         okta_admin = OktaAdmin(session)
+        patient_group = okta_admin.get_groups_by_name("Patient")[0]  # Default to first found group by name
 
         for row in csv_reader:
             print(row)
@@ -392,11 +439,34 @@ def load_users():
                         "email": row["email"],
                         "firstName": row["first_name"],
                         "lastName": row["last_name"],
-                        "dob": row["dob"]
-                    }
+                        "dob": row["dob"],
+                        "requires_validation": True
+                    },
+                    "groupIds": [
+                        patient_group["id"]
+                    ]
                 }
                 created_user = okta_admin.create_user(new_user, activate_user=False)
                 if "id" in created_user:
+                    #  Send activation email
+                    recipients = [{"address": {"email": created_user["profile"]["email"]}}]
+                    substitution = {
+                        "activation_email": created_user["profile"]["email"],
+                        "activation_key": created_user["id"],
+                        "udp_subdomain": session["udp_subdomain"],
+                        "udp_app_name": session["demo_app_name"],
+                        "domain": session["remaining_domain"],
+                        "logo_url": session["app_logo"],
+                        "first_name": created_user["profile"]["firstName"],
+                        "last_name": created_user["profile"]["lastName"]
+                    }
+
+                    send_mail(
+                        "invite-to-app",
+                        recipients,
+                        session["spark_post_api_key"],
+                        substitution)
+
                     response["number_of_users_created"] += 1
                 else:
                     print("Failed to created user: '{0}' reason: {1}".format(

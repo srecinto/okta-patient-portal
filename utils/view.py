@@ -1,6 +1,7 @@
 import base64
 import json
 import requests
+import uuid
 
 from oktapatientportal import default_settings, secure_settings
 
@@ -301,3 +302,41 @@ def send_mail(template_id, recipients, spark_post_api_key, substitution=None):
         body["substitution_data"] = substitution
 
     return RestUtil.execute_post(url, body, headers=headers)
+
+
+def create_login_response(user_name, password, session):
+    print("create_login_response()")
+    auth_response = {"success": False}
+    okta_auth = OktaAuth(session)
+
+    #  print("login_form_data: {0}".format(json.dumps(login_form_data, indent=4, sort_keys=True)))
+    authn_json_response = okta_auth.authenticate(
+        username=session["login_id_prefix"] + user_name,
+        password=password,
+        headers=request.headers)
+
+    # print("authn_json_response: {0}".format(json.dumps(authn_json_response, indent=4, sort_keys=True)))
+    if "sessionToken" in authn_json_response:
+        session["state"] = str(uuid.uuid4())
+        oauth_authorize_url = okta_auth.create_oauth_authorize_url(
+            response_type="code",
+            state=session["state"],
+            auth_options={
+                "response_mode": "form_post",
+                "prompt": "none",
+                "scope": "openid profile email",
+                "sessionToken": authn_json_response["sessionToken"],
+            }
+        )
+
+        auth_response["redirectUrl"] = oauth_authorize_url
+        auth_response["success"] = True
+
+        #  print("oauth_authorize_url: {0}".format(oauth_authorize_url))
+    elif "errorSummary" in authn_json_response:
+        auth_response["errorMessage"] = "Login Unsuccessful: {0}".format(authn_json_response["errorSummary"])
+    else:
+        # pass the message down for further processing like MFA
+        auth_response = authn_json_response
+
+    return auth_response

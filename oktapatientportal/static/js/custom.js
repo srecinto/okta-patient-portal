@@ -12,6 +12,8 @@ $(document).ready(function() {
 	$("#registerUser").on("click", registerUserClickHandler);
 	$("#submitRegistrationDefault").on("click", submitRegistrationDefaultClickHandler);
 	$("#submitRegistrationAlt1").on("click", submitRegistrationAlt1ClickHandler);
+	$("#verifyAccount").on("click", verifyAccountClickHandler);
+	$("#setPreRegCredentials").on("click", setPreRegCredentialsClickHandler);
 
 	$("#password").keypress(function (e) {
 		var key = e.which;
@@ -30,13 +32,17 @@ $(document).ready(function() {
 	});
 
 	//Display Modals
+	console.log("stateToken: " + $("#stateToken").val());
 	if($("#showConsent").val() == "True") {
 		$("#consentModal").modal("show");
 	}else if($("#showRegistrationDefault").val() == "True") {
 	    $("#registrationDefaultModal").modal("show");
 	} else if($("#showRegistrationAlt1").val() == "True") {
 	    $("#registrationAlt1Modal").modal("show");
+	} else if($("#stateToken").val() != "") {
+	    $("#verifyAccountModal").modal("show");
 	}
+
 
 }); // End document ready
 
@@ -142,9 +148,6 @@ function registerUserClickHandler() {
                 	$("#basicRegistrationCompleteModal").modal("show");
                 } else {
                 	//TODO: use modal popup
-                	$("#registerUser").prop("disabled", false);
-                	$("#registerUser").html("Sign Me Up!");
-
                 	errorMessage = acceptConsentResponseJson.errorMessage + "\r\n";
 
                 	if(acceptConsentResponseJson.errorMessages != undefined){
@@ -160,6 +163,8 @@ function registerUserClickHandler() {
 
                 	alert(errorMessage);
                 }
+                $("#registerUser").prop("disabled", false);
+            	$("#registerUser").html("Sign Me Up!");
             }
         });
     } else {
@@ -219,9 +224,6 @@ function submitRegistrationDefaultClickHandler(){
                 	$("#finalRegistrationCompleteModal").modal("show");
                 } else {
                 	//TODO: use modal popup
-                	$("#submitRegistrationDefault").prop("disabled", false);
-                	$("#submitRegistrationDefault").html("Save");
-
                 	errorMessage = responseJson.errorMessage + "\r\n";
 
                 	if(responseJson.errorMessages != undefined){
@@ -232,6 +234,8 @@ function submitRegistrationDefaultClickHandler(){
 
                 	alert(errorMessage);
                 }
+                $("#submitRegistrationDefault").prop("disabled", false);
+            	$("#submitRegistrationDefault").html("Save");
             }
         });
     } else {
@@ -291,9 +295,6 @@ function submitRegistrationAlt1ClickHandler() {
                 	$("#finalRegistrationCompleteModal").modal("show");
                 } else {
                 	//TODO: use modal popup
-                	$("#submitRegistrationAlt1").prop("disabled", false);
-                	$("#submitRegistrationAlt1").html("Save");
-
                 	errorMessage = responseJson.errorMessage + "\r\n";
 
                 	if(responseJson.errorMessages != undefined){
@@ -304,6 +305,126 @@ function submitRegistrationAlt1ClickHandler() {
 
                 	alert(errorMessage);
                 }
+                $("#submitRegistrationAlt1").prop("disabled", false);
+            	$("#submitRegistrationAlt1").html("Save");
+            }
+        });
+    } else {
+        alert(errorMessage);
+    }
+}
+
+function verifyAccountClickHandler() {
+    console.log("verifyAccountClickHandler()");
+
+	var isValid = true;
+    var errorMessage = "";
+
+    if($("#verifyDOB").val() == "") {
+        isValid = false;
+        errorMessage += "Dateof Brith is Required\r\n";
+    }
+
+    if(isValid) {
+        $("#verifyAccount").prop("disabled", true);
+    	$("#verifyAccount").html(
+    	    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Processing...'
+    	);
+
+    	var json_post_data = {
+    	    "dob": $("#verifyDOB").val(),
+    	    "stateToken": $("#stateToken").val()
+    	}
+
+        $.ajax({
+            url: "/verify-dob",
+            type: "POST",
+            data: JSON.stringify(json_post_data),
+            contentType: "application/json; charset=utf-8",
+            success: data => {
+                console.log(data);
+                var responseJson = JSON.parse(data);
+
+                if(responseJson.success) {
+                	$("#verifyAccountModal").modal("hide");
+                	$("#lblUserNamePreRegform").html(responseJson.user.profile.email);
+                	$("#registrationPreRegModal").modal("show");
+                } else {
+                	//TODO: use modal popup
+                	errorMessage = responseJson.errorMessage + "\r\n";
+
+                	if(responseJson.errorMessages != undefined){
+                	    for(msgIdx in responseJson.errorMessages) {
+                	        errorMessage += responseJson.errorMessages[msgIdx].errorMessage + "\r\n";
+                	    }
+                	}
+
+                	alert(errorMessage);
+                }
+                $("#verifyAccount").prop("disabled", false);
+            	$("#verifyAccount").html("Verify");
+            }
+        });
+    } else {
+        alert(errorMessage);
+    }
+}
+
+function setPreRegCredentialsClickHandler() {
+    console.log("setPreRegCredentialsClickHandler()");
+
+    var isValid = true;
+    var errorMessage = "";
+
+    if($("#preRegPassword").val() == "") {
+        isValid = false;
+        errorMessage += "Password is Required\r\n";
+    }
+
+    if($("#preRegPassword").val() != $("#preRegConfirmPassword").val()) {
+        isValid = false;
+        errorMessage += "Passwords must match\r\n";
+    }
+
+    if(isValid) {
+        $("#setPreRegCredentials").prop("disabled", true);
+    	$("#setPreRegCredentials").html(
+    	    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Processing...'
+    	);
+
+    	var json_post_data = {
+    	    "username": $("#lblUserNamePreRegform").html(),
+    	    "newPassword": $("#preRegPassword").val(),
+    	    "stateToken": $("#stateToken").val()
+    	}
+
+        $.ajax({
+            url: "/pre-reg-password-set",
+            type: "POST",
+            data: JSON.stringify(json_post_data),
+            contentType: "application/json; charset=utf-8",
+            success: data => {
+                console.log(data);
+                var responseJson = JSON.parse(data);
+
+                if(responseJson.success) {
+                	$("#registrationPreRegModal").modal("hide");
+                	$("#finalRegistrationCompleteModal").modal("show");
+                	$("#finalRegistrationCompleteModalClose").on("click", () => { window.location.href=responseJson.redirectUrl })
+                } else {
+                	//TODO: use modal popup
+                	errorMessage = responseJson.errorMessage + "\r\n";
+
+                	if(responseJson.errorMessages != undefined){
+                	    for(msgIdx in responseJson.errorMessages) {
+                	        errorMessage += responseJson.errorMessages[msgIdx].errorMessage + "\r\n";
+                	    }
+                	}
+
+                	alert(errorMessage);
+                }
+                $("#setPreRegCredentials").prop("disabled", false);
+            	$("#setPreRegCredentials").html("Save");
             }
         });
     } else {
