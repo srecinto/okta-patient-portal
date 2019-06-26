@@ -260,7 +260,7 @@ def show_user_reg_form_default(user, app):
             app["profile"]["registrationForm"] == "DEFAULT"):
         result = True
     else:
-        if "dob" in user["weight"] and "dob" in user["height"]:
+        if "weight" in user["profile"] and "height" in user["profile"]:
             if ((user["profile"]["weight"] == "" or user["profile"]["height"] == "") and
                 app["profile"]["registrationForm"] == "DEFAULT"):
                 result = True
