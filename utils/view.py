@@ -260,8 +260,10 @@ def show_user_reg_form_default(user, app):
             app["profile"]["registrationForm"] == "DEFAULT"):
         result = True
     else:
-        if (user["profile"]["weight"] == "" or user["profile"]["height"] == ""):
-            result = True
+        if "dob" in user["weight"] and "dob" in user["height"]:
+            if ((user["profile"]["weight"] == "" or user["profile"]["height"] == "") and
+                app["profile"]["registrationForm"] == "DEFAULT"):
+                result = True
 
     return result
 
@@ -274,8 +276,10 @@ def show_user_reg_form_alt1(user, app):
             app["profile"]["registrationForm"] == "ALT1"):
         result = True
     else:
-        if (user["profile"]["dob"] == "" or user["profile"]["mobilePhone"] == ""):
-            result = True
+        if "dob" in user["profile"]:
+            if ((user["profile"]["dob"] == "" or user["profile"]["mobilePhone"] == "") and
+                app["profile"]["registrationForm"] == "ALT1"):
+                result = True
 
     return result
 
