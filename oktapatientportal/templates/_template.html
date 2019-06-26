@@ -606,7 +606,7 @@
             <p>Thanks for completing your profile.  You are now ready to use the app.</p>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-sm btn-dark" data-dismiss="modal">Close</button>
+            <button type="button" id="finalRegistrationCompleteModalClose" class="btn btn-sm btn-dark" data-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
@@ -632,6 +632,69 @@
         </div>
       </div>
     </div>
+
+    <!-- Accout Verification -->
+    <div class="modal fade" id="verifyAccountModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel">Verify Your Account</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          </div>
+          <div class="modal-body">
+            <p>Consectetur adipisicing elit. Nemo architecto debitis dolorum ullam in ut sint, odit maiores eaque explicabo, repellendus minima soluta sunt! Nisi minima blanditiis voluptate, ut atque.</p>
+            <p>
+              <div class="form-group">
+                <label for="verifyDOB" class="col-sm-2 col-form-label">Date Of Birth</label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" id="verifyDOB" placeholder="Date Of Birth"{% if user %} value="{{user.profile.dob}}"{% endif %}>
+                </div>
+              </div>
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="verifyAccount" class="btn btn-sm btn-default">
+              Verify
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pre Reg Registraion -->
+    <div class="modal fade" id="registrationPreRegModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel">Set You Password</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          </div>
+          <div class="modal-body">
+            <p>Consectetur adipisicing elit. Nemo architecto debitis dolorum ullam in ut sint, odit maiores eaque explicabo, repellendus minima soluta sunt! Nisi minima blanditiis voluptate, ut atque.</p>
+            <p>
+              <div class="form-group">
+                <label id="lblUserNamePreRegform"></label>
+              </div>
+              <div class="form-group">
+                <label for="preRegPassword">Password</label>
+                <input type="password" class="form-control" id="preRegPassword" placeholder="Password">
+              </div>
+              <div class="form-group">
+                <label for="preRegConfirmPassword">Confirm Password</label>
+                <input type="password" class="form-control" id="preRegConfirmPassword" placeholder="Password">
+              </div>
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="setPreRegCredentials" class="btn btn-sm btn-default">
+              Save
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <input type="hidden" id="stateToken"{% if state_token %} value="{{state_token}}"{% endif %} />
 
     <!-- JavaScript files placed at the end of the document so the pages load faster -->
     <!-- ================================================== -->
