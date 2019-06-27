@@ -60,6 +60,16 @@
       href="https://ok1static.oktacdn.com/assets/js/sdk/okta-signin-widget/2.16.0/css/okta-theme.css"
       type="text/css"
       rel="stylesheet"/>
+
+    <style>
+      #okta-sign-in {
+        margin: 15px auto 8px; !important
+      }
+
+      #okta-sign-in.auth-container .button-primary {
+        /*background: {{site_config.skin}};*/
+      }
+    </style>
   </head>
 
   <!-- body classes:  -->
@@ -256,7 +266,7 @@
                         <li class="nav-item dropdown ">
                           <a href="/" class="nav-link dropdown-toggle" id="second-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Tools</a>
                           <ul class="dropdown-menu" aria-labelledby="second-dropdown">
-                            <li ><a href="/signin"><i class="fa fa-user pr-2"></i>Sign In</a></li>
+                            <li ><a href="/login-form"><i class="fa fa-user pr-2"></i>Sign In</a></li>
                           </ul>
                         </li>
 
@@ -755,10 +765,12 @@
             callRecovery: true,
             deviceFingerprinting: true,
             //idpDiscovery: true
+          }, helpLinks: {
+            help: '/help'
           }
         });
 
-        oktaSignIn.renderEl({ el: '#okta-login-container' },
+        oktaSignIn.renderEl({ el: '#{{okta_widget_container_id}}' },
           function(res) {
             if (res.status === 'SUCCESS') {
               console.log("data: %s", JSON.stringify(res));
