@@ -55,7 +55,64 @@ def index():
             site_config=session,
             user=user,
             modal_options=modal_options,
-            state_token=state_token
+            state_token=state_token,
+            okta_widget_container_id="okta-login-container"
+        )
+    )
+
+    handle_invalid_tokens(session, response)
+
+    return response
+
+
+@app.route('/login-form')
+@apply_remote_config
+def login_form():
+    """ handler for the login form url path of the app """
+    print("login_form()")
+    user = None
+    modal_options = None
+    state_token = request.args.get("stateToken")
+    print("state_token: {0}".format(state_token))
+
+    session["current_title"] = "{0} | {1} Sign In".format(session["base_title"], session["app_title"])
+
+    response = make_response(
+        render_template(
+            "login.html",
+            site_config=session,
+            user=user,
+            modal_options=modal_options,
+            state_token=state_token,
+            okta_widget_container_id="okta-login-full-container"
+        )
+    )
+
+    handle_invalid_tokens(session, response)
+
+    return response
+
+
+@app.route('/help')
+@apply_remote_config
+def help():
+    """ handler for the login form url path of the app """
+    print("login_form()")
+    user = None
+    modal_options = None
+    state_token = request.args.get("stateToken")
+    print("state_token: {0}".format(state_token))
+
+    session["current_title"] = "{0} | {1} Help".format(session["base_title"], session["app_title"])
+
+    response = make_response(
+        render_template(
+            "faq.html",
+            site_config=session,
+            user=user,
+            modal_options=modal_options,
+            state_token=state_token,
+            okta_widget_container_id="okta-login-full-container"
         )
     )
 

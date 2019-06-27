@@ -92,6 +92,11 @@ def get_domain_parts_from_request(request):
     demo_app_name = domain_parts[1]
     remaining_domain = ".".join(domain_parts[2:])
 
+    # TODO: REMOVE!!!!
+    # udp_subdomain = "lilly"
+    # demo_app_name = "patient-portal"
+    # remaining_domain = "recintodev.com"
+
     print("udp_subdomain: {0}".format(udp_subdomain))
     print("demo_app_name: {0}".format(demo_app_name))
 
