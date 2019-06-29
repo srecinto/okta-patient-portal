@@ -363,14 +363,14 @@ def register_alt():
     user = {
         "profile": {
             "firstName": user_form_data["firstName"],
-            "lastName": user_form_data["lastName"]
+            "lastName": user_form_data["lastName"],
+            "mobilePhone": user_form_data["mobilePhone"]
         }
     }
 
     app_user = {
         "profile": {
-            "dob": user_form_data["dob"],
-            "mobilePhone": user_form_data["mobilePhone"]
+            "dob": user_form_data["dob"]
         }
     }
 
