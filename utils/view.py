@@ -259,15 +259,16 @@ def show_user_consent(app):
 def show_user_reg_form_default(user, app):
     print("show_user_reg_form_default()")
     result = False
-
-    if ("height" not in user["profile"] and
-            "weight" not in user["profile"] and
+    print("app: {0}".format(json.dumps(app, indent=4, sort_keys=True)))
+    if ("height" not in app["profile"] and
+            "weight" not in app["profile"] and
             app["profile"]["registrationForm"] == "DEFAULT"):
         result = True
     else:
-        if "weight" in user["profile"] and "height" in user["profile"]:
-            if ((user["profile"]["weight"] == "" or user["profile"]["height"] == "") and
-                app["profile"]["registrationForm"] == "DEFAULT"):
+        if "weight" in app["profile"] and "height" in app["profile"]:
+            if ((app["profile"]["weight"] == "" or app["profile"]["height"] == "" or
+                    app["profile"]["weight"] is None or app["profile"]["height"] is None) and
+                    app["profile"]["registrationForm"] == "DEFAULT"):
                 result = True
 
     return result
@@ -277,13 +278,14 @@ def show_user_reg_form_alt1(user, app):
     print("show_user_reg_form_alt1()")
     result = False
 
-    if ("dob" not in user["profile"] and
+    if ("dob" not in app["profile"] and
             app["profile"]["registrationForm"] == "ALT1"):
         result = True
     else:
-        if "dob" in user["profile"]:
-            if ((user["profile"]["dob"] == "" or user["profile"]["mobilePhone"] == "") and
-                app["profile"]["registrationForm"] == "ALT1"):
+        if "dob" in app["profile"]:
+            if ((app["profile"]["dob"] == "" or user["profile"]["mobilePhone"] == "" or
+                    app["profile"]["dob"] is None or user["profile"]["mobilePhone"] is None) and
+                    app["profile"]["registrationForm"] == "ALT1"):
                 result = True
 
     return result
