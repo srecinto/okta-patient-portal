@@ -315,7 +315,12 @@ def register_default():
     user = {
         "profile": {
             "firstName": user_form_data["firstName"],
-            "lastName": user_form_data["lastName"],
+            "lastName": user_form_data["lastName"]
+        }
+    }
+
+    app_user = {
+        "profile": {
             "height": user_form_data["height"],
             "weight": user_form_data["weight"]
         }
@@ -323,6 +328,7 @@ def register_default():
 
     updated_user = okta_admin.update_user(user_id, user)
     # print("updated_user: {0}".format(json.dumps(updated_user, indent=4, sort_keys=True)))
+    updated_app_user = okta_admin.update_application_user_profile(session["client_id"], user_id, app_user)
 
     if "errorSummary" in updated_user:
         register_default_response["errorMessage"] = updated_user["errorSummary"]
@@ -335,6 +341,7 @@ def register_default():
                 })
     else:
         register_default_response["success"] = True
+        register_default_response["app_user"] = updated_app_user
         register_default_response["user"] = updated_user
 
     return json.dumps(register_default_response)
@@ -356,26 +363,33 @@ def register_alt():
     user = {
         "profile": {
             "firstName": user_form_data["firstName"],
-            "lastName": user_form_data["lastName"],
+            "lastName": user_form_data["lastName"]
+        }
+    }
+
+    app_user = {
+        "profile": {
             "dob": user_form_data["dob"],
-            "mobilePhone": user_form_data["mobilePhone"],
+            "mobilePhone": user_form_data["mobilePhone"]
         }
     }
 
     updated_user = okta_admin.update_user(user_id, user)
+    updated_app_user = okta_admin.update_application_user_profile(session["client_id"], user_id, app_user)
     # print("updated_user: {0}".format(json.dumps(updated_user, indent=4, sort_keys=True)))
 
-    if "errorSummary" in updated_user:
-        register_alt1_response["errorMessage"] = updated_user["errorSummary"]
+    if "errorSummary" in updated_app_user:
+        register_alt1_response["errorMessage"] = updated_app_user["errorSummary"]
 
-        if "errorCauses" in updated_user:
+        if "errorCauses" in updated_app_user:
             register_alt1_response["errorMessages"] = []
-            for error_cause in updated_user["errorCauses"]:
+            for error_cause in updated_app_user["errorCauses"]:
                 register_alt1_response["errorMessages"].append({
                     "errorMessage": error_cause["errorSummary"]
                 })
     else:
         register_alt1_response["success"] = True
+        register_alt1_response["app_user"] = updated_app_user
         register_alt1_response["user"] = updated_user
 
     return json.dumps(register_alt1_response)
@@ -422,7 +436,9 @@ def verify_dob():
     else:
         okta_admin = OktaAdmin(session)
         user = okta_admin.get_user(token_state["_embedded"]["user"]["id"])
+        app_user = okta_admin.get_user_application_by_current_client_id(user["id"])
         # print("user: {0}".format(json.dumps(user, indent=4, sort_keys=True)))
+        # print("app_user: {0}".format(json.dumps(app_user, indent=4, sort_keys=True)))
 
         if "errorSummary" in user:
             verify_dob_response["errorMessage"] = user["errorSummary"]
@@ -433,8 +449,9 @@ def verify_dob():
                         "errorMessage": user["errorSummary"]
                     })
         else:
-            if user["profile"]["dob"] == json_data["dob"]:
+            if app_user["profile"]["dob"] == json_data["dob"]:
                 verify_dob_response["user"] = user
+                verify_dob_response["app_user"] = user
                 verify_dob_response["success"] = True,
             else:
                 verify_dob_response["errorMessage"] = "Your date of birth does not match our records"
@@ -481,7 +498,6 @@ def load_users():
 
     with open("./test_users.csv", mode='r', encoding='utf-8-sig') as csv_file:
         csv_reader = csv.DictReader(csv_file)
-        line_count = 0
         okta_admin = OktaAdmin(session)
         patient_group = okta_admin.get_groups_by_name("Patient")[0]  # Default to first found group by name
 
@@ -495,9 +511,7 @@ def load_users():
                         "login": row["email"],
                         "email": row["email"],
                         "firstName": row["first_name"],
-                        "lastName": row["last_name"],
-                        "dob": row["dob"],
-                        "requires_validation": True
+                        "lastName": row["last_name"]
                     },
                     "groupIds": [
                         patient_group["id"]
@@ -505,6 +519,14 @@ def load_users():
                 }
                 created_user = okta_admin.create_user(new_user, activate_user=False)
                 if "id" in created_user:
+                    app_user = {
+                        "profile": {
+                            "dob": row["dob"],
+                            "requires_validation": True
+                        }
+                    }
+                    okta_admin.update_application_user_profile(session["client_id"], created_user["id"], app_user)
+
                     #  Send activation email
                     recipients = [{"address": {"email": created_user["profile"]["email"]}}]
                     substitution = {
