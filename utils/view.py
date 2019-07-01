@@ -42,6 +42,10 @@ def apply_remote_config(f):
 
             config_json = RestUtil.execute_get(well_known_default_settings_url, {}, json_headers)
             print("config_json: {0}".format(json.dumps(config_json, indent=4, sort_keys=True)))
+
+            # aply default sessting always
+            map_config(default_settings["config"], session)
+
             # If invalid response, default to default / environment setting
             if "config" in config_json:
                 if config_json["config"]["status"] == "ready":
@@ -127,31 +131,23 @@ def get_configs_url(udp_subdomain, demo_app_name):
 def map_config(config, session):
     print("map_config(config, session)")
 
-    session["client_id"] = config["client_id"]
-    session["issuer"] = config["issuer"]
-    session["base_url"] = config["base_url"]
-    session["redirect_uri"] = config["redirect_uri"]
+    safe_assign_config_item_to_session("client_id", config, session)
+    safe_assign_config_item_to_session("issuer", config, session)
+    safe_assign_config_item_to_session("base_url", config, session)
+    safe_assign_config_item_to_session("redirect_uri", config, session)
 
-    session["app_base_url"] = config["settings"]["app_base_url"]
-    session["app_favicon"] = config["settings"]["app_favicon"]
-    session["app_logo"] = config["settings"]["app_logo"]
-    session["app_slogan"] = config["settings"]["app_slogan"]
-    session["app_title"] = config["settings"]["app_title"]
-    session["base_title"] = config["settings"]["base_title"]
-    session["current_title"] = config["settings"]["current_title"]
-    session["skin"] = config["settings"]["skin"]
-
-    session["spark_post_api_key"] = None  # Default to None if no key provided
-    if "spark_post_api_key" in config["settings"]:
-        session["spark_post_api_key"] = config["settings"]["spark_post_api_key"]
-
-    session["spark_post_activate_template_id"] = None
-    if "spark_post_activate_template_id" in config["settings"]:
-        session["spark_post_activate_template_id"] = config["settings"]["spark_post_activate_template_id"]
-
-    session["login_id_prefix"] = ""
-    if "login_id_prefix" in config["settings"]:
-        session["login_id_prefix"] = config["settings"]["login_id_prefix"]
+    safe_assign_config_item_to_session("app_base_url", config["settings"], session)
+    safe_assign_config_item_to_session("app_favicon", config["settings"], session)
+    safe_assign_config_item_to_session("app_logo", config["settings"], session)
+    safe_assign_config_item_to_session("app_slogan", config["settings"], session)
+    safe_assign_config_item_to_session("app_title", config["settings"], session)
+    safe_assign_config_item_to_session("base_title", config["settings"], session)
+    safe_assign_config_item_to_session("current_title", config["settings"], session)
+    safe_assign_config_item_to_session("redirect_uri", config["settings"], session)
+    safe_assign_config_item_to_session("skin", config["settings"], session)
+    safe_assign_config_item_to_session("spark_post_api_key", config["settings"], session)
+    safe_assign_config_item_to_session("spark_post_activate_template_id", config["settings"], session)
+    safe_assign_config_item_to_session("login_id_prefix", config["settings"], session)
 
 
 def map_secrets_config(config, session):
@@ -351,3 +347,7 @@ def create_login_response(user_name, password, session):
         auth_response = authn_json_response
 
     return auth_response
+
+def safe_assign_config_item_to_session(key, collection, session):
+    if key in collection:
+        session[key] = collection[key]
