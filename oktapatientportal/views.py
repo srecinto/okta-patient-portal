@@ -247,7 +247,10 @@ def register_basic():
     }
 
     okta_admin = OktaAdmin(session)
-    patient_group = okta_admin.get_groups_by_name("{0} {1} - Patient".format(session["udp_subdomain"], session["demo_app_name"]))[0]  # Default to first found group by name
+    patient_group = okta_admin.get_groups_by_name(
+        "{0} {1} - Patient".format(
+            session["udp_subdomain"],
+            session["demo_app_name"]))[0]  # Default to first found group by name
 
     user = {
         "profile": {
@@ -499,7 +502,10 @@ def load_users():
     with open("./test_users.csv", mode='r', encoding='utf-8-sig') as csv_file:
         csv_reader = csv.DictReader(csv_file)
         okta_admin = OktaAdmin(session)
-        patient_group = okta_admin.get_groups_by_name("{0} {1} - Patient".format(session["udp_subdomain"], session["demo_app_name"]))[0]  # Default to first found group by name
+        patient_group = okta_admin.get_groups_by_name(
+            "{0} {1} - Patient".format(
+                session["udp_subdomain"],
+                session["demo_app_name"]))[0]  # Default to first found group by name
 
         for row in csv_reader:
             print(row)

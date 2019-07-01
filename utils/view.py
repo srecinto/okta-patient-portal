@@ -92,11 +92,6 @@ def get_domain_parts_from_request(request):
     demo_app_name = domain_parts[1]
     remaining_domain = ".".join(domain_parts[2:])
 
-    # TODO: REMOVE!!!!
-    # udp_subdomain = "lilly"
-    # demo_app_name = "patient-portal"
-    # remaining_domain = "recintodev.com"
-
     print("udp_subdomain: {0}".format(udp_subdomain))
     print("demo_app_name: {0}".format(demo_app_name))
 
@@ -145,13 +140,18 @@ def map_config(config, session):
     session["base_title"] = config["settings"]["base_title"]
     session["current_title"] = config["settings"]["current_title"]
     session["skin"] = config["settings"]["skin"]
-    session["spark_post_api_key"] = config["settings"]["spark_post_api_key"]
-    session["spark_post_activate_template_id"] = config["settings"]["spark_post_activate_template_id"]
 
+    session["spark_post_api_key"] = None  # Default to None if no key provided
+    if "spark_post_api_key" in config["settings"]:
+        session["spark_post_api_key"] = config["settings"]["spark_post_api_key"]
+
+    session["spark_post_activate_template_id"] = None
+    if "spark_post_activate_template_id" in config["settings"]:
+        session["spark_post_activate_template_id"] = config["settings"]["spark_post_activate_template_id"]
+
+    session["login_id_prefix"] = ""
     if "login_id_prefix" in config["settings"]:
         session["login_id_prefix"] = config["settings"]["login_id_prefix"]
-    else:
-        session["login_id_prefix"] = ""
 
 
 def map_secrets_config(config, session):
