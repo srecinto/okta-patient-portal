@@ -737,11 +737,12 @@
 
     <script type="text/javascript">
       //<![CDATA[
+      var oktaSignIn = undefined;
       $(document).ready(function() {
 
         var orgUrl = "{{site_config.base_url}}";
         var redirect = "{{site_config.redirect_uri}}";
-        var oktaSignIn = new OktaSignIn({
+        oktaSignIn = new OktaSignIn({
           baseUrl: orgUrl,
           // logo: "{{site_config.app_logo}}",
           // OpenID Connect options
