@@ -66,8 +66,8 @@
         margin: 15px auto 8px; !important
       }
 
-      #okta-sign-in.auth-container .button-primary {
-        /*background: {{site_config.skin}};*/
+      colors: {
+        brand: '#008000'
       }
     </style>
   </head>
@@ -737,11 +737,12 @@
 
     <script type="text/javascript">
       //<![CDATA[
+      var oktaSignIn = undefined;
       $(document).ready(function() {
 
         var orgUrl = "{{site_config.base_url}}";
         var redirect = "{{site_config.redirect_uri}}";
-        var oktaSignIn = new OktaSignIn({
+        oktaSignIn = new OktaSignIn({
           baseUrl: orgUrl,
           // logo: "{{site_config.app_logo}}",
           // OpenID Connect options
@@ -765,22 +766,48 @@
             callRecovery: true,
             deviceFingerprinting: true,
             //idpDiscovery: true
-          }, helpLinks: {
-            help: '/help'
+          },
+          helpLinks: {
+            help: "/help",
+            custom: [
+              {
+                text: 'FAQ',
+                href: '/help',
+                target: '_self'
+              }
+            ]
           }
         });
 
-        oktaSignIn.renderEl({ el: '#{{okta_widget_container_id}}' },
-          function(res) {
-            if (res.status === 'SUCCESS') {
-              console.log("data: %s", JSON.stringify(res));
+        oktaSignIn.session.get(function (res) {
+          // Session exists, show logged in state.
+          if (res.status === 'ACTIVE') {
+            // showApp()
+            console.log("Session Active");
+            //console.log(res);
+            $("#sessionId").val(res.id);
+
+            if($("#okta-login-full-container")) {
+              $("#okta-login-full-container").html("<a href=\"/logout\">Sign Out</a> of the exsisting session.");
             }
           }
-        );
+          // No session, or error retrieving the session. Render the Sign-In Widget.
+          else if (res.status === 'INACTIVE') {
+            console.log("Session Not Active");
+            oktaSignIn.renderEl({ el: '#{{okta_widget_container_id}}' },
+              function(res) {
+                if (res.status === 'SUCCESS') {
+                  console.log("data: %s", JSON.stringify(res));
+                }
+              }
+            );
+          }
+        });
 
       });
       //]]>
     </script>
+    <input type="hidden" id="sessionId" />
 
   </body>
 </html>
