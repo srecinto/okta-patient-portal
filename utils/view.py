@@ -2,6 +2,7 @@ import base64
 import json
 import requests
 import uuid
+import os
 
 from oktapatientportal import default_settings, secure_settings
 
@@ -44,24 +45,19 @@ def apply_remote_config(f):
             print("config_json: {0}".format(json.dumps(config_json, indent=4, sort_keys=True)))
 
             # aply default sessting always
-            map_config(default_settings["config"], session)
+            map_config(default_settings, session)
 
             # If invalid response, default to default / environment setting
-            if "config" in config_json:
-                if config_json["config"]["status"] == "ready":
-                    print("Remote config success. Mapping config to session")
-                    map_config(config_json["config"], session)
+            if config_json["status"] == "ready":
+                print("Remote config success. Mapping config to session")
+                map_config(config_json, session)
 
-                    print("Getting Secrets config")
-                    # print("secrets_url: {0}".format(secrets_url))
-                    map_secrets_config(requests.get(secrets_url), session)
-
-                else:
-                    print("Remote config not ready. Default to the local container env and default config")
-                    set_default_env_secrets(session)
+                print("Getting Secrets config")
+                # print("secrets_url: {0}".format(secrets_url))
+                map_secrets_config(requests.get(secrets_url), session)
 
             else:
-                print("Remote config failed. Default to the local container env and default config")
+                print("Remote config not ready. Default to the local container env and default config")
                 set_default_env_secrets(session)
 
             session["is_config_set"] = True
@@ -96,6 +92,10 @@ def get_domain_parts_from_request(request):
     demo_app_name = domain_parts[1]
     remaining_domain = ".".join(domain_parts[2:])
 
+    os.getenv("UDP_APP_NAME", udp_subdomain)
+    os.getenv("UDP_BASE_DOMAIN", demo_app_name)
+    os.getenv("UDP_SUB_DOMAIN", remaining_domain)
+
     print("udp_subdomain: {0}".format(udp_subdomain))
     print("demo_app_name: {0}".format(demo_app_name))
 
@@ -110,15 +110,15 @@ def get_domain_parts_from_request(request):
 
 def set_default_env_secrets(session):
     print("set_default_env_secrets(session)")
-    map_config(default_settings["config"], session)
+    map_config(default_settings, session)
 
-    session["CLIENT_SECRET"] = secure_settings["config"]["client_secret"]
-    session["OKTA_API_TOKEN"] = secure_settings["config"]["okta_api_token"]
+    session["CLIENT_SECRET"] = secure_settings["client_secret"]
+    session["OKTA_API_TOKEN"] = secure_settings["okta_api_token"]
 
 
 def get_configs_url(udp_subdomain, demo_app_name):
     print("get_well_know_settings_url()")
-    config_url = default_settings["config"]["app_config"].format(
+    config_url = default_settings["app_config"].format(
         udp_subdomain=udp_subdomain,
         demo_app_name=demo_app_name)
 
@@ -347,6 +347,7 @@ def create_login_response(user_name, password, session):
         auth_response = authn_json_response
 
     return auth_response
+
 
 def safe_assign_config_item_to_session(key, collection, session):
     if key in collection:
