@@ -187,7 +187,6 @@ class OktaAdmin:
             user_id=user_id,
             send_email=str(send_email).lower())
         body = {}
-        print("url: {0}".format(url))
 
         return RestUtil.execute_post(url, body, okta_headers)
 
@@ -243,13 +242,24 @@ class OktaAdmin:
             app_id=app_id,
             user_id=user_id)
 
-        print("url: {0}".format(url))
-
         body = {
             "profile": app_user_profile["profile"]
         }
 
         return RestUtil.execute_post(url, body, okta_headers)
+
+    def close_session(self, session_id):
+        print("OktaAdmin.close_session(session_id)")
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
+        url = "{base_url}/api/v1/sessions/{session_id}".format(
+            base_url=self.okta_config["base_url"],
+            session_id=session_id)
+
+        print("url: {0}".format(url))
+
+        body = {}
+
+        return RestUtil.execute_delete(url, body, okta_headers)
 
 
 class OktaUtil:

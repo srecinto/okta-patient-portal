@@ -43,16 +43,42 @@ $(document).ready(function() {
 	    $("#verifyAccountModal").modal("show");
 	}
 
-
 }); // End document ready
-
 
 
 function loginClickHandler() {
 	console.log("loginClickHandler()");
 
-	$.ajax({
-        url: "/login",
+	var url = "/login";
+
+	if($("#sessionId").val()) {
+	    url = "/login/" + $("#sessionId").val();
+	}
+
+	oktaSignIn.session.get(function (res) {
+      // Session exists, show logged in state.
+      if (res.status === 'ACTIVE') {
+        // showApp()
+        console.log("Session Active");
+        oktaSignIn.session.close(function (err) {
+          if (err) {
+            // The user has not been logged out, perform some error handling here.
+            console.log("Failed to close the session (if it exsists) otherwise fine");
+            console.log(err);
+          }
+          // The user is now logged out.
+            callLogin(url);
+        });
+      } else if (res.status === 'INACTIVE') {
+        console.log("Session Not Active");
+        callLogin(url);
+      }
+	});
+}
+
+function callLogin(url) {
+    $.ajax({
+        url: url,
         type: "POST",
         contentType: "application/json; charset=utf-8",
         data: JSON.stringify({"username": $("#username").val(), "password": $("#password").val()}),

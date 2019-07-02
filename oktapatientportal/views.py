@@ -162,6 +162,19 @@ def login():
     return json.dumps(create_login_response(login_form_data["username"], login_form_data["password"], session))
 
 
+@app.route('/login/<session_id>', methods=["POST"])
+def login_clear_session(session_id=None):
+    """ Handle either full form post redirect or a json response with redirect url """
+    print("login_clear_session()")
+    login_form_data = request.get_json()
+
+    if session_id:
+        okta_admin = OktaAdmin(session)
+        okta_admin.close_session(session_id)
+
+    return json.dumps(create_login_response(login_form_data["username"], login_form_data["password"], session))
+
+
 @app.route('/login-token/<token>', methods=["POST"])
 def login_token(token):
     """ Handle either full form post redirect or a json response with redirect url """
