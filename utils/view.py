@@ -4,7 +4,7 @@ import requests
 import uuid
 import os
 
-from oktapatientportal import default_settings, secure_settings
+from oktapatientportal import default_settings
 
 from functools import wraps
 from flask import request, session, make_response, redirect
@@ -14,7 +14,8 @@ from utils.okta import OktaAuth, OktaAdmin
 
 json_headers = {
     "Accept": "application/json",
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
+    "Authorization": "Bearer {0}".format(os.getenv("UDP_SECRET_KEY", ""))
 }
 
 
@@ -29,6 +30,7 @@ def apply_remote_config(f):
         print("session['is_config_set']: {0}".format(session["is_config_set"]))
 
         # Request from service to get app config, if not is session or cache
+        well_known_default_settings_url = None
         if not session["is_config_set"]:
             print("No session set")
 
@@ -38,29 +40,38 @@ def apply_remote_config(f):
             session["demo_app_name"] = split_domain_parts["demo_app_name"]
             session["remaining_domain"] = split_domain_parts["remaining_domain"]
 
-            well_known_default_settings_url, secrets_url = get_configs_url(session["udp_subdomain"], session["demo_app_name"])
-            # print("well_known_default_settings_url: {0}".format(well_known_default_settings_url))
+            # aply default sessting always
+            map_config(default_settings, session)
+
+            # look for remote config
+            well_known_default_settings_url = get_configs_url(session["udp_subdomain"], session["demo_app_name"])
+            print("well_known_default_settings_url: {0}".format(well_known_default_settings_url))
 
             config_json = RestUtil.execute_get(well_known_default_settings_url, {}, json_headers)
             print("config_json: {0}".format(json.dumps(config_json, indent=4, sort_keys=True)))
 
-            # aply default sessting always
-            map_config(default_settings, session)
-
             # If invalid response, default to default / environment setting
-            if config_json["status"] == "ready":
-                print("Remote config success. Mapping config to session")
-                map_config(config_json, session)
+            if "status" in config_json:
+                if config_json["status"] == "ready":
+                    print("Remote config success. Mapping config to session")
+                    map_config(config_json, session)
 
-                print("Getting Secrets config")
-                # print("secrets_url: {0}".format(secrets_url))
-                map_secrets_config(requests.get(secrets_url), session)
+                    subdomain_config_url = os.getenv("UDP_SUBDOMAIN_URL", "{udp_subdomain}").format(session["udp_subdomain"])
 
+                    print("subdomain_config_url: {0}".format(subdomain_config_url))
+                    subdomain_config_json = RestUtil.execute_get(subdomain_config_url, {}, json_headers)
+                    print("subdomain_config_json: {0}".format(json.dumps(subdomain_config_json, indent=4, sort_keys=True)))
+                    if "okta_api_token" in subdomain_config_json:
+                        session["okta_api_token"] = subdomain_config_json["okta_api_token"]
+                    else:
+                        raise Exception("Failed to get the Okta API Key from config")
+
+                else:
+                    print("Remote config not ready. Default to the local container env and default config")
+
+                session["is_config_set"] = True
             else:
-                print("Remote config not ready. Default to the local container env and default config")
-                set_default_env_secrets(session)
-
-            session["is_config_set"] = True
+                print("Failed to load remote config from: {0}".format(well_known_default_settings_url))
 
             print("Session Dump: {0}".format(session))
 
@@ -92,9 +103,9 @@ def get_domain_parts_from_request(request):
     demo_app_name = domain_parts[1]
     remaining_domain = ".".join(domain_parts[2:])
 
-    os.getenv("UDP_APP_NAME", udp_subdomain)
-    os.getenv("UDP_BASE_DOMAIN", demo_app_name)
-    os.getenv("UDP_SUB_DOMAIN", remaining_domain)
+    udp_subdomain = os.getenv("UDP_APP_NAME", udp_subdomain)
+    demo_app_name = os.getenv("UDP_BASE_DOMAIN", demo_app_name)
+    remaining_domain = os.getenv("UDP_SUB_DOMAIN", remaining_domain)
 
     print("udp_subdomain: {0}".format(udp_subdomain))
     print("demo_app_name: {0}".format(demo_app_name))
@@ -108,14 +119,6 @@ def get_domain_parts_from_request(request):
     return split_domain_parts
 
 
-def set_default_env_secrets(session):
-    print("set_default_env_secrets(session)")
-    map_config(default_settings, session)
-
-    session["CLIENT_SECRET"] = secure_settings["client_secret"]
-    session["OKTA_API_TOKEN"] = secure_settings["okta_api_token"]
-
-
 def get_configs_url(udp_subdomain, demo_app_name):
     print("get_well_know_settings_url()")
     config_url = default_settings["app_config"].format(
@@ -123,15 +126,15 @@ def get_configs_url(udp_subdomain, demo_app_name):
         demo_app_name=demo_app_name)
 
     well_known_default_settings_url = "{0}".format(config_url)
-    secrets_url = "{0}/secret".format(config_url)
 
-    return well_known_default_settings_url, secrets_url
+    return well_known_default_settings_url
 
 
 def map_config(config, session):
     print("map_config(config, session)")
 
     safe_assign_config_item_to_session("client_id", config, session)
+    safe_assign_config_item_to_session("client_secret", config, session)
     safe_assign_config_item_to_session("issuer", config, session)
     safe_assign_config_item_to_session("base_url", config, session)
     safe_assign_config_item_to_session("redirect_uri", config, session)
@@ -148,24 +151,6 @@ def map_config(config, session):
     safe_assign_config_item_to_session("spark_post_api_key", config["settings"], session)
     safe_assign_config_item_to_session("spark_post_activate_template_id", config["settings"], session)
     safe_assign_config_item_to_session("login_id_prefix", config["settings"], session)
-
-
-def map_secrets_config(config, session):
-    print("map_secrets_config(config, session)")
-    try:
-        secret_data = config.content.decode('utf-8').splitlines()
-        print("config: {0}".format(config))
-
-        for config_item in secret_data:
-            split_config_item = config_item.split("=")
-            if len(split_config_item) == 2:
-                env_key = split_config_item[0]
-                env_value = split_config_item[1]
-
-                session[env_key] = env_value
-    except Exception as ex:
-        print("Failed to map secrets, setting defaults instead.  Exception: {0}".format(ex))
-        set_default_env_secrets(session)
 
 
 def is_token_valid_remote(token, session):
