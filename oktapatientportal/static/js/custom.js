@@ -51,8 +51,14 @@ $(document).ready(function() {
 function loginClickHandler() {
 	console.log("loginClickHandler()");
 
+	var url = "/login";
+
+	if($("#sessionId").val()) {
+	    url = "/login/" + $("#sessionId").val();
+	}
+
 	$.ajax({
-        url: "/login",
+        url: url,
         type: "POST",
         contentType: "application/json; charset=utf-8",
         data: JSON.stringify({"username": $("#username").val(), "password": $("#password").val()}),
