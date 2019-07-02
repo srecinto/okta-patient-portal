@@ -24,17 +24,14 @@ default_settings = {
         # -Prefix to add to login id for auth and reg actions for unique credentials
         # on an exsisting user with the same email for login. Defaults to empty string-
         "login_id_prefix": os.getenv("LOGIN_ID_PREFIX", "")
-    }
-}
-
-secure_settings = {
+    },
     "client_secret": os.getenv("OKTA_CLIENT_SECRET", "-Client Secret in Okta App-"),
     "okta_api_token": os.getenv("OKTA_API_TOKEN", "-Okta API Token-"),
-    "app_secret_key": os.getenv("SECRET_KEY", "-A GUID for your secret key-"),
+    "app_secret_key": os.getenv("SECRET_KEY", "-A GUID for your secret key-")
 }
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = secure_settings["app_secret_key"]
+app.config["SECRET_KEY"] = default_settings["app_secret_key"]
 
 sslify = SSLify(app, permanent=True, subdomains=True)
 
