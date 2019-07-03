@@ -139,7 +139,7 @@ def oidc():
         grant_type="authorization_code",
         auth_options={
             "client_id": session["client_id"],
-            "client_secret": session["CLIENT_SECRET"],
+            "client_secret": session["client_secret"],
         }
     )
     #  print("oauth_token: {0}".format(json.dumps(oauth_token, indent=4, sort_keys=True)))

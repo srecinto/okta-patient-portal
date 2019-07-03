@@ -275,7 +275,7 @@ class OktaUtil:
 
     @staticmethod
     def get_protected_okta_headers(okta_config):
-        okta_api_token = okta_config["OKTA_API_TOKEN"]
+        okta_api_token = okta_config["okta_api_token"]
         okta_protected_headers = {
             "Accept": "application/json",
             "Content-Type": "application/json",

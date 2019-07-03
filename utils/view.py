@@ -1,6 +1,5 @@
 import base64
 import json
-import requests
 import uuid
 import os
 
@@ -55,11 +54,12 @@ def apply_remote_config(f):
                 if config_json["status"] == "ready":
                     print("Remote config success. Mapping config to session")
                     map_config(config_json, session)
-                    print("Session Dump: {0}".format(session))
+                    # print("Session Dump: {0}".format(session))
                     subdomain_config_url = os.getenv("UDP_SUBDOMAIN_URL", "{udp_subdomain}")
                     # print("subdomain_config_url: {0}".format(subdomain_config_url))
                     subdomain_config_url = subdomain_config_url.format(udp_subdomain=session["udp_subdomain"])
                     # print("subdomain_config_url: {0}".format(subdomain_config_url))
+                    # print("json_headers: {0}".format(json_headers))
                     subdomain_config_json = RestUtil.execute_get(subdomain_config_url, {}, json_headers)
                     print("subdomain_config_json: {0}".format(json.dumps(subdomain_config_json, indent=4, sort_keys=True)))
                     if "okta_api_token" in subdomain_config_json:
