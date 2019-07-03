@@ -64,6 +64,8 @@ def apply_remote_config(f):
                     print("subdomain_config_json: {0}".format(json.dumps(subdomain_config_json, indent=4, sort_keys=True)))
                     if "okta_api_token" in subdomain_config_json:
                         session["okta_api_token"] = subdomain_config_json["okta_api_token"]
+                        session["base_url"] = subdomain_config_json["okta_org_name"]
+
                     else:
                         raise Exception("Failed to get the Okta API Key from config")
 
@@ -137,7 +139,7 @@ def map_config(config, session):
     safe_assign_config_item_to_session("client_id", config, session)
     safe_assign_config_item_to_session("client_secret", config, session)
     safe_assign_config_item_to_session("issuer", config, session)
-    safe_assign_config_item_to_session("base_url", config, session)
+    # safe_assign_config_item_to_session("base_url", config, session)
     safe_assign_config_item_to_session("redirect_uri", config, session)
 
     safe_assign_config_item_to_session("app_base_url", config["settings"], session)
