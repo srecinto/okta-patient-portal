@@ -54,6 +54,14 @@ def apply_remote_config(f):
                 if config_json["status"] == "ready":
                     print("Remote config success. Mapping config to session")
                     map_config(config_json, session)
+
+                    if session["redirect_uri"] == default_settings["redirect_uri"]:
+                        # infer the redirect if not set from the server
+                        session["redirect_uri"] = "https://{udp_subdomain}.{demo_app_name}.{remaining_domain}/oidc".format(
+                            udp_subdomain=session["udp_subdomain"],
+                            demo_app_name=session["demo_app_name"],
+                            remaining_domain=session["remaining_domain"]
+                        )
                     # print("Session Dump: {0}".format(session))
                     subdomain_config_url = os.getenv("UDP_SUBDOMAIN_URL", "{udp_subdomain}")
                     # print("subdomain_config_url: {0}".format(subdomain_config_url))
@@ -139,7 +147,7 @@ def map_config(config, session):
     safe_assign_config_item_to_session("client_id", config, session)
     safe_assign_config_item_to_session("client_secret", config, session)
     safe_assign_config_item_to_session("issuer", config, session)
-    # safe_assign_config_item_to_session("base_url", config, session)
+    # safe_assign_config_item_to_session("base_url", config, session)  # took this out because of UDP api change
     safe_assign_config_item_to_session("redirect_uri", config, session)
 
     safe_assign_config_item_to_session("app_base_url", config["settings"], session)
