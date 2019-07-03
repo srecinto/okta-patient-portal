@@ -119,7 +119,7 @@ class OktaAuth:
 
     def introspect(self, token, headers=None):
         print("OktaAuth.introspect()")
-        okta_headers = OktaUtil.get_oauth_okta_headers(headers, self.okta_config["client_id"], self.okta_config["CLIENT_SECRET"])
+        okta_headers = OktaUtil.get_oauth_okta_headers(headers, self.okta_config["client_id"], self.okta_config["client_secret"])
 
         url = "{issuer}/v1/introspect?token={token}".format(
             issuer=self.okta_config["issuer"],
