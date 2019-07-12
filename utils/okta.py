@@ -17,7 +17,7 @@ class OktaAuth:
 
     def authenticate(self, username, password, additional_options=None, headers=None):
         print("OktaAuth.authenticate()")
-        url = "{host}/api/v1/authn".format(host=self.okta_config["base_url"])
+        url = "{host}/api/v1/authn".format(host=self.okta_config["okta_org_name"])
         okta_headers = OktaUtil.get_default_okta_headers(headers)
 
         body = {
@@ -36,7 +36,7 @@ class OktaAuth:
 
     def authenticate_with_activation_token(self, token, headers=None):
         print("OktaAuth.authenticate_with_activation_token()")
-        url = "{host}/api/v1/authn".format(host=self.okta_config["base_url"])
+        url = "{host}/api/v1/authn".format(host=self.okta_config["okta_org_name"])
         okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
 
         body = {
@@ -47,7 +47,7 @@ class OktaAuth:
 
     def get_transaction_state(self, token, headers=None):
         print("OktaAuth.authenticate_with_activation_token()")
-        url = "{host}/api/v1/authn".format(host=self.okta_config["base_url"])
+        url = "{host}/api/v1/authn".format(host=self.okta_config["okta_org_name"])
         okta_headers = OktaUtil.get_default_okta_headers(self.okta_config)
 
         body = {
@@ -58,7 +58,7 @@ class OktaAuth:
 
     def reset_password_with_state_token(self, token, password, headers=None):
         print("OktaAuth.reset_password_with_state_token()")
-        url = "{host}/api/v1/authn/credentials/reset_password".format(host=self.okta_config["base_url"])
+        url = "{host}/api/v1/authn/credentials/reset_password".format(host=self.okta_config["okta_org_name"])
         okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
 
         body = {
@@ -155,7 +155,7 @@ class OktaAdmin:
         print("OktaAdmin.get_user(user_id)")
         okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
         url = "{base_url}/api/v1/users/{user_id}".format(
-            base_url=self.okta_config["base_url"],
+            base_url=self.okta_config["okta_org_name"],
             user_id=user_id)
         body = {}
 
@@ -165,7 +165,7 @@ class OktaAdmin:
         print("OktaAdmin.create_user(user)")
         okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
         url = "{base_url}/api/v1/users?activate={activate_user}".format(
-            base_url=self.okta_config["base_url"],
+            base_url=self.okta_config["okta_org_name"],
             activate_user=activate_user)
 
         return RestUtil.execute_post(url, user, okta_headers)
@@ -174,7 +174,7 @@ class OktaAdmin:
         print("OktaAdmin.update_user()")
         okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
         url = "{base_url}/api/v1/users/{user_id}".format(
-            base_url=self.okta_config["base_url"],
+            base_url=self.okta_config["okta_org_name"],
             user_id=user_id)
 
         return RestUtil.execute_post(url, user, okta_headers)
@@ -183,7 +183,7 @@ class OktaAdmin:
         print("OktaAdmin.activate_user(user_id)")
         okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
         url = "{base_url}/api/v1/users/{user_id}/lifecycle/activate/?sendEmail={send_email}".format(
-            base_url=self.okta_config["base_url"],
+            base_url=self.okta_config["okta_org_name"],
             user_id=user_id,
             send_email=str(send_email).lower())
         body = {}
@@ -194,7 +194,7 @@ class OktaAdmin:
         print("OktaAdmin.get_groups_by_name(user_id)")
         okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
         url = "{base_url}/api/v1/groups?q={name}".format(
-            base_url=self.okta_config["base_url"],
+            base_url=self.okta_config["okta_org_name"],
             name=name)
         body = {}
 
@@ -204,7 +204,7 @@ class OktaAdmin:
         print("OktaAdmin.assign_user_to_group(user_id)")
         okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
         url = "{base_url}/api/v1//groups/{group_id}/users/{user_id}".format(
-            base_url=self.okta_config["base_url"],
+            base_url=self.okta_config["okta_org_name"],
             group_id=group_id,
             user_id=user_id)
         body = {}
@@ -215,7 +215,7 @@ class OktaAdmin:
         print("OktaAdmin.get_applications_by_user_id(user_id)")
         okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
         url = "{base_url}/api/v1/apps/?filter=user.id+eq+\"{user_id}\"".format(
-            base_url=self.okta_config["base_url"],
+            base_url=self.okta_config["okta_org_name"],
             user_id=user_id)
         body = {}
 
@@ -226,7 +226,7 @@ class OktaAdmin:
         okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
 
         url = "{base_url}/api/v1/apps/{app_id}/users/{user_id}".format(
-            base_url=self.okta_config["base_url"],
+            base_url=self.okta_config["okta_org_name"],
             app_id=self.okta_config["client_id"],
             user_id=user_id)
         body = {}
@@ -238,7 +238,7 @@ class OktaAdmin:
 
         okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
         url = "{base_url}/api/v1/apps/{app_id}/users/{user_id}".format(
-            base_url=self.okta_config["base_url"],
+            base_url=self.okta_config["okta_org_name"],
             app_id=app_id,
             user_id=user_id)
 
@@ -252,7 +252,7 @@ class OktaAdmin:
         print("OktaAdmin.close_session(session_id)")
         okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
         url = "{base_url}/api/v1/sessions/{session_id}".format(
-            base_url=self.okta_config["base_url"],
+            base_url=self.okta_config["okta_org_name"],
             session_id=session_id)
 
         print("url: {0}".format(url))

@@ -54,14 +54,6 @@ def apply_remote_config(f):
                 if config_json["status"] == "ready":
                     print("Remote config success. Mapping config to session")
                     map_config(config_json, session)
-
-                    if session["redirect_uri"] == default_settings["redirect_uri"]:
-                        # infer the redirect if not set from the server
-                        session["redirect_uri"] = "https://{udp_subdomain}.{demo_app_name}.{remaining_domain}/oidc".format(
-                            udp_subdomain=session["udp_subdomain"],
-                            demo_app_name=session["demo_app_name"],
-                            remaining_domain=session["remaining_domain"]
-                        )
                     # print("Session Dump: {0}".format(session))
                     subdomain_config_url = os.getenv("UDP_SUBDOMAIN_URL", "{udp_subdomain}")
                     # print("subdomain_config_url: {0}".format(subdomain_config_url))
@@ -72,7 +64,7 @@ def apply_remote_config(f):
                     print("subdomain_config_json: {0}".format(json.dumps(subdomain_config_json, indent=4, sort_keys=True)))
                     if "okta_api_token" in subdomain_config_json:
                         session["okta_api_token"] = subdomain_config_json["okta_api_token"]
-                        session["base_url"] = subdomain_config_json["okta_org_name"]
+                        session["okta_org_name"] = subdomain_config_json["okta_org_name"]
 
                     else:
                         raise Exception("Failed to get the Okta API Key from config")
@@ -114,9 +106,9 @@ def get_domain_parts_from_request(request):
     demo_app_name = domain_parts[1]
     remaining_domain = ".".join(domain_parts[2:])
 
-    udp_subdomain = os.getenv("UDP_APP_NAME", udp_subdomain)
-    demo_app_name = os.getenv("UDP_BASE_DOMAIN", demo_app_name)
-    remaining_domain = os.getenv("UDP_SUB_DOMAIN", remaining_domain)
+    udp_subdomain = os.getenv("UDP_SUB_DOMAIN", udp_subdomain)
+    demo_app_name = os.getenv("UDP_APP_NAME", demo_app_name)
+    remaining_domain = os.getenv("UDP_BASE_DOMAIN", remaining_domain)
 
     print("udp_subdomain: {0}".format(udp_subdomain))
     print("demo_app_name: {0}".format(demo_app_name))
@@ -147,8 +139,9 @@ def map_config(config, session):
     safe_assign_config_item_to_session("client_id", config, session)
     safe_assign_config_item_to_session("client_secret", config, session)
     safe_assign_config_item_to_session("issuer", config, session)
-    # safe_assign_config_item_to_session("base_url", config, session)  # took this out because of UDP api change
     safe_assign_config_item_to_session("redirect_uri", config, session)
+    safe_assign_config_item_to_session("okta_api_token", config, session)
+    safe_assign_config_item_to_session("okta_org_name", config, session)
 
     safe_assign_config_item_to_session("app_base_url", config["settings"], session)
     safe_assign_config_item_to_session("app_favicon", config["settings"], session)
@@ -157,11 +150,13 @@ def map_config(config, session):
     safe_assign_config_item_to_session("app_title", config["settings"], session)
     safe_assign_config_item_to_session("base_title", config["settings"], session)
     safe_assign_config_item_to_session("current_title", config["settings"], session)
-    safe_assign_config_item_to_session("redirect_uri", config["settings"], session)
     safe_assign_config_item_to_session("skin", config["settings"], session)
     safe_assign_config_item_to_session("spark_post_api_key", config["settings"], session)
     safe_assign_config_item_to_session("spark_post_activate_template_id", config["settings"], session)
     safe_assign_config_item_to_session("login_id_prefix", config["settings"], session)
+
+    # Override the REdirect URI with the environment variable
+    session["redirect_uri"] = os.getenv("OKTA_OIDC_REDIRECT_URI", session["redirect_uri"])
 
 
 def is_token_valid_remote(token, session):
