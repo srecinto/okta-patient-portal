@@ -142,7 +142,7 @@ def oidc():
             "client_secret": session["client_secret"],
         }
     )
-    #  print("oauth_token: {0}".format(json.dumps(oauth_token, indent=4, sort_keys=True)))
+    print("oauth_token: {0}".format(json.dumps(oauth_token, indent=4, sort_keys=True)))
     app_landing_page_url = session["app_base_url"]
     response = make_response(redirect(app_landing_page_url))
     response.set_cookie('token', oauth_token["access_token"])
@@ -209,7 +209,7 @@ def logout():
         app_base_url = request.url_root.replace('http://', 'https://', 1)
 
     redirect_url = "{host}/login/signout?fromURI={redirect_path}".format(
-        host=session["base_url"],
+        host=session["okta_org_name"],
         redirect_path=app_base_url
     )
 
@@ -411,15 +411,21 @@ def register_alt():
     return json.dumps(register_alt1_response)
 
 
-@app.route("/activate/<user_id>", methods=["GET"])
-def activate(user_id):
-    print("activate(user_id)")
+@app.route("/activate/<user_id>", defaults={'okta_session_id': None}, methods=["GET"])
+@app.route("/activate/<user_id>/<okta_session_id>", methods=["GET"])
+def activate(user_id, okta_session_id):
+    print("activate(user_id, okta_session_id)")
 
     auth_response = make_response(redirect("/"))
 
     okta_admin = OktaAdmin(session)
     activation_response = okta_admin.activate_user(user_id, send_email=False)
     print("activation_response: {0}".format(json.dumps(activation_response, indent=4, sort_keys=True)))
+
+    if "okta_session_id":
+        print("Clearing exsisting session")
+        clear_session_response = okta_admin.close_session(okta_session_id)
+        print("clear_session_response: {0}".format(json.dumps(clear_session_response, indent=4, sort_keys=True)))
 
     if "activationToken" in activation_response:
         okta_auth = OktaAuth(session)
@@ -431,6 +437,30 @@ def activate(user_id):
             auth_response = make_response(redirect("/?stateToken={0}".format(auth_response["stateToken"])))
 
     return auth_response
+
+
+@app.route("/activate-account/<user_id>", methods=["GET"])
+def activate_account(user_id):
+    print("activate_account()")
+    print("user_id: {0}".format(user_id))
+
+    user = None
+    modal_options = None
+    session["current_title"] = "{0} | {1} Sign In".format(session["base_title"], session["app_title"])
+
+    response = make_response(
+        render_template(
+            "activate.html",
+            site_config=session,
+            user=user,
+            modal_options=modal_options,
+            user_id=user_id
+        )
+    )
+
+    handle_invalid_tokens(session, response)
+
+    return response
 
 
 @app.route("/verify-dob", methods=["POST"])

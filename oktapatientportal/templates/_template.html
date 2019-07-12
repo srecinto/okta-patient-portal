@@ -19,32 +19,32 @@
     <link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet">
 
     <!-- Bootstrap core CSS -->
-    <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="/bootstrap/css/bootstrap.css" rel="stylesheet">
 
     <!-- Font Awesome CSS -->
-    <link href="fonts/font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="/fonts/font-awesome/css/font-awesome.css" rel="stylesheet">
 
     <!-- Plugins -->
-    <link href="plugins/magnific-popup/magnific-popup.css" rel="stylesheet">
-    <link href="plugins/rs-plugin-5/css/settings.css" rel="stylesheet">
-    <link href="plugins/rs-plugin-5/css/layers.css" rel="stylesheet">
-    <link href="plugins/rs-plugin-5/css/navigation.css" rel="stylesheet">
-    <link href="css/animations.css" rel="stylesheet">
-    <link href="plugins/slick/slick.css" rel="stylesheet">
+    <link href="/plugins/magnific-popup/magnific-popup.css" rel="stylesheet">
+    <link href="/plugins/rs-plugin-5/css/settings.css" rel="stylesheet">
+    <link href="/plugins/rs-plugin-5/css/layers.css" rel="stylesheet">
+    <link href="/plugins/rs-plugin-5/css/navigation.css" rel="stylesheet">
+    <link href="/css/animations.css" rel="stylesheet">
+    <link href="/plugins/slick/slick.css" rel="stylesheet">
 
     <!-- The Project's core CSS file -->
     <!-- Use css/rtl_style.css for RTL version -->
-    <link href="css/style.css" rel="stylesheet" >
+    <link href="/css/style.css" rel="stylesheet" >
     <!-- The Project's Typography CSS file, includes used fonts -->
     <!-- Used font for body: Roboto -->
     <!-- Used font for headings: Raleway -->
     <!-- Use css/rtl_typography-default.css for RTL version -->
-    <link href="css/typography-default.css" rel="stylesheet" >
+    <link href="/css/typography-default.css" rel="stylesheet" >
     <!-- Color Scheme (In order to change the color scheme, replace the blue.css with the color scheme that you prefer) -->
-    <link href="css/skins/{{site_config.skin}}.css" rel="stylesheet">
+    <link href="/css/skins/{{site_config.skin}}.css" rel="stylesheet">
 
     <!-- Custom css -->
-    <link href="css/custom.css" rel="stylesheet">
+    <link href="/css/custom.css" rel="stylesheet">
 
     <!-- Latest CDN production Javascript and CSS -->
     <script
@@ -709,38 +709,39 @@
     <!-- JavaScript files placed at the end of the document so the pages load faster -->
     <!-- ================================================== -->
     <!-- Jquery and Bootstap core js files -->
-    <script src="plugins/jquery.min.js"></script>
-    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/plugins/jquery.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
     <!-- jQuery Revolution Slider  -->
-    <script src="plugins/rs-plugin-5/js/jquery.themepunch.tools.min.js"></script>
-    <script src="plugins/rs-plugin-5/js/jquery.themepunch.revolution.min.js"></script>
+    <script src="/plugins/rs-plugin-5/js/jquery.themepunch.tools.min.js"></script>
+    <script src="/plugins/rs-plugin-5/js/jquery.themepunch.revolution.min.js"></script>
     <!-- Isotope javascript -->
-    <script src="plugins/isotope/imagesloaded.pkgd.min.js"></script>
-    <script src="plugins/isotope/isotope.pkgd.min.js"></script>
+    <script src="/plugins/isotope/imagesloaded.pkgd.min.js"></script>
+    <script src="/plugins/isotope/isotope.pkgd.min.js"></script>
     <!-- Magnific Popup javascript -->
-    <script src="plugins/magnific-popup/jquery.magnific-popup.min.js"></script>
+    <script src="/plugins/magnific-popup/jquery.magnific-popup.min.js"></script>
     <!-- Appear javascript -->
-    <script src="plugins/waypoints/jquery.waypoints.min.js"></script>
-    <script src="plugins/waypoints/sticky.min.js"></script>
+    <script src="/plugins/waypoints/jquery.waypoints.min.js"></script>
+    <script src="/plugins/waypoints/sticky.min.js"></script>
     <!-- Count To javascript -->
-    <script src="plugins/countTo/jquery.countTo.js"></script>
+    <script src="/plugins/countTo/jquery.countTo.js"></script>
     <!-- Google Maps javascript -->
     <!--script src="https://maps.googleapis.com/maps/api/js?key=your_google_map_key"></script-->
     <!--script src="js/google.map.config.js"></script-->
     <!-- Slick carousel javascript -->
-    <script src="plugins/slick/slick.min.js"></script>
+    <script src="/plugins/slick/slick.min.js"></script>
     <!-- Initialization of Plugins -->
-    <script src="js/template.js"></script>
+    <script src="/js/template.js"></script>
     <!-- Custom Scripts -->
     <script src="https://ok1static.oktacdn.com/assets/js/sdk/okta-auth-js/2.4.0/okta-auth-js.min.js" type="text/javascript"></script>
-    <script src="js/custom.js"></script>
+    <script src="/js/custom.js"></script>
 
+    <input type="hidden" id="sessionId" />
     <script type="text/javascript">
       //<![CDATA[
       var oktaSignIn = undefined;
       $(document).ready(function() {
 
-        var orgUrl = "{{site_config.base_url}}";
+        var orgUrl = "{{site_config.okta_org_name}}";
         var redirect = "{{site_config.redirect_uri}}";
         oktaSignIn = new OktaSignIn({
           baseUrl: orgUrl,
@@ -807,7 +808,7 @@
       });
       //]]>
     </script>
-    <input type="hidden" id="sessionId" />
+    {% block extra_script %}{% endblock %}
 
   </body>
 </html>

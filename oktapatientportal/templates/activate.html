@@ -1,0 +1,85 @@
+{% extends "_template.html" %}
+{% block title %}{{site_config.current_title}}{% endblock %}
+{% block banner %}
+      <!-- breadcrumb start -->
+      <!-- ================ -->
+      <div class="breadcrumb-container">
+        <div class="container">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><i class="fa fa-home pr-2"></i><a class="link-dark" href="index.html">Home</a></li>
+            <li class="breadcrumb-item active">Activating Account</li>
+          </ol>
+        </div>
+      </div>
+      <!-- breadcrumb end -->
+{% endblock %}
+{% block content %}
+      <!-- main-container start -->
+      <!-- ================ -->
+      <div class="main-container dark-translucent-bg" style="background-image:url('/images/background-img-6.jpg');">
+        <div class="container">
+          <div class="row justify-content-center">
+            <div class="col-auto">
+              <!-- main start -->
+              <!-- ================ -->
+              <div class="main hc-element-invisible" data-animation-effect="fadeInUpSmall" data-effect-delay="100">
+                <div class="form-block p-30 light-gray-bg border-clear">
+                    Activating Account...
+                </div>
+              </div>
+              <!-- main end -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- main-container end -->
+{% endblock %}
+{% block extra_script %}
+<script type="text/javascript">
+//<![CDATA[
+$(document).ready(function() {
+    console.log("Ready!!!");
+    /*
+    $.get({
+        url: "{{site_config.okta_org_name}}/api/v1/sessions/me",
+        xhrFields: { withCredentials: true },
+        crossDomain: true,
+        success: data => {
+            console.log("data: %s", JSON.stringify(data));
+
+            if (data.id) {
+                location.href = "/activate/{{user_id}}/" + data.id;
+            } else {
+                console.log("No active session");
+                location.href = "/activate/{{user_id}}";
+            }
+        },
+        error: () => {
+          console.log("No active session");
+          location.href = "/activate/{{user_id}}";
+        }
+    });*/
+
+    oktaSignIn.session.get(function (res) {
+      // Session exists, show logged in state.
+      if (res.status === 'ACTIVE') {
+        // showApp()
+        console.log("Session Active");
+        oktaSignIn.session.close(function (err) {
+          if (err) {
+            // The user has not been logged out, perform some error handling here.
+            console.log("Failed to close the session (if it exsists) otherwise fine");
+            console.log(err);
+          }
+          // The user is now logged out.
+            location.href = "/activate/{{user_id}}";
+        });
+      } else if (res.status === 'INACTIVE') {
+        console.log("Session Not Active");
+        location.href = "/activate/{{user_id}}";
+      }
+	});
+});
+//]]>
+</script>
+{% endblock %}
