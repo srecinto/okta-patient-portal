@@ -738,47 +738,49 @@
     <input type="hidden" id="sessionId" />
     <script type="text/javascript">
       //<![CDATA[
-      var oktaSignIn = undefined;
+
+      var orgUrl = "{{site_config.okta_org_name}}";
+      var redirect = "{{site_config.redirect_uri}}";
+      var oktaSignIn = new OktaSignIn({
+        baseUrl: orgUrl,
+        // logo: "{{site_config.app_logo}}",
+        // OpenID Connect options
+        clientId: "{{site_config.client_id}}",
+        redirectUri: redirect,
+        authScheme: "OAUTH2",
+        authParams: {
+          display: "page",
+          responseType: "code",
+          responseMode: "form_post",
+          issuer: "{{site_config.issuer}}",
+          authorizeUrl: "{{site_config.issuer}}/v1/authorize",
+          scopes: [
+            "openid",
+            "profile"
+          ]
+        },
+        features: {
+          multiOptionalFactorEnroll: true,
+          smsRecovery: true,
+          callRecovery: true,
+          deviceFingerprinting: true,
+          //idpDiscovery: true
+        },
+        helpLinks: {
+          help: "/help",
+          custom: [
+            {
+              text: 'FAQ',
+              href: '/help',
+              target: '_self'
+            }
+          ]
+        }
+      });
+
       $(document).ready(function() {
 
-        var orgUrl = "{{site_config.okta_org_name}}";
-        var redirect = "{{site_config.redirect_uri}}";
-        oktaSignIn = new OktaSignIn({
-          baseUrl: orgUrl,
-          // logo: "{{site_config.app_logo}}",
-          // OpenID Connect options
-          clientId: "{{site_config.client_id}}",
-          redirectUri: redirect,
-          authScheme: "OAUTH2",
-          authParams: {
-            display: "page",
-            responseType: "code",
-            responseMode: "form_post",
-            issuer: "{{site_config.issuer}}",
-            authorizeUrl: "{{site_config.issuer}}/v1/authorize",
-            scopes: [
-              "openid",
-              "profile"
-            ]
-          },
-          features: {
-            multiOptionalFactorEnroll: true,
-            smsRecovery: true,
-            callRecovery: true,
-            deviceFingerprinting: true,
-            //idpDiscovery: true
-          },
-          helpLinks: {
-            help: "/help",
-            custom: [
-              {
-                text: 'FAQ',
-                href: '/help',
-                target: '_self'
-              }
-            ]
-          }
-        });
+
 
         oktaSignIn.session.get(function (res) {
           // Session exists, show logged in state.
