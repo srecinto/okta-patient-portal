@@ -218,9 +218,9 @@ def get_modal_options(okta_user_id):
     # print("okta_user_id: {0}".format(okta_user_id))
     okta_admin = OktaAdmin(session)
     user = okta_admin.get_user(okta_user_id)
-    # print("user: {0}".format(json.dumps(user, indent=4, sort_keys=True)))
+    print("user: {0}".format(json.dumps(user, indent=4, sort_keys=True)))
     curent_application = okta_admin.get_user_application_by_current_client_id(user["id"])
-    # print("curent_application: {0}".format(json.dumps(curent_application, indent=4, sort_keys=True)))
+    print("curent_application: {0}".format(json.dumps(curent_application, indent=4, sort_keys=True)))
     # print("user: {0}".format(json.dumps(user, indent=4, sort_keys=True)))
     #  Apply Rules based on user and app combo
 
@@ -247,16 +247,17 @@ def show_user_reg_form_default(user, app):
     print("show_user_reg_form_default()")
     result = False
     print("app: {0}".format(json.dumps(app, indent=4, sort_keys=True)))
-    if ("height" not in app["profile"] and
-            "weight" not in app["profile"] and
-            app["profile"]["registrationForm"] == "DEFAULT"):
-        result = True
-    else:
-        if "weight" in app["profile"] and "height" in app["profile"]:
-            if ((app["profile"]["weight"] == "" or app["profile"]["height"] == "" or
-                    app["profile"]["weight"] is None or app["profile"]["height"] is None) and
-                    app["profile"]["registrationForm"] == "DEFAULT"):
-                result = True
+    if "profile" in app:
+        if ("height" not in app["profile"] and
+                "weight" not in app["profile"] and
+                app["profile"]["registrationForm"] == "DEFAULT"):
+            result = True
+        else:
+            if "weight" in app["profile"] and "height" in app["profile"]:
+                if ((app["profile"]["weight"] == "" or app["profile"]["height"] == "" or
+                        app["profile"]["weight"] is None or app["profile"]["height"] is None) and
+                        app["profile"]["registrationForm"] == "DEFAULT"):
+                    result = True
 
     return result
 
@@ -265,15 +266,16 @@ def show_user_reg_form_alt1(user, app):
     print("show_user_reg_form_alt1()")
     result = False
 
-    if ("dob" not in app["profile"] and
-            app["profile"]["registrationForm"] == "ALT1"):
-        result = True
-    else:
-        if "dob" in app["profile"]:
-            if ((app["profile"]["dob"] == "" or user["profile"]["mobilePhone"] == "" or
-                    app["profile"]["dob"] is None or user["profile"]["mobilePhone"] is None) and
-                    app["profile"]["registrationForm"] == "ALT1"):
-                result = True
+    if "profile" in app:
+        if ("dob" not in app["profile"] and
+                app["profile"]["registrationForm"] == "ALT1"):
+            result = True
+        else:
+            if "dob" in app["profile"]:
+                if ((app["profile"]["dob"] == "" or user["profile"]["mobilePhone"] == "" or
+                        app["profile"]["dob"] is None or user["profile"]["mobilePhone"] is None) and
+                        app["profile"]["registrationForm"] == "ALT1"):
+                    result = True
 
     return result
 
