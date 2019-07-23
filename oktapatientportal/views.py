@@ -302,9 +302,9 @@ def register_basic():
             patient_group["id"]
         ]
     }
-
+    print("user: {0}".format(json.dumps(user, indent=4, sort_keys=True)))
     created_user = okta_admin.create_user(user)
-    # print("created_user: {0}".format(json.dumps(created_user, indent=4, sort_keys=True)))
+    print("created_user: {0}".format(json.dumps(created_user, indent=4, sort_keys=True)))
 
     if "errorSummary" in created_user:
         register_basic_response["errorMessage"] = created_user["errorSummary"]

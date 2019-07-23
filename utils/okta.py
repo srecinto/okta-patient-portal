@@ -161,6 +161,18 @@ class OktaAdmin:
 
         return RestUtil.execute_get(url, body, okta_headers)
 
+
+    def get_user_groups(self, user_id):
+        print("OktaAdmin.get_user_groups(user_id)")
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
+        url = "{base_url}/api/v1/users/{user_id}/groups".format(
+            base_url=self.okta_config["okta_org_name"],
+            user_id=user_id)
+        body = {}
+
+        return RestUtil.execute_get(url, body, okta_headers)
+
+
     def create_user(self, user, activate_user=False):
         print("OktaAdmin.create_user(user)")
         okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
