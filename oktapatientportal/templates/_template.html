@@ -704,6 +704,50 @@
       </div>
     </div>
 
+    <!-- MFA Enrollment -->
+    <div class="modal fade" id="mfaEnrollmentModal" tabindex="-1" role="dialog" aria-labelledby="mfaEnrollLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="mfaEnrollLabel">Enroll your Factor</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          </div>
+          <div class="modal-body">
+            TODO: Add MFA Enrollment Stuff
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="mfaEnroll" class="btn btn-sm btn-default">
+              Enroll
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MFA Verify -->
+    <div class="modal fade" id="mfaVerifyModal" tabindex="-1" role="dialog" aria-labelledby="mfaVerifyLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="mfaVerifyLabel">Verify your Factor</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="factorList">Authenticate With:</label>
+              <select id="factorList"></select>
+            </div>
+            TODO: Add MFA Verify Stuff
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="mfaVerify" class="btn btn-sm btn-default">
+              Verify
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <input type="hidden" id="stateToken"{% if state_token %} value="{{state_token}}"{% endif %} />
 
     <!-- JavaScript files placed at the end of the document so the pages load faster -->
