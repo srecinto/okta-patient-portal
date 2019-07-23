@@ -481,6 +481,9 @@ def activate_account(user_id):
         )
     )
 
+    response.set_cookie("token", "")
+    response.set_cookie("id_token", "")
+
     handle_invalid_tokens(session, response)
 
     return response
