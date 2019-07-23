@@ -95,6 +95,17 @@ function callLogin(url) {
 
             if(authResponseJson.success) {
 				location.href = authResponseJson.redirectUrl;
+            } else if(authResponseJson.status == "MFA_REQUIRED") {
+
+                // Add enrolled MFA Options
+                $("#factorList").empty().append("<option>Select Factor</option>");
+
+                for(factorIdx in authResponseJson._embedded.factors) {
+                    var factor = authResponseJson._embedded.factors[factorIdx];
+                    $("#factorList").append('<option value="' + factor.id + '">' + factor.factorType + '</option>')
+                }
+
+                $("#mfaVerifyModal").modal("show");
             } else {
             	//TODO: use modal popup
             	$("body").removeClass("page-loader-2");
