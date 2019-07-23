@@ -8,7 +8,8 @@ $(document).ready(function() {
 	$("#loginButton").on("click", loginClickHandler);
 	$("#acceptConsent").on("click", acceptConsentClickHandler);
 	$("#rejectConsent").on("click", rejectConsentClickHandler);
-	$("#signUpButton").on("click", () => { $("#basicRegistrationModal").modal("show"); });
+	$("#signUpButton").on("click", signUpButtonClickHandler);
+	$("#customSignUpButton").on("click", signUpButtonClickHandler);
 	$("#registerUser").on("click", registerUserClickHandler);
 	$("#submitRegistrationDefault").on("click", submitRegistrationDefaultClickHandler);
 	$("#submitRegistrationAlt1").on("click", submitRegistrationAlt1ClickHandler);
@@ -45,6 +46,12 @@ $(document).ready(function() {
 
 }); // End document ready
 
+function signUpButtonClickHandler() {
+    console.log("signUpButtonClickHandler()");
+
+    $("#basicRegistrationModal").modal("show");
+
+}
 
 function loginClickHandler() {
 	console.log("loginClickHandler()");
@@ -160,42 +167,65 @@ function registerUserClickHandler() {
     	$("#registerUser").html(
     	    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Processing...'
     	);
-        $.ajax({
-            url: "/register-basic",
-            type: "POST",
-            data: JSON.stringify({"username": $("#registraionEmail").val(), "password": $("#registrationPassword").val()}),
-            contentType: "application/json; charset=utf-8",
-            success: data => {
-                console.log(data);
-                var acceptConsentResponseJson = JSON.parse(data);
 
-                if(acceptConsentResponseJson.success) {
-                	$("#basicRegistrationModal").modal("hide");
-                	$("#basicRegistrationCompleteModal").modal("show");
-                } else {
-                	//TODO: use modal popup
-                	errorMessage = acceptConsentResponseJson.errorMessage + "\r\n";
-
-                	if(acceptConsentResponseJson.errorMessages != undefined){
-                	    for(msgIdx in acceptConsentResponseJson.errorMessages) {
-                	        errorMessage += acceptConsentResponseJson.errorMessages[msgIdx].errorMessage + "\r\n";
-                	        if(acceptConsentResponseJson.errorMessages[msgIdx].errorMessage == "login: An object with this field already exists in the current organization") {
-                	            $("#basicRegistrationModal").modal("hide");
-                	            $("#popupLoginModal").modal("show");
-                	            return;
-                	        }
-                	    }
-                	}
-
-                	alert(errorMessage);
-                }
-                $("#registerUser").prop("disabled", false);
-            	$("#registerUser").html("Sign Me Up!");
-            }
-        });
+    	oktaSignIn.session.get(function (res) {
+          // Session exists, show logged in state.
+          if (res.status === 'ACTIVE') {
+            // showApp()
+            console.log("Session Active");
+            oktaSignIn.session.close(function (err) {
+              if (err) {
+                // The user has not been logged out, perform some error handling here.
+                console.log("Failed to close the session (if it exsists) otherwise fine");
+                console.log(err);
+              }
+              // The user is now logged out.
+                invokeRegisterBasic()
+            });
+          } else if (res.status === 'INACTIVE') {
+            console.log("Session Not Active");
+            invokeRegisterBasic();
+          }
+    	});
     } else {
         alert(errorMessage);
     }
+}
+
+function invokeRegisterBasic() {
+    $.ajax({
+        url: "/register-basic",
+        type: "POST",
+        data: JSON.stringify({"username": $("#registraionEmail").val(), "password": $("#registrationPassword").val()}),
+        contentType: "application/json; charset=utf-8",
+        success: data => {
+            console.log(data);
+            var acceptConsentResponseJson = JSON.parse(data);
+
+            if(acceptConsentResponseJson.success) {
+            	$("#basicRegistrationModal").modal("hide");
+            	$("#basicRegistrationCompleteModal").modal("show");
+            } else {
+            	//TODO: use modal popup
+            	errorMessage = acceptConsentResponseJson.errorMessage + "\r\n";
+
+            	if(acceptConsentResponseJson.errorMessages != undefined){
+            	    for(msgIdx in acceptConsentResponseJson.errorMessages) {
+            	        errorMessage += acceptConsentResponseJson.errorMessages[msgIdx].errorMessage + "\r\n";
+            	        if(acceptConsentResponseJson.errorMessages[msgIdx].errorMessage == "login: An object with this field already exists in the current organization") {
+            	            $("#basicRegistrationModal").modal("hide");
+            	            $("#popupLoginModal").modal("show");
+            	            return;
+            	        }
+            	    }
+            	}
+
+            	alert(errorMessage);
+            }
+            $("#registerUser").prop("disabled", false);
+        	$("#registerUser").html("Sign Me Up!");
+        }
+    });
 }
 
 function submitRegistrationDefaultClickHandler(){

@@ -218,9 +218,9 @@ def get_modal_options(okta_user_id):
     # print("okta_user_id: {0}".format(okta_user_id))
     okta_admin = OktaAdmin(session)
     user = okta_admin.get_user(okta_user_id)
-    print("user: {0}".format(json.dumps(user, indent=4, sort_keys=True)))
+    # print("user: {0}".format(json.dumps(user, indent=4, sort_keys=True)))
     curent_application = okta_admin.get_user_application_by_current_client_id(user["id"])
-    print("curent_application: {0}".format(json.dumps(curent_application, indent=4, sort_keys=True)))
+    # print("curent_application: {0}".format(json.dumps(curent_application, indent=4, sort_keys=True)))
     # print("user: {0}".format(json.dumps(user, indent=4, sort_keys=True)))
     #  Apply Rules based on user and app combo
 
@@ -308,6 +308,7 @@ def create_login_response(user_name, password, session):
     print("create_login_response()")
     auth_response = {"success": False}
     okta_auth = OktaAuth(session)
+    okta_admin = OktaAdmin(session)
 
     #  print("login_form_data: {0}".format(json.dumps(login_form_data, indent=4, sort_keys=True)))
     authn_json_response = okta_auth.authenticate(
@@ -317,6 +318,35 @@ def create_login_response(user_name, password, session):
 
     # print("authn_json_response: {0}".format(json.dumps(authn_json_response, indent=4, sort_keys=True)))
     if "sessionToken" in authn_json_response:
+
+        # Added to fix issue where users pre exsist but are not assigned to the patient portal app as a patient
+        # Look up if user is in  this app/subdomain
+        # TODO: Clean this up to use Terraform setting or Group Rule
+        user_id = authn_json_response["_embedded"]["user"]["id"]
+        print("user_id: {0}".format(user_id))
+        # Look up Patient group for this app/subdomain
+        patient_group_name = "{0}_{1}_patient".format(
+            session["udp_subdomain"],
+            session["demo_app_name"]
+        )
+        print("patient_group_name: {0}".format(patient_group_name))
+        patient_group = okta_admin.get_groups_by_name(patient_group_name)[0]
+        print("patient_group: {0}".format(json.dumps(patient_group, indent=4, sort_keys=True)))
+
+        user_groups = okta_admin.get_user_groups(user_id)
+        print("user_groups: {0}".format(json.dumps(user_groups, indent=4, sort_keys=True)))
+        has_patient_group = False
+
+        for group in user_groups:
+            if patient_group["id"] == group["id"]:
+                has_patient_group = True
+                break
+
+        if not has_patient_group:
+            # Assign User to group
+            group_assignment_response = okta_admin.assign_user_to_group(patient_group["id"], user_id);
+            print("user_groups: {0}".format(json.dumps(user_groups, indent=4, sort_keys=True)))
+
         session["state"] = str(uuid.uuid4())
         oauth_authorize_url = okta_auth.create_oauth_authorize_url(
             response_type="code",
