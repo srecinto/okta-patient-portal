@@ -139,6 +139,70 @@ class OktaAuth:
 
         return RestUtil.execute_post(url, body, okta_headers)
 
+    """
+    MFA verification methods
+    """
+    
+    # used by Okta Verify Push, this starts the MFA transaction
+    def send_push(self, factor_id, state_token, headers=None):
+        print("send_push()")
+        okta_headers = OktaUtil.get_default_okta_headers(headers)
+        
+        url = "{0}/api/v1/authn/factors/{1}/verify".format(self.okta_config["okta_org_name"], factor_id)
+        body = {
+            "stateToken": state_token
+        }
+        
+        return RestUtil.execute_post(url, body, okta_headers)
+    
+    # this is the Okta Verify Push polling method
+    def poll_for_push(self, factor_id, state_token, headers=None):
+        print("poll_for_push()")
+        okta_headers = OktaUtil.get_default_okta_headers(headers)
+
+        url = "{0}/api/v1/authn/factors/{1}/verify".format(self.okta_config["okta_org_name"], factor_id)
+        body = {
+            "stateToken": state_token
+        }
+        return RestUtil.execute_post(url, body, okta_headers)
+        
+    def resend_push(self, factor_id, state_token, headers=None):
+        print("send_push()")
+        okta_headers = OktaUtil.get_default_okta_headers(headers)
+        
+        url = "{0}/api/v1/authn/factors/{1}/verify/resend".format(self.okta_config["okta_org_name"], factor_id)
+        body = {
+            "stateToken": state_token
+        }
+        
+        return RestUtil.execute_post(url, body, okta_headers)
+    
+    # used by SMS, voice, Google Authenticator and Okta Verify OTP factors
+    def verify_totp(self, factor_id, state_token, pass_code=None, headers=None):
+        print("verify_totp()")
+        okta_headers = OktaUtil.get_default_okta_headers(headers)
+        
+        url = "{0}/api/v1/authn/factors/{1}/verify".format(self.okta_config["okta_org_name"], factor_id)
+        body = {
+            "stateToken": state_token,
+            "passCode": pass_code
+        }
+        
+        return RestUtil.execute_post(url, body, okta_headers)
+    
+    # used for Security Question factor
+    def verify_answer(self, factor_id, state_token, answer, headers=None):
+        print("verify_answer()")
+        okta_headers = OktaUtil.get_default_okta_headers(headers)
+        
+        url = "{0}/api/v1/authn/factors/{1}/verify".format(self.okta_config["okta_org_name"], factor_id)
+        body = {
+            "stateToken": state_token,
+            "answer": answer
+        }
+        
+        return RestUtil.execute_post(url, body, okta_headers)
+    
 
 class OktaAdmin:
 
