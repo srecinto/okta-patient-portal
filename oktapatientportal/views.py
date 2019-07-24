@@ -64,7 +64,30 @@ def index():
 
     return response
 
-
+@app.route("/profile")
+@authenticated
+def profile():
+    print("profile()")
+    user = None
+    if ("token" in request.cookies and "id_token" in request.cookies):
+        id_token_claims = get_claims_from_token(request.cookies["id_token"])
+        if "sub" in id_token_claims:
+            okta_admin = OktaAdmin(session)
+            user = okta_admin.get_user(id_token_claims["sub"])
+            #print("user: {0}".format(user))
+    
+    response = make_response(
+        render_template(
+            "profile.html",
+            site_config=session,
+            user=user,
+            claims=id_token_claims,
+            okta_widget_container_id="okta-login-container"
+        )
+    )
+    
+    return response
+    
 @app.route('/login-form')
 @apply_remote_config
 def login_form():
@@ -244,6 +267,103 @@ def logout():
 
     return response
 
+"""
+routes for MFA verification
+"""
+
+@app.route("/verify_totp", methods=["POST"])
+def verify_totp():
+    print("verify_totp()")
+    okta_auth = OktaAuth(session)
+    
+    body = request.get_json()
+    pass_code = None
+    factor_id = body["factor_id"]
+    state_token = body["state_token"]
+    
+    if "pass_code" in body:
+        pass_code = body["pass_code"]
+    
+    print("verifying factor ID {0} with code {1} ({2})".format(factor_id, pass_code, state_token))
+    response = okta_auth.verify_totp(factor_id, state_token, pass_code)
+    return json.dumps(response)
+
+@app.route("/send_push", methods=["POST"])
+def send_push():
+    print("send_push()")
+    okta_auth = OktaAuth(session)
+    
+    body = request.get_json()
+    factor_id = body["factor_id"]
+    state_token = body["state_token"]
+    
+    response = okta_auth.send_push(factor_id, state_token)
+    return json.dumps(response)
+
+@app.route("/poll_for_push", methods=["POST"])
+def poll_for_push():
+    print("poll_for_push()")
+    okta_auth = OktaAuth(session)
+    
+    body = request.get_json()
+    factor_id = body["factor_id"]
+    state_token = body["state_token"]
+    
+    response = okta_auth.send_push(factor_id, state_token)
+    return json.dumps(response)
+
+@app.route("/resend_push", methods=["POST"])
+def resend_push():
+    print("resend_push()")
+    okta_auth = OktaAuth(session)
+    
+    body = request.get_json()
+    factor_id = body["factor_id"]
+    state_token = body["state_token"]
+    
+    response = okta_auth.resend_push(factor_id, state_token)
+    return json.dumps(response)
+
+@app.route("/verify_answer", methods=["POST"])
+def verify_answer():
+    print("verify_answer()")
+    okta_auth = OktaAuth(session)
+    
+    body = request.get_json()
+    factor_id = body["factor_id"]
+    state_token = body["state_token"]
+    answer = body["answer"]
+    
+    response = okta_auth.verify_answer(factor_id, state_token, answer)
+    return json.dumps(response)
+
+@app.route("/get_authorize_url", methods=["POST"])
+def get_authorize_url():
+    print("get_authorize_url()")
+    okta_auth = OktaAuth(session)
+    
+    body = request.get_json()
+    session_token = body["session_token"]
+    session["state"] = str(uuid.uuid4())
+    oauth_authorize_url = okta_auth.create_oauth_authorize_url(
+        response_type="code",
+        state=session["state"],
+        auth_options={
+            "response_mode": "form_post",
+            "prompt": "none",
+            "scope": "openid profile email",
+            "sessionToken": session_token
+        }
+    )
+    
+    response = {
+        "authorize_url": oauth_authorize_url
+    }
+    return json.dumps(response)
+        
+"""
+end MFA routes
+"""
 
 @app.route("/accept-consent", methods=["POST"])
 @authenticated

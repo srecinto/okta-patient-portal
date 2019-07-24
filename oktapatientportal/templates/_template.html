@@ -63,7 +63,7 @@
 
     <style>
       #okta-sign-in {
-        margin: 15px auto 8px; !important
+        margin: 15px auto 8px !important;
       }
 
       colors: {
@@ -136,7 +136,7 @@
                   <div class="header-top-dropdown text-right">
                     {% if user %}
                     <ul class="list-inline" id="loggedinMenu">
-                      <li class="list-inline-item"><a class="link-light" href="#" id="userNameLabel">{{user.profile.firstName}} {{user.profile.lastName}}</a></li>
+                      <li class="list-inline-item"><a class="link-light" href="/profile" id="userNameLabel">{{user.profile.firstName}} {{user.profile.lastName}}</a></li>
                       <li class="list-inline-item"><a class="link-light" href="/logout">Sign Out</a></li>
                     </ul>
                     {% else %}
@@ -150,12 +150,12 @@
                           <form class="login-form margin-clear" id="loginForm">
                             <div class="form-group has-feedback">
                               <label class="control-label">Username</label>
-                              <input type="text" class="form-control" placeholder="" id="username">
+                              <input type="text" class="form-control" placeholder="" id="username" value="les.claypool">
                               <i class="fa fa-user form-control-feedback"></i>
                             </div>
                             <div class="form-group has-feedback">
                               <label class="control-label">Password</label>
-                              <input type="password" class="form-control" placeholder="" id="password">
+                              <input type="password" class="form-control" placeholder="" id="password" value="Password1">
                               <i class="fa fa-lock form-control-feedback"></i>
                             </div>
                             <button type="button" class="btn btn-gray btn-sm" id="loginButton">Log In</button>
@@ -204,7 +204,7 @@
 
                   <!-- logo -->
                   <div id="logo" class="logo">
-                    <a href="/index"><img id="logo_img" src="{{site_config.app_logo}}" alt="{{site_config.app_title}}"></a>
+                    <a href="/"><img id="logo_img" src="{{site_config.app_logo}}" alt="{{site_config.app_title}}"></a>
                   </div>
 
                   <!-- name-and-slogan -->
@@ -725,6 +725,9 @@
     </div>
 
     <!-- MFA Verify -->
+    <input type="hidden" id="mfaFactorID">
+    <input type="hidden" id="mfaStateToken">
+    
     <div class="modal fade" id="mfaVerifyModal" tabindex="-1" role="dialog" aria-labelledby="mfaVerifyLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -737,12 +740,53 @@
               <label for="factorList">Authenticate With:</label>
               <select id="factorList"></select>
             </div>
-            TODO: Add MFA Verify Stuff
+            
+            <!-- sub-form for Okta Verify Push -->
+            <div class="form-group" id="mfaPushForm">
+              <button type="button" id="sendPushButton" class="btn btn-sm btn-default">
+                Send Push
+              </button>
+              <a href="#" id="oktaOTPCodeLink">Or Enter Code</a>
+            </div>
+              
+            <!-- sub-form for SMS, voice call and email factors -->
+            <div class="form-group" id="mfaOTPForm">
+              <span id="mfaRecipient"></span>
+              <button type="button" id="sendOTPButton" class="btn btn-sm btn-default">
+                Send SMS
+              </button>
+            </div>
+
+            <!-- TOTP, SMS, email and voice all use this field -->
+            <div class="form-group" id="mfaVerifyCodeForm">
+              <label for="mfaPassCode">Enter your code:</label>
+              <input type="text" id="mfaPassCode">
+              <button type="button" id="mfaVerifyButton" class="btn btn-sm btn-default">
+                Verify
+              </button>
+            </div>
+            
+            <!-- security question -->
+            <div class="form-group" id="mfaQuestionForm">
+              <div>
+                <!--<label for="mfaQuestion"></label>-->
+                <span id="mfaQuestion">Security question text goes here</span>
+              </div>
+              <!--<label for="mfaAnswer">Answer:</label>-->
+              <input type="password" id="mfaAnswer" size="40">
+              <button type="button" id="mfaVerifyAnswerButton" class="btn btn-sm btn-default">
+                Verify
+              </button>
+            </div>
+            
+            <div class="form-group" id="mfaStatusForm">
+              <span id="mfaStatusMessage"></span>
+            </div>
+          
           </div>
+          
           <div class="modal-footer">
-            <button type="button" id="mfaVerify" class="btn btn-sm btn-default">
-              Verify
-            </button>
+            
           </div>
         </div>
       </div>
@@ -782,7 +826,7 @@
     <input type="hidden" id="sessionId" />
     <script type="text/javascript">
       //<![CDATA[
-
+      
       var orgUrl = "{{site_config.okta_org_name}}";
       var redirect = "{{site_config.redirect_uri}}";
       var oktaSignIn = new OktaSignIn({
