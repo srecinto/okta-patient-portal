@@ -18,11 +18,11 @@ $(document).ready(function() {
 	
 	// MFA event handlers
 	$("#factorList").on("change", factorListOnChange);
-	$("#sendOTPButton").on("click", sendOTP);
-	$("#sendPushButton").on("click", sendPush);
-	$("#oktaOTPCodeLink").on("click", enterOktaOTP);
-	$("#mfaVerifyButton").on("click", verifyOTP);
-	$("#mfaVerifyAnswerButton").on("click", verifyAnswer);
+	$("#sendOTPButton").on("click", sendOTPClickHandler);
+	$("#sendPushButton").on("click", sendPushClickHandler);
+	$("#oktaOTPCodeLink").on("click", enterOktaOTPClickHandler);
+	$("#mfaVerifyButton").on("click", verifyOTPClickHandler);
+	$("#mfaVerifyAnswerButton").on("click", verifyAnswerClickHandler);
 	hideAllSubForms();
 	
 	$("#password").keypress(function (e) {
@@ -161,7 +161,6 @@ function setupFactorList(factors) {
             email = factor.profile.email;
         } else if (factorType == "question") {
             factorName = "Security Question";
-            //question = factor.profile.question;
             questionText = factor.profile.questionText;
         }
         
@@ -233,7 +232,7 @@ function logMessage(message) {
     $("#mfaStatusMessage").text(message);
 }
 
-function sendPush() {
+function sendPushClickHandler() {
     var factor_id = $("#mfaFactorID").val();
     var state_token = $("#mfaStateToken").val();
     logMessage("Push notification sent");
@@ -280,11 +279,11 @@ function pollForPush() {
             } else if (factorResut == "TIMEOUT") {
                 logMessage("Your push notification has timed out");
                 $("#sendPushButton").text("Resend Push");
-                $("#sendPushButton").on("click", resendPush);
+                $("#sendPushButton").on("click", resendPushClickHandler);
             } else if (factorResut == "REJECTED") {
                 logMessage("You have chosen to reject this login");
                 $("#sendPushButton").text("Resend Push");
-                $("#sendPushButton").on("click", resendPush);
+                $("#sendPushButton").on("click", resendPushClickHandler);
             }
         },
         error: function(xhr, status, error) {
@@ -293,7 +292,7 @@ function pollForPush() {
     });
 }
 
-function resendPush() {
+function resendPushClickHandler() {
     var factor_id = $("#mfaFactorID").val();
     var state_token = $("#mfaStateToken").val();
     logMessage("Push notification re-sent");
@@ -315,12 +314,12 @@ function resendPush() {
     });
 }
 
-function enterOktaOTP() {
+function enterOktaOTPClickHandler() {
     $("#oktaOTPCodeLink").hide();
     $("#factorList").val("Okta Verify OTP").change();
 }
 
-function sendOTP() {
+function sendOTPClickHandler() {
     var factor_id = $("#mfaFactorID").val();
     var state_token = $("#mfaStateToken").val();
     $("#mfaPassCode").focus();
@@ -341,7 +340,7 @@ function sendOTP() {
     });
 }
 
-function verifyOTP() {
+function verifyOTPClickHandler() {
     var factor_id = $("#mfaFactorID").val();
     var state_token = $("#mfaStateToken").val();
     var pass_code = $("#mfaPassCode").val();
@@ -374,7 +373,7 @@ function verifyOTP() {
     });
 }
 
-function verifyAnswer() {
+function verifyAnswerClickHandler() {
     var factor_id = $("#mfaFactorID").val();
     var state_token = $("#mfaStateToken").val();
     var answer = $("#mfaAnswer").val();
