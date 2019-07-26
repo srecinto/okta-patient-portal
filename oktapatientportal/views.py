@@ -64,6 +64,87 @@ def index():
 
     return response
 
+@app.route("/profile")
+@authenticated
+def profile():
+    print("profile()")
+    user = None
+    factors = None
+    
+    if ("token" in request.cookies and "id_token" in request.cookies):
+        id_token_claims = get_claims_from_token(request.cookies["id_token"])
+        
+        if "sub" in id_token_claims:
+            okta_admin = OktaAdmin(session)
+            user = okta_admin.get_user(id_token_claims["sub"])
+            app_user = okta_admin.get_user_application_by_current_client_id(user["id"])
+            #print("user: {0}".format(user))
+            
+            # get a list of enrolled factors
+            factors = get_enrolled_factors(user["id"])
+
+    response = make_response(
+        render_template(
+            "profile.html",
+            site_config=session,
+            user=user,
+            app_user=app_user,
+            factors=factors,
+            claims=id_token_claims,
+            okta_widget_container_id="okta-login-container"
+        )
+    )
+    
+    return response
+
+def get_enrolled_factors(user_id):
+    print("get_enrolled_factors()")
+    okta_admin = OktaAdmin(session)
+    
+    enrolled_factors = okta_admin.list_enrolled_factors(user_id)
+    factors = []
+    for f in enrolled_factors:
+        factor = {}
+        factor["id"] = f["id"]
+        # default the name to the type, just in case
+        factor["name"] = f["factorType"]
+        factor["type"] = f["factorType"]
+        factor["provider"] = f["provider"]
+        factor["vendor"] = f["vendorName"]
+        #factor["profile"] = f["profile"]
+        factor["sortOrder"] = 100
+        factorType = factor["type"]
+        vendorName = factor["vendor"]
+        
+        if (factorType == "token:software:totp"):
+            if (vendorName == "GOOGLE"):
+                factor["name"] = "Google Authenticator"
+                factor["profile"] = f["profile"]["credentialId"]
+                factor["sortOrder"] = 20
+            elif (vendorName == "OKTA"):
+                # don't list Okta Verify OTP
+                continue
+        elif (factorType == "push"):
+            factor["name"] = "Okta Verify"
+            factor["profile"] = f["profile"]["name"]
+            factor["sortOrder"] = 10
+        elif (factorType == "sms"):
+            factor["name"] = "SMS"
+            factor["profile"] = f["profile"]["phoneNumber"]
+            factor["sortOrder"] = 30
+        elif (factorType == "call"):
+            factor["name"] = "Voice Call"
+            factor["profile"] = f["profile"]["phoneNumber"]
+            factor["sortOrder"] = 40
+        elif (factorType == "question"):
+            factor["name"] = "Security Question"
+            factor["profile"] = f["profile"]["questionText"]
+            factor["sortOrder"] = 50
+        
+        factors.append(factor)
+    
+    # return the sorted array
+    return sorted(factors, key = lambda i: i["sortOrder"])
 
 @app.route('/login-form')
 @apply_remote_config
@@ -146,6 +227,8 @@ def oidc():
         )
         print("oauth_token: {0}".format(json.dumps(oauth_token, indent=4, sort_keys=True)))
         app_landing_page_url = session["app_base_url"]
+        print("app landing page {0}".format(app_landing_page_url))
+        
         response = make_response(redirect(app_landing_page_url))
         response.set_cookie('token', oauth_token["access_token"])
         response.set_cookie('id_token', oauth_token["id_token"])
@@ -244,6 +327,192 @@ def logout():
 
     return response
 
+"""
+routes for MFA verification
+"""
+
+@app.route("/verify_totp", methods=["POST"])
+def verify_totp():
+    print("verify_totp()")
+    okta_auth = OktaAuth(session)
+    
+    body = request.get_json()
+    pass_code = None
+    factor_id = body["factor_id"]
+    state_token = body["state_token"]
+    
+    if "pass_code" in body:
+        pass_code = body["pass_code"]
+    
+    print("verifying factor ID {0} with code {1} ({2})".format(factor_id, pass_code, state_token))
+    response = okta_auth.verify_totp(factor_id, state_token, pass_code)
+    return json.dumps(response)
+
+@app.route("/send_push", methods=["POST"])
+def send_push():
+    print("send_push()")
+    okta_auth = OktaAuth(session)
+    
+    body = request.get_json()
+    factor_id = body["factor_id"]
+    state_token = body["state_token"]
+    
+    response = okta_auth.send_push(factor_id, state_token)
+    return json.dumps(response)
+
+@app.route("/poll_for_push_verification", methods=["POST"])
+def poll_for_push_verification():
+    print("poll_for_push_verification()")
+    okta_auth = OktaAuth(session)
+    
+    body = request.get_json()
+    factor_id = body["factor_id"]
+    state_token = body["state_token"]
+    
+    response = okta_auth.send_push(factor_id, state_token)
+    return json.dumps(response)
+
+@app.route("/resend_push", methods=["POST"])
+def resend_push():
+    print("resend_push()")
+    okta_auth = OktaAuth(session)
+    
+    body = request.get_json()
+    factor_id = body["factor_id"]
+    state_token = body["state_token"]
+    
+    response = okta_auth.resend_push(factor_id, state_token)
+    return json.dumps(response)
+
+@app.route("/verify_answer", methods=["POST"])
+def verify_answer():
+    print("verify_answer()")
+    okta_auth = OktaAuth(session)
+    
+    body = request.get_json()
+    factor_id = body["factor_id"]
+    state_token = body["state_token"]
+    answer = body["answer"]
+    
+    response = okta_auth.verify_answer(factor_id, state_token, answer)
+    return json.dumps(response)
+
+@app.route("/get_authorize_url", methods=["POST"])
+def get_authorize_url():
+    print("get_authorize_url()")
+    okta_auth = OktaAuth(session)
+    
+    body = request.get_json()
+    session_token = body["session_token"]
+    session["state"] = str(uuid.uuid4())
+    oauth_authorize_url = okta_auth.create_oauth_authorize_url(
+        response_type="code",
+        state=session["state"],
+        auth_options={
+            "response_mode": "form_post",
+            "prompt": "none",
+            "scope": "openid profile email",
+            "sessionToken": session_token
+        }
+    )
+    
+    response = {
+        "authorize_url": oauth_authorize_url
+    }
+    return json.dumps(response)
+        
+"""
+end MFA verification routes
+"""
+
+"""
+routes for MFA enrollment
+"""
+
+@app.route("/enroll_push", methods=["POST"])
+def enroll_push():
+    print("enroll_push()")
+    okta_auth = OktaAuth(session)
+    
+    body = request.get_json()
+    state_token = body["state_token"]
+    factor_type = body["factor_type"]
+    provider = body["provider"]
+    
+    response = okta_auth.enroll_push(state_token, factor_type, provider)
+    return json.dumps(response)
+
+@app.route("/poll_for_push_enrollment", methods=["POST"])
+def poll_for_push_enrollment():
+    print("poll_for_push_enrollment()")
+    okta_auth = OktaAuth(session)
+    
+    body = request.get_json()
+    factor_id = body["factor_id"]
+    state_token = body["state_token"]
+    
+    response = okta_auth.poll_for_enrollment_push(factor_id, state_token)
+    return json.dumps(response)
+
+@app.route("/enroll_totp", methods=["POST"])
+def enroll_totp():
+    print("enroll_totp()")
+    okta_auth = OktaAuth(session)
+    
+    body = request.get_json()
+    state_token = body["state_token"]
+    factor_type = body["factor_type"]
+    provider = body["provider"]
+    
+    response = okta_auth.enroll_totp(state_token, factor_type, provider)
+    return json.dumps(response)
+
+@app.route("/enroll_sms_voice", methods=["POST"])
+def enroll_sms_voice():
+    print("enroll_sms_voice()")
+    okta_auth = OktaAuth(session)
+    
+    body = request.get_json()
+    state_token = body["state_token"]
+    factor_type = body["factor_type"]
+    provider = body["provider"]
+    phone_number = body["phone_number"]
+    
+    response = okta_auth.enroll_sms_voice(state_token, factor_type, provider, phone_number)
+    return json.dumps(response)
+
+@app.route("/enroll_question", methods=["POST"])
+def enroll_question():
+    print("enroll_question()")
+    okta_auth = OktaAuth(session)
+    
+    body = request.get_json()
+    state_token = body["state_token"]
+    factor_type = body["factor_type"]
+    provider = body["provider"]
+    question = body["question"]
+    answer = body["answer"]
+    
+    response = okta_auth.enroll_question(state_token, factor_type, provider, question, answer)
+    return json.dumps(response)
+
+@app.route("/activate_totp", methods=["POST"])
+def activate_totp():
+    print("activate_totp()")
+    okta_auth = OktaAuth(session)
+    
+    body = request.get_json()
+    state_token = body["state_token"]
+    factor_id = body["factor_id"]
+    pass_code = body["pass_code"]
+    
+    response = okta_auth.activate_totp(factor_id, state_token, pass_code)
+    return json.dumps(response)
+
+
+"""
+end MFA enrollment routes
+"""
 
 @app.route("/accept-consent", methods=["POST"])
 @authenticated
