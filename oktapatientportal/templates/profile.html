@@ -3,13 +3,62 @@
 {% block banner %}
       <!-- ================ -->
       <div class="banner clearfix">
+        
         <div class="container">
-          <p>ID Token contents</p>
-          {% for claim, value in claims.items() %}
-            {{ claim }}: {{ value }}<br>
-          {% endfor %}
+          <h1>User Profile</h1>
+          
+          <form action="#" method="post">
+          
+          <div class="form-group">
+            <label for="login">User name:</label>
+            <input type="text" id="login" value="{{ user['profile']['login'] }}">
           </div>
-      </div>
+
+          <div class="form-group">
+            <label for="first_name">First name:</label>
+            <input type="text" id="first_name" value="{{ user['profile']['firstName'] }}">
+          </div>
+
+          <div class="form-group">
+            <label for="last_name">Last name:</label>
+            <input type="text" id="last_name" value="{{ user['profile']['lastName'] }}">
+          </div>
+
+          <div class="form-group">
+            <label for="first_name">Email:</label>
+            <input type="email" id="email" value="{{ user['profile']['email'] }}">
+          </div>
+
+          <div class="form-group">
+            <label for="mobile_phone">Mobile phone:</label>
+            <input type="tel" id="mobile_phone" value="{{ user['profile']['mobilePhone'] }}">
+          </div>
+          
+          </form>
+          
+          <div>
+            {{ user }}
+            <p></p>
+            {{ app_user }}
+          </div>
+        </div>
+          
+        <div class="container">
+          <p>Enrolled Factors</p>
+          <ul>
+          {% for factor in factors %}
+            <li>{{ factor.name }} - {{ factor.profile }}</li>
+          {% endfor %}
+          </ul>
+        </div>
+        
+      <!--  <div class="container">-->
+      <!--    <p>ID Token contents</p>-->
+      <!--    {% for claim, value in claims.items() %}-->
+      <!--      {{ claim }}: {{ value }}<br>-->
+      <!--    {% endfor %}-->
+      <!--    </div>-->
+      <!--</div>-->
 {% endblock %}
 
 {% block content %}
