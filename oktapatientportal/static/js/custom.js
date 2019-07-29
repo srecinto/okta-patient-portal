@@ -30,6 +30,8 @@ $(document).ready(function() {
 	$("#sendEnrollOTPButton").on("click", sendEnrollOTPClickHandler);
 	$("#mfaEnrollVerifyButton").on("click", verifyEnrollOTPClickHandler);
 	$("#mfaEnrollQuestionButton").on("click", enrollQuestionClickHandler);
+	$("#mfaFinishEnrollButton").on("click", finishEnrollClickHandler);
+	$("#mfaFinishEnrollButton").hide();
 	hideAllEnrollForms();
 	
 	$("#password").keypress(function (e) {
@@ -177,7 +179,6 @@ function setupFactorEnrollmentList(factors) {
         }
         
         factors_array.push(factor);
-        console.log("Added factor " + factor);
     }
     
     // now add the sorted array to the select list
@@ -204,10 +205,12 @@ function hideAllEnrollForms() {
 
 function factorEnrollListOnChange() {
     hideAllEnrollForms();
+    logEnrollMessage("");
     var factorName = $("#factorEnrollList option:selected").text();
     var factorType = $("#factorEnrollList option:selected").data("type");
     var provider = $("#factorEnrollList option:selected").data("provider");
     
+    $("#mfaFactorName").val(factorName);
     $("#mfaFactorType").val(factorType);
     $("#mfaProvider").val(provider);
 
@@ -280,6 +283,7 @@ function enrollPushFactor() {
 function pollForPushEnrollment() {
     var factor_id = $("#mfaFactorID").val();
     var state_token = $("#mfaStateToken").val();
+    var factor_name = $("#mfaFactorName").val();
     
     $.ajax({
         url: "/poll_for_push_enrollment",
@@ -292,10 +296,11 @@ function pollForPushEnrollment() {
             var txStatus = authResponseJson.status;
             var factorResut = authResponseJson.factorResult;
             if (txStatus == "SUCCESS") {
+                logEnrollMessage(factor_name + " successfully enrolled!");
                 // get the sessionToken
                 var sessionToken = authResponseJson.sessionToken;
                 // go get OIDC tokens to complete the login
-                processLogin(sessionToken);
+                saveSessionToken(sessionToken);
             } else if (factorResut == "WAITING") {
                 logEnrollMessage("Waiting for enrollment");
                 setTimeout(pollForPushEnrollment, 3000);
@@ -377,6 +382,7 @@ function sendEnrollOTPClickHandler() {
 }
 
 function verifyEnrollOTPClickHandler() {
+    var factor_name = $("#mfaFactorName").val();
     var factorId = $("#mfaFactorID").val();
     var stateToken = $("#mfaStateToken").val();
     var pass_code = $("#mfaEnrollPassCode").val();
@@ -398,10 +404,11 @@ function verifyEnrollOTPClickHandler() {
             if (authResponseJson.errorCode) {
                 logEnrollMessage(authResponseJson.errorSummary);
             } else if (authResponseJson.status == "SUCCESS") {
+                logEnrollMessage(factor_name + " successfully enrolled!");
                 // get the sessionToken
                 var sessionToken = authResponseJson.sessionToken;
                 // go get OIDC tokens to complete the login
-                processLogin(sessionToken);
+                saveSessionToken(sessionToken);
             }
         },
         error: function(xhr, status, error) {
@@ -411,6 +418,7 @@ function verifyEnrollOTPClickHandler() {
 }
 
 function enrollQuestionClickHandler() {
+    var factor_name = $("#mfaFactorName").val();
     var stateToken = $("#mfaStateToken").val();
     var factorType = $("#mfaFactorType").val();
     var provider = $("#mfaProvider").val();
@@ -433,13 +441,28 @@ function enrollQuestionClickHandler() {
             console.log(data);
             var authResponseJson = JSON.parse(data);
             if (authResponseJson.status == "SUCCESS") {
-                processLogin(authResponseJson.sessionToken);
+                logEnrollMessage(factor_name + " successfully enrolled!");
+                saveSessionToken(authResponseJson.sessionToken);
             }
         },
         error: function(xhr, status, error) {
             logMessage("Status: " + status + ", message: " + error);
         }
     });
+}
+
+function saveSessionToken(token) {
+    $("#mfaSessionToken").val(token);
+    $("#factorEnrollList").prop("disabled", true);
+    $("#mfaFinishEnrollButton").show();
+    setTimeout(function() {
+        logEnrollMessage("");
+    }, 5000);
+}
+
+function finishEnrollClickHandler() {
+    var sessionToken = $("#mfaSessionToken").val();
+    processLogin(sessionToken);
 }
 
 /**
@@ -628,7 +651,7 @@ function resendPushClickHandler() {
             console.log(data);
             var authResponseJson = JSON.parse(data);
             // set up the polling
-            setTimeout(pollForPush, 3000);
+            setTimeout(pollForPushVerification, 3000);
         },
         error: function(xhr, status, error) {
             logMessage("Status: " + status + ", message: " + error);
@@ -747,6 +770,72 @@ function processLogin(sessionToken) {
 
 /**
  * end MFA verification functions
+ */
+
+/**
+ * User profile functions
+ */
+$("#saveUserProfileButton").on("click", saveUserClickHandler);
+
+function saveUserClickHandler() {
+    var userId = $("#userId").val();
+    var firstName = $("#first_name").val();
+    var lastName = $("#last_name").val();
+    var email = $("#email").val();
+    var secondEmail = $("#second_email").val();
+    //var primaryPhone = $("#primary_phone").val();
+    var mobilePhone = $("#mobile_phone").val();
+    var height = $("#height").val();
+    var weight = $("#weight").val();
+    var dob = $("#dob").val();
+    
+    var payload = {
+        "user_profile": {
+            "profile": {
+                "firstName": firstName,
+                "lastName": lastName,
+                "email": email,
+                "secondEmail": secondEmail,
+                //"primaryPhone": primaryPhone,
+                "mobilePhone": mobilePhone
+            }
+        },
+        "app_profile": {
+            "profile": {
+                "height": height,
+                "weight": weight,
+                "dob": dob
+            }
+        }
+    };
+    
+    $.ajax({
+        url: "/profile/" + userId,
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(payload),
+        success: data => {
+            console.log(data);
+            var responseJson = JSON.parse(data);
+            console.log(responseJson);
+            logStatusMessage("Profile saved!");
+        },
+        error: function(xhr, status, error) {
+            logMessage("Status: " + status + ", message: " + error);
+        }
+    });
+}
+
+function logStatusMessage(message) {
+    $("#statusMessage").text(message);
+    setTimeout(clearStatusMessage, 5000);
+}
+function clearStatusMessage() {
+    $("#statusMessage").text("");
+}
+
+/**
+ * End user profile functions
  */
 
 function acceptConsentClickHandler() {
@@ -1107,23 +1196,39 @@ function setPreRegCredentialsClickHandler() {
             success: data => {
                 console.log(data);
                 var responseJson = JSON.parse(data);
-
-                if(responseJson.success) {
+                var txStatus = responseJson.status;
+            
+                if (txStatus == "SUCCESS") {
                 	$("#registrationPreRegModal").modal("hide");
                 	$("#finalRegistrationCompleteModal").modal("show");
-                	$("#finalRegistrationCompleteModalClose").on("click", () => { window.location.href=responseJson.redirectUrl })
-                } else {
-                	//TODO: use modal popup
-                	errorMessage = responseJson.errorMessage + "\r\n";
-
-                	if(responseJson.errorMessages != undefined){
-                	    for(msgIdx in responseJson.errorMessages) {
-                	        errorMessage += responseJson.errorMessages[msgIdx].errorMessage + "\r\n";
-                	    }
-                	}
-
-                	alert(errorMessage);
+                	$("#finalRegistrationCompleteModalClose").on("click", () => {
+                	    window.location.href=responseJson.redirectUrl
+                	});
+                } else if (txStatus == "MFA_ENROLL") {
+                    $("#registrationPreRegModal").modal("hide");
+                    // show MFA enrollment modal
+                    $("#mfaStateToken").val(responseJson.stateToken);
+                    var factors = responseJson._embedded.factors;
+                    setupFactorEnrollmentList(factors);
+                    $("#mfaEnrollmentModal").modal("show");
                 }
+                
+                // if(responseJson.success) {
+                // 	$("#registrationPreRegModal").modal("hide");
+                // 	$("#finalRegistrationCompleteModal").modal("show");
+                // 	$("#finalRegistrationCompleteModalClose").on("click", () => { window.location.href=responseJson.redirectUrl })
+                // } else {
+                // 	//TODO: use modal popup
+                // 	errorMessage = responseJson.errorMessage + "\r\n";
+
+                // 	if(responseJson.errorMessages != undefined){
+                // 	    for(var msgIdx in responseJson.errorMessages) {
+                // 	        errorMessage += responseJson.errorMessages[msgIdx].errorMessage + "\r\n";
+                // 	    }
+                // 	}
+
+                // 	alert(errorMessage);
+                // }
                 $("#setPreRegCredentials").prop("disabled", false);
             	$("#setPreRegCredentials").html("Save");
             }
