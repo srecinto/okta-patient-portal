@@ -63,7 +63,7 @@
 
     <style>
       #okta-sign-in {
-        margin: 15px auto 8px; !important
+        margin: 15px auto 8px !important;
       }
 
       colors: {
@@ -136,7 +136,11 @@
                   <div class="header-top-dropdown text-right">
                     {% if user %}
                     <ul class="list-inline" id="loggedinMenu">
-                      <li class="list-inline-item"><a class="link-light" href="#" id="userNameLabel">{{user.profile.firstName}} {{user.profile.lastName}}</a></li>
+                      <li class="list-inline-item">
+                        <!--<a class="link-light" href="/profile" id="userNameLabel">-->
+                          {{user.profile.firstName}} {{user.profile.lastName}}
+                        <!--</a>-->
+                      </li>
                       <li class="list-inline-item"><a class="link-light" href="/logout">Sign Out</a></li>
                     </ul>
                     {% else %}
@@ -150,12 +154,12 @@
                           <form class="login-form margin-clear" id="loginForm">
                             <div class="form-group has-feedback">
                               <label class="control-label">Username</label>
-                              <input type="text" class="form-control" placeholder="" id="username">
+                              <input type="text" class="form-control" placeholder="" id="username" value="">
                               <i class="fa fa-user form-control-feedback"></i>
                             </div>
                             <div class="form-group has-feedback">
                               <label class="control-label">Password</label>
-                              <input type="password" class="form-control" placeholder="" id="password">
+                              <input type="password" class="form-control" placeholder="" id="password" value="">
                               <i class="fa fa-lock form-control-feedback"></i>
                             </div>
                             <button type="button" class="btn btn-gray btn-sm" id="loginButton">Log In</button>
@@ -204,7 +208,7 @@
 
                   <!-- logo -->
                   <div id="logo" class="logo">
-                    <a href="/index"><img id="logo_img" src="{{site_config.app_logo}}" alt="{{site_config.app_title}}"></a>
+                    <a href="/"><img id="logo_img" src="{{site_config.app_logo}}" alt="{{site_config.app_title}}"></a>
                   </div>
 
                   <!-- name-and-slogan -->
@@ -676,7 +680,7 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h4 class="modal-title" id="myModalLabel">Set You Password</h4>
+            <h4 class="modal-title" id="myModalLabel">Set Your Password</h4>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
           </div>
           <div class="modal-body">
@@ -705,6 +709,13 @@
     </div>
 
     <!-- MFA Enrollment -->
+    <input type="hidden" id="mfaFactorID">
+    <input type="hidden" id="mfaStateToken">
+    <input type="hidden" id="mfaFactorType">
+    <input type="hidden" id="mfaProvider">
+    <input type="hidden" id="mfaFactorName">
+    <input type="hidden" id="mfaSessionToken">
+    
     <div class="modal fade" id="mfaEnrollmentModal" tabindex="-1" role="dialog" aria-labelledby="mfaEnrollLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -713,11 +724,86 @@
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
           </div>
           <div class="modal-body">
-            TODO: Add MFA Enrollment Stuff
+            
+            <div class="form-group">
+              <label for="factorEnrollList">Choose a factor:</label>
+              <select id="factorEnrollList"></select>
+            </div>
+            
+            <!-- sub-form for Okta Verify Push -->
+            <div class="form-group" id="mfaEnrollPushForm">
+              
+            </div>
+              
+            <!-- sub-form for SMS and voice call factors -->
+            <div class="form-group" id="mfaEnrollOTPForm">
+              <label for="mfaEnrollRecipient">Enter your phone number:</label>
+              <input type="tel" id="mfaEnrollRecipient">
+              <button type="button" id="sendEnrollOTPButton" class="btn btn-sm btn-default">
+                Send SMS
+              </button>
+            </div>
+
+            <!-- this holds the QR code for Okta Verify and Google Authenticator enrollment -->
+            <div class="form-group overlay-container" id="mfaEnrollQRCodeForm">
+              <img id="mfaEnrollQRCode">
+              <p>Scan this QR code with your smartphone.</p>
+              <!--<div class="overlay">-->
+              <!--    <i class="fa fa-check green"></i>-->
+              <!--</div>-->
+            </div>
+            
+            <!-- TOTP, SMS, email and voice all use this field -->
+            <div class="form-group" id="mfaEnrollVerifyCodeForm">
+              <label for="mfaEnrollPassCode">Enter your code:</label>
+              <input type="text" id="mfaEnrollPassCode">
+              <button type="button" id="mfaEnrollVerifyButton" class="btn btn-sm btn-default">
+                Submit
+              </button>
+            </div>
+            
+            <!-- security question -->
+            <div class="form-group" id="mfaEnrollQuestionForm">
+              <div>
+                <!--<label for="mfaEnrollQuestion"></label>-->
+                <select id="mfaEnrollQuestion">
+                  <option value="disliked_food">What is the food you least liked as a child?</option>
+                  <option value="name_of_first_plush_toy">What is the name of your first stuffed animal?</option>
+                  <option value="first_award">What did you earn your first medal or award for?</option>
+                  <option value="favorite_security_question">What is your favorite security question?</option>
+                  <option value="favorite_toy">What is the toy/stuffed animal you liked the most as a kid?</option>
+                  <option value="first_computer_game">What was the first computer game you played?</option>
+                  <option value="favorite_movie_quote">What is your favorite movie quote?</option>
+                  <option value="first_sports_team_mascot">What was the mascot of the first sports team you played on?</option>
+                  <option value="first_music_purchase">What music album or song did you first purchase?</option>
+                  <option value="favorite_art_piece">What is your favorite piece of art?</option>
+                  <option value="grandmother_favorite_desert">What was your grandmother's favorite dessert?</option>
+                  <option value="first_thing_cooked">What was the first thing you learned to cook?</option>
+                  <option value="childhood_dream_job">What was your dream job as a child?</option>
+                  <option value="place_where_significant_other_was_met">Where did you meet your spouse/significant other?</option>
+                  <option value="favorite_vacation_location">Where did you go for your favorite vacation?</option>
+                  <option value="new_years_two_thousand">Where were you on New Year's Eve in the year 2000?</option>
+                  <option value="favorite_speaker_actor">Who is your favorite speaker/orator?</option>
+                  <option value="favorite_book_movie_character">Who is your favorite book/movie character?</option>
+                  <option value="favorite_sports_player">Who is your favorite sports player?</option>
+                </select>
+              </div>
+              <!--<label for="mfaAnswer">Answer:</label>-->
+              <input type="text" id="mfaEnrollAnswer" size="40">
+              <button type="button" id="mfaEnrollQuestionButton" class="btn btn-sm btn-default">
+                Submit
+              </button>
+            </div>
+            
+            <div class="form-group" id="mfaEnrollStatusForm">
+              <span id="mfaEnrollStatusMessage"></span>
+            </div>
+            
+            
           </div>
           <div class="modal-footer">
-            <button type="button" id="mfaEnroll" class="btn btn-sm btn-default">
-              Enroll
+            <button type="button" id="mfaFinishEnrollButton" class="btn btn-sm btn-default">
+              Done
             </button>
           </div>
         </div>
@@ -737,12 +823,53 @@
               <label for="factorList">Authenticate With:</label>
               <select id="factorList"></select>
             </div>
-            TODO: Add MFA Verify Stuff
+            
+            <!-- sub-form for Okta Verify Push -->
+            <div class="form-group" id="mfaPushForm">
+              <button type="button" id="sendPushButton" class="btn btn-sm btn-default">
+                Send Push
+              </button>
+              <a href="#" id="oktaOTPCodeLink">Or Enter Code</a>
+            </div>
+              
+            <!-- sub-form for SMS, voice call and email factors -->
+            <div class="form-group" id="mfaOTPForm">
+              <span id="mfaRecipient"></span>
+              <button type="button" id="sendOTPButton" class="btn btn-sm btn-default">
+                Send SMS
+              </button>
+            </div>
+
+            <!-- TOTP, SMS, email and voice all use this field -->
+            <div class="form-group" id="mfaVerifyCodeForm">
+              <label for="mfaPassCode">Enter your code:</label>
+              <input type="text" id="mfaPassCode">
+              <button type="button" id="mfaVerifyButton" class="btn btn-sm btn-default">
+                Verify
+              </button>
+            </div>
+            
+            <!-- security question -->
+            <div class="form-group" id="mfaQuestionForm">
+              <div>
+                <!--<label for="mfaQuestion"></label>-->
+                <span id="mfaQuestion">Security question text goes here</span>
+              </div>
+              <!--<label for="mfaAnswer">Answer:</label>-->
+              <input type="password" id="mfaAnswer" size="40">
+              <button type="button" id="mfaVerifyAnswerButton" class="btn btn-sm btn-default">
+                Verify
+              </button>
+            </div>
+            
+            <div class="form-group" id="mfaStatusForm">
+              <span id="mfaStatusMessage"></span>
+            </div>
+          
           </div>
+          
           <div class="modal-footer">
-            <button type="button" id="mfaVerify" class="btn btn-sm btn-default">
-              Verify
-            </button>
+            
           </div>
         </div>
       </div>
@@ -782,7 +909,7 @@
     <input type="hidden" id="sessionId" />
     <script type="text/javascript">
       //<![CDATA[
-
+      
       var orgUrl = "{{site_config.okta_org_name}}";
       var redirect = "{{site_config.redirect_uri}}";
       var oktaSignIn = new OktaSignIn({

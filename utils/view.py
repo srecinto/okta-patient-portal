@@ -375,3 +375,20 @@ def create_login_response(user_name, password, session):
 def safe_assign_config_item_to_session(key, collection, session):
     if key in collection:
         session[key] = collection[key]
+
+def get_factor_name(factorType, provider):
+    factor_name = factorType
+    
+    if (factorType == "token:software:totp"):
+        if (provider == "GOOGLE"):
+            factor_name = "Google Authenticator"
+    elif (factorType == "push"):
+        factor_name = "Okta Verify"
+    elif (factorType == "sms"):
+        factor_name = "SMS"
+    elif (factorType == "call"):
+        factor_name = "Voice Call"
+    elif (factorType == "question"):
+        factor_name = "Security Question"
+    
+    return factor_name
