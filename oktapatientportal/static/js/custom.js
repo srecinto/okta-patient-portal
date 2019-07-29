@@ -15,7 +15,7 @@ $(document).ready(function() {
 	$("#submitRegistrationAlt1").on("click", submitRegistrationAlt1ClickHandler);
 	$("#verifyAccount").on("click", verifyAccountClickHandler);
 	$("#setPreRegCredentials").on("click", setPreRegCredentialsClickHandler);
-	
+
 	// MFA verification event handlers
 	$("#factorList").on("change", factorListOnChange);
 	$("#sendOTPButton").on("click", sendOTPClickHandler);
@@ -24,7 +24,7 @@ $(document).ready(function() {
 	$("#mfaVerifyButton").on("click", verifyOTPClickHandler);
 	$("#mfaVerifyAnswerButton").on("click", verifyAnswerClickHandler);
 	hideAllVerifyForms();
-	
+
 	// MFA enrollment event handlers
 	$("#factorEnrollList").on("change", factorEnrollListOnChange);
 	$("#sendEnrollOTPButton").on("click", sendEnrollOTPClickHandler);
@@ -33,7 +33,7 @@ $(document).ready(function() {
 	$("#mfaFinishEnrollButton").on("click", finishEnrollClickHandler);
 	$("#mfaFinishEnrollButton").hide();
 	hideAllEnrollForms();
-	
+
 	$("#password").keypress(function (e) {
 		var key = e.which;
 		if(key == 13) {  // the enter key code
@@ -52,14 +52,39 @@ $(document).ready(function() {
 
 	//Display Modals
 	console.log("stateToken: " + $("#stateToken").val());
+	console.log("showMFAEnroll: " + $("#showMFAEnroll").val());
+	console.log("showBDV: " + $("#showBDV").val());
+
 	if($("#showConsent").val() == "True") {
 		$("#consentModal").modal("show");
 	}else if($("#showRegistrationDefault").val() == "True") {
 	    $("#registrationDefaultModal").modal("show");
 	} else if($("#showRegistrationAlt1").val() == "True") {
 	    $("#registrationAlt1Modal").modal("show");
-	} else if($("#stateToken").val() != "") {
+	} else if($("#stateToken").val() != "" && $("#showBDV").val() == "true") {
 	    $("#verifyAccountModal").modal("show");
+	} else if($("#stateToken").val() != "" && $("#showMFAEnroll").val() == "true") {
+	    $.ajax({
+            url: "get_available_factors_by_state/" + $("#stateToken").val(),
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            success: data => {
+                console.log(data);
+                var authResponseJson = JSON.parse(data);
+                var txStatus = authResponseJson.status;
+
+                if (txStatus == "MFA_ENROLL") {
+                    $("#mfaStateToken").val($("#stateToken").val());
+                    var factors = authResponseJson._embedded.factors;
+                    setupFactorEnrollmentList(factors);
+                    $("#mfaEnrollmentModal").modal("show");
+                } else {
+                	//TODO: use modal popup
+                	$("body").removeClass("page-loader-2");
+                	alert(authResponseJson.errorMessage);
+                }
+            }
+        });
 	}
 
 }); // End document ready
@@ -111,7 +136,7 @@ function callLogin(url) {
             console.log(data);
             var authResponseJson = JSON.parse(data);
             var txStatus = authResponseJson.status;
-            
+
             if (txStatus == "SUCCESS") {
 				location.href = authResponseJson.redirectUrl;
             } else if (txStatus == "MFA_REQUIRED") {
@@ -141,7 +166,7 @@ function callLogin(url) {
  */
 function setupFactorEnrollmentList(factors) {
     $("#factorEnrollList").empty().append("<option>Select Factor</option>");
-    
+
     // make a list of factors to choose from, and also map
     // to friendly display names
     var factors_array = [];
@@ -177,15 +202,15 @@ function setupFactorEnrollmentList(factors) {
             factor.factorName = "Security Question";
             factor.sortOrder = 50;
         }
-        
+
         factors_array.push(factor);
     }
-    
+
     // now add the sorted array to the select list
     factors_array.sort(function(a, b) {
         return a.sortOrder - b.sortOrder;
     });
-    
+
     for (var i = 0; i < factors_array.length; i++) {
         var factor = factors_array[i];
         var option = '<option value="' + factor.factorName + '" data-type="' + factor.factorType + '"';
@@ -209,7 +234,7 @@ function factorEnrollListOnChange() {
     var factorName = $("#factorEnrollList option:selected").text();
     var factorType = $("#factorEnrollList option:selected").data("type");
     var provider = $("#factorEnrollList option:selected").data("provider");
-    
+
     $("#mfaFactorName").val(factorName);
     $("#mfaFactorType").val(factorType);
     $("#mfaProvider").val(provider);
@@ -256,7 +281,7 @@ function enrollPushFactor() {
         "factor_type": factorType,
         "provider": provider
     };
-    
+
     $.ajax({
         url: "/enroll_push",
         type: "POST",
@@ -270,7 +295,7 @@ function enrollPushFactor() {
             $("#mfaFactorID").val(factorId);
             $("#mfaEnrollQRCode").attr("src", qrCode);
             $("#mfaEnrollQRCodeForm").show();
-            
+
             // start polling for a response
             setTimeout(pollForPushEnrollment, 3000);
         },
@@ -284,7 +309,7 @@ function pollForPushEnrollment() {
     var factor_id = $("#mfaFactorID").val();
     var state_token = $("#mfaStateToken").val();
     var factor_name = $("#mfaFactorName").val();
-    
+
     $.ajax({
         url: "/poll_for_push_enrollment",
         type: "POST",
@@ -326,7 +351,7 @@ function enrollTOTPFactor() {
         "provider": provider
     };
     //logEnrollMessage("Enrolling");
-    
+
     $.ajax({
         url: "/enroll_totp",
         type: "POST",
@@ -359,11 +384,11 @@ function sendEnrollOTPClickHandler() {
         "provider": provider,
         "phone_number": phoneNumber
     };
-    
+
     $("#mfaEnrollVerifyCodeForm").show();
     $("#mfaEnrollPassCode").focus();
     logEnrollMessage("A code has been sent to your device");
-    
+
     $.ajax({
         url: "/enroll_sms_voice",
         type: "POST",
@@ -392,7 +417,7 @@ function verifyEnrollOTPClickHandler() {
         "pass_code": pass_code
     };
     console.log(payload);
-    
+
     $.ajax({
         url: "/activate_totp",
         type: "POST",
@@ -431,7 +456,7 @@ function enrollQuestionClickHandler() {
         "question": question,
         "answer": answer
     };
-    
+
     $.ajax({
         url: "/enroll_question",
         type: "POST",
@@ -487,7 +512,7 @@ function setupFactorList(factors) {
         var questionText = "";
         // default factor name to factor type as a fallback
         var factorName = factorType;
-        
+
         if (factorType == "token:software:totp") {
             if (vendorName == "OKTA") {
                 factorName = "Okta Verify OTP";
@@ -509,7 +534,7 @@ function setupFactorList(factors) {
             factorName = "Security Question";
             questionText = factor.profile.questionText;
         }
-        
+
         var option = '<option value="' + factorName + '" data-type="' + factorType + '"';
         option += ' data-question="' + questionText + '" data-phone="' + phoneNumber + '"';
         option += ' data-email="' + email + '" data-vendor="' + vendorName + '"';
@@ -581,7 +606,7 @@ function sendPushClickHandler() {
     var factor_id = $("#mfaFactorID").val();
     var state_token = $("#mfaStateToken").val();
     logMessage("Push notification sent");
-    
+
     $.ajax({
         url: "/send_push",
         type: "POST",
@@ -602,7 +627,7 @@ function sendPushClickHandler() {
 function pollForPushVerification() {
     var factor_id = $("#mfaFactorID").val();
     var state_token = $("#mfaStateToken").val();
-    
+
     $.ajax({
         url: "/poll_for_push_verification",
         type: "POST",
@@ -641,7 +666,7 @@ function resendPushClickHandler() {
     var factor_id = $("#mfaFactorID").val();
     var state_token = $("#mfaStateToken").val();
     logMessage("Push notification re-sent");
-    
+
     $.ajax({
         url: "/resend_push",
         type: "POST",
@@ -669,7 +694,7 @@ function sendOTPClickHandler() {
     var state_token = $("#mfaStateToken").val();
     $("#mfaPassCode").focus();
     logMessage("A code has been sent to your device");
-    
+
     $.ajax({
         url: "/verify_totp",
         type: "POST",
@@ -694,7 +719,7 @@ function verifyOTPClickHandler() {
         "factor_id": factor_id,
         "pass_code": pass_code
     };
-    
+
     $.ajax({
         url: "/verify_totp",
         type: "POST",
@@ -727,7 +752,7 @@ function verifyAnswerClickHandler() {
         "factor_id": factor_id,
         "answer": answer
     };
-    
+
     $.ajax({
         url: "/verify_answer",
         type: "POST",
@@ -788,7 +813,7 @@ function saveUserClickHandler() {
     var height = $("#height").val();
     var weight = $("#weight").val();
     var dob = $("#dob").val();
-    
+
     var payload = {
         "user_profile": {
             "profile": {
@@ -808,7 +833,7 @@ function saveUserClickHandler() {
             }
         }
     };
-    
+
     $.ajax({
         url: "/profile/" + userId,
         type: "POST",
@@ -1197,7 +1222,7 @@ function setPreRegCredentialsClickHandler() {
                 console.log(data);
                 var responseJson = JSON.parse(data);
                 var txStatus = responseJson.status;
-            
+
                 if (txStatus == "SUCCESS") {
                 	$("#registrationPreRegModal").modal("hide");
                 	$("#finalRegistrationCompleteModal").modal("show");
@@ -1212,7 +1237,7 @@ function setPreRegCredentialsClickHandler() {
                     setupFactorEnrollmentList(factors);
                     $("#mfaEnrollmentModal").modal("show");
                 }
-                
+
                 // if(responseJson.success) {
                 // 	$("#registrationPreRegModal").modal("hide");
                 // 	$("#finalRegistrationCompleteModal").modal("show");
