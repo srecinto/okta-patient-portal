@@ -680,7 +680,7 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h4 class="modal-title" id="myModalLabel">Set You Password</h4>
+            <h4 class="modal-title" id="myModalLabel">Set Your Password</h4>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
           </div>
           <div class="modal-body">
@@ -709,6 +709,13 @@
     </div>
 
     <!-- MFA Enrollment -->
+    <input type="hidden" id="mfaFactorID">
+    <input type="hidden" id="mfaStateToken">
+    <input type="hidden" id="mfaFactorType">
+    <input type="hidden" id="mfaProvider">
+    <input type="hidden" id="mfaFactorName">
+    <input type="hidden" id="mfaSessionToken">
+    
     <div class="modal fade" id="mfaEnrollmentModal" tabindex="-1" role="dialog" aria-labelledby="mfaEnrollLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -738,8 +745,12 @@
             </div>
 
             <!-- this holds the QR code for Okta Verify and Google Authenticator enrollment -->
-            <div class="form-group" id="mfaEnrollQRCodeForm">
+            <div class="form-group overlay-container" id="mfaEnrollQRCodeForm">
               <img id="mfaEnrollQRCode">
+              <p>Scan this QR code with your smartphone.</p>
+              <!--<div class="overlay">-->
+              <!--    <i class="fa fa-check green"></i>-->
+              <!--</div>-->
             </div>
             
             <!-- TOTP, SMS, email and voice all use this field -->
@@ -791,18 +802,15 @@
             
           </div>
           <div class="modal-footer">
-            
+            <button type="button" id="mfaFinishEnrollButton" class="btn btn-sm btn-default">
+              Done
+            </button>
           </div>
         </div>
       </div>
     </div>
 
     <!-- MFA Verify -->
-    <input type="hidden" id="mfaFactorID">
-    <input type="hidden" id="mfaStateToken">
-    <input type="hidden" id="mfaFactorType">
-    <input type="hidden" id="mfaProvider">
-    
     <div class="modal fade" id="mfaVerifyModal" tabindex="-1" role="dialog" aria-labelledby="mfaVerifyLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
