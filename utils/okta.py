@@ -366,6 +366,7 @@ class OktaAdmin:
 
     def update_user(self, user_id, user):
         print("OktaAdmin.update_user()")
+        print("User profile: {0}".format(json.dumps(user)))
         okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
         url = "{base_url}/api/v1/users/{user_id}".format(
             base_url=self.okta_config["okta_org_name"],
@@ -416,7 +417,7 @@ class OktaAdmin:
         return RestUtil.execute_get(url, body, okta_headers)
 
     def get_user_application_by_current_client_id(self, user_id):
-        print("OktaAdmin.get_user_application_by_current_client_id(user_id)")
+        print("OktaAdmin.get_user_application_by_current_client_id()")
         okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
 
         url = "{base_url}/api/v1/apps/{app_id}/users/{user_id}".format(
@@ -427,13 +428,14 @@ class OktaAdmin:
 
         return RestUtil.execute_get(url, body, okta_headers)
 
-    def update_application_user_profile(self, app_id, user_id, app_user_profile):
-        print("OktaAdmin.update_application_user_profile(app_id, user_id, app_user_profile)")
-
+    def update_application_user_profile(self, user_id, app_user_profile):
+        print("OktaAdmin.update_application_user_profile()")
+        print("App user profile: {0}".format(json.dumps(app_user_profile)))
+        
         okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
         url = "{base_url}/api/v1/apps/{app_id}/users/{user_id}".format(
             base_url=self.okta_config["okta_org_name"],
-            app_id=app_id,
+            app_id=self.okta_config["client_id"],
             user_id=user_id)
 
         body = {
@@ -454,6 +456,41 @@ class OktaAdmin:
         body = {}
 
         return RestUtil.execute_delete(url, body, okta_headers)
+    
+    """
+    MFA enrollment methods
+    These are for enrollment outside of the authentication process
+    """
+    
+    # Okta Verify Push
+    def enroll_push(self, user_id, factor_type, provider, headers=None):
+        print("enroll_push()")
+        okta_headers = OktaUtil.get_default_okta_headers(headers)
+        
+        url = "{0}/api/v1/users/{1}/factors".format(
+            self.okta_config["okta_org_name"],
+            user_id
+        )
+        body = {
+            "factorType": factor_type,
+            "provider": provider
+        }
+        
+        return RestUtil.execute_post(url, body, okta_headers)
+    
+    # this is the Okta Verify Push polling method
+    def poll_for_enrollment_push(self, user_id, factor_id, headers=None):
+        print("poll_for_enrollment_push()")
+        okta_headers = OktaUtil.get_default_okta_headers(headers)
+
+        url = "{0}/api/v1/users/{1}/factors/{2}/lifecycle/activate/poll".format(
+            self.okta_config["okta_org_name"],
+            user_id,
+            factor_id
+        )
+        body = {}
+        
+        return RestUtil.execute_post(url, body, okta_headers)
 
     def list_enrolled_factors(self, user_id):
         print("list_enrolled_factors()")
@@ -466,9 +503,23 @@ class OktaAdmin:
         body = {}
         
         response = RestUtil.execute_get(url, body, okta_headers)
-        #print(json.dumps(response))
+        print(json.dumps(response))
         return response
+
+    def list_available_factors(self, user_id):
+        print("list_available_factors()")
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
         
+        url = "{0}/api/v1/users/{1}/factors/catalog".format(
+            self.okta_config["okta_org_name"],
+            user_id
+        )
+        body = {}
+        
+        response = RestUtil.execute_get(url, body, okta_headers)
+        print(json.dumps(response))
+        return response
+
         
 class OktaUtil:
 
