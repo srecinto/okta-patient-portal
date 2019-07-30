@@ -508,43 +508,61 @@ def poll_for_push_enrollment():
 @app.route("/enroll_totp", methods=["POST"])
 def enroll_totp():
     print("enroll_totp()")
-    okta_auth = OktaAuth(session)
     
     body = request.get_json()
-    state_token = body["state_token"]
     factor_type = body["factor_type"]
     provider = body["provider"]
     
-    response = okta_auth.enroll_totp(state_token, factor_type, provider)
+    if "stateToken" in body:
+        okta_auth = OktaAuth(session)
+        state_token = body["state_token"]
+        response = okta_auth.enroll_totp(state_token, factor_type, provider)
+    else:
+        okta_admin = OktaAdmin(session)
+        user_id = body["user_id"]
+        response = okta_admin.enroll_totp(user_id)
     return json.dumps(response)
 
 @app.route("/enroll_sms_voice", methods=["POST"])
 def enroll_sms_voice():
     print("enroll_sms_voice()")
-    okta_auth = OktaAuth(session)
     
     body = request.get_json()
-    state_token = body["state_token"]
     factor_type = body["factor_type"]
     provider = body["provider"]
     phone_number = body["phone_number"]
     
-    response = okta_auth.enroll_sms_voice(state_token, factor_type, provider, phone_number)
+    if "state_token" in body:
+        okta_auth = OktaAuth(session)
+        state_token = body["state_token"]
+        response = okta_auth.enroll_sms_voice(state_token, factor_type, provider, phone_number)
+    else:
+        okta_admin = OktaAdmin(session)
+        user_id = body["user_id"]
+        response = okta_admin.enroll_sms_voice(user_id, factor_type, provider, phone_number)
+        
     return json.dumps(response)
 
 @app.route("/enroll_question", methods=["POST"])
 def enroll_question():
     print("enroll_question()")
-    okta_auth = OktaAuth(session)
+    
     
     body = request.get_json()
-    state_token = body["state_token"]
     factor_type = body["factor_type"]
     provider = body["provider"]
     question = body["question"]
     answer = body["answer"]
     
-    response = okta_auth.enroll_question(state_token, factor_type, provider, question, answer)
+    if "state_token" in body:
+        okta_auth = OktaAuth(session)
+        state_token = body["state_token"]
+        response = okta_auth.enroll_question(state_token, factor_type, provider, question, answer)
+    else:
+        okta_admin = OktaAdmin(session)
+        user_id = body["user_id"]
+        response = okta_admin.enroll_question(user_id, factor_type, provider, question, answer)
+        
     return json.dumps(response)
 
 @app.route("/activate_totp", methods=["POST"])

@@ -345,7 +345,7 @@ function _enrollTOTPFactor() {
         success: data => {
             console.log(data);
             var responseJson = JSON.parse(data);
-            var factorId = responseJson._embedded.factor.id;
+            var factorId = responseJson.id;
             var qrCode = responseJson._embedded.activation._links.qrcode.href;
             $("#mfaFactorID").val(factorId);
             $("#mfaEnrollQRCode").attr("src", qrCode);
@@ -358,13 +358,13 @@ function _enrollTOTPFactor() {
 }
 
 // for SMS and voice
-function sendEnrollOTPClickHandler() {
-    var stateToken = $("#mfaStateToken").val();
+function _sendEnrollOTPClickHandler() {
+    var user_id = $("#userId").val();
     var factorType = $("#mfaFactorType").val();
     var provider = $("#mfaProvider").val();
     var phoneNumber = $("#mfaEnrollRecipient").val();
     var payload = {
-        "state_token": stateToken,
+        "user_id": user_id,
         "factor_type": factorType,
         "provider": provider,
         "phone_number": phoneNumber
@@ -381,8 +381,8 @@ function sendEnrollOTPClickHandler() {
         data: JSON.stringify(payload),
         success: data => {
             console.log(data);
-            var authResponseJson = JSON.parse(data);
-            var factorId = authResponseJson._embedded.factor.id;
+            var responseJson = JSON.parse(data);
+            var factorId = responseJson.id;
             $("#mfaFactorID").val(factorId);
         },
         error: function(xhr, status, error) {
@@ -392,13 +392,13 @@ function sendEnrollOTPClickHandler() {
 }
 
 function verifyEnrollOTPClickHandler() {
-    var factor_name = $("#mfaFactorName").val();
+    var user_id = $("#userId").val();
     var factorId = $("#mfaFactorID").val();
-    var stateToken = $("#mfaStateToken").val();
     var pass_code = $("#mfaEnrollPassCode").val();
+    var factor_name = $("#mfaFactorName").val();
     var payload = {
+        "user_id": user_id,
         "factor_id": factorId,
-        "state_token": stateToken,
         "pass_code": pass_code
     };
     console.log(payload);
@@ -410,15 +410,12 @@ function verifyEnrollOTPClickHandler() {
         data: JSON.stringify(payload),
         success: data => {
             console.log(data);
-            var authResponseJson = JSON.parse(data);
-            if (authResponseJson.errorCode) {
-                logEnrollMessage(authResponseJson.errorSummary);
-            } else if (authResponseJson.status == "SUCCESS") {
+            var responseJson = JSON.parse(data);
+            if (responseJson.errorCode) {
+                logEnrollMessage(responseJson.errorSummary);
+            } else if (responseJson.status == "SUCCESS") {
                 logEnrollMessage(factor_name + " successfully enrolled!");
-                // get the sessionToken
-                var sessionToken = authResponseJson.sessionToken;
-                // go get OIDC tokens to complete the login
-                saveSessionToken(sessionToken);
+                finishEnrollment();
             }
         },
         error: function(xhr, status, error) {
@@ -428,14 +425,14 @@ function verifyEnrollOTPClickHandler() {
 }
 
 function enrollQuestionClickHandler() {
+    var user_id = $("#userId").val();
     var factor_name = $("#mfaFactorName").val();
-    var stateToken = $("#mfaStateToken").val();
     var factorType = $("#mfaFactorType").val();
     var provider = $("#mfaProvider").val();
     var question = $("#mfaEnrollQuestion").val();
     var answer = $("#mfaEnrollAnswer").val();
     var payload = {
-        "state_token": stateToken,
+        "user_id": user_id,
         "factor_type": factorType,
         "provider": provider,
         "question": question,
@@ -449,10 +446,10 @@ function enrollQuestionClickHandler() {
         data: JSON.stringify(payload),
         success: data => {
             console.log(data);
-            var authResponseJson = JSON.parse(data);
-            if (authResponseJson.status == "SUCCESS") {
+            var responseJson = JSON.parse(data);
+            if (responseJson.status == "SUCCESS") {
                 logEnrollMessage(factor_name + " successfully enrolled!");
-                saveSessionToken(authResponseJson.sessionToken);
+                finishEnrollment();
             }
         },
         error: function(xhr, status, error) {
@@ -469,8 +466,10 @@ function finishEnrollment() {
 }
 
 function finishEnrollClickHandler() {
-    var sessionToken = $("#mfaSessionToken").val();
-    processLogin(sessionToken);
+    console.log("Enrollment finished");
+    location.reload();
+    // var sessionToken = $("#mfaSessionToken").val();
+    // processLogin(sessionToken);
 }
 //]]>
 </script>

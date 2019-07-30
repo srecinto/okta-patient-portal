@@ -102,11 +102,16 @@ function loginClickHandler() {
 }
 
 function callLogin(url) {
+    var payload = {
+        "username": $("#username").val(),
+        "password": $("#password").val()
+    };
+    
     $.ajax({
         url: url,
         type: "POST",
         contentType: "application/json; charset=utf-8",
-        data: JSON.stringify({"username": $("#username").val(), "password": $("#password").val()}),
+        data: JSON.stringify(payload),
         success: data => {
             console.log(data);
             var authResponseJson = JSON.parse(data);
