@@ -715,7 +715,7 @@
     <input type="hidden" id="mfaProvider">
     <input type="hidden" id="mfaFactorName">
     <input type="hidden" id="mfaSessionToken">
-    
+
     <div class="modal fade" id="mfaEnrollmentModal" tabindex="-1" role="dialog" aria-labelledby="mfaEnrollLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -724,17 +724,17 @@
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
           </div>
           <div class="modal-body">
-            
+
             <div class="form-group">
               <label for="factorEnrollList">Choose a factor:</label>
               <select id="factorEnrollList"></select>
             </div>
-            
+
             <!-- sub-form for Okta Verify Push -->
             <div class="form-group" id="mfaEnrollPushForm">
-              
+
             </div>
-              
+
             <!-- sub-form for SMS and voice call factors -->
             <div class="form-group" id="mfaEnrollOTPForm">
               <label for="mfaEnrollRecipient">Enter your phone number:</label>
@@ -752,7 +752,7 @@
               <!--    <i class="fa fa-check green"></i>-->
               <!--</div>-->
             </div>
-            
+
             <!-- TOTP, SMS, email and voice all use this field -->
             <div class="form-group" id="mfaEnrollVerifyCodeForm">
               <label for="mfaEnrollPassCode">Enter your code:</label>
@@ -761,7 +761,7 @@
                 Submit
               </button>
             </div>
-            
+
             <!-- security question -->
             <div class="form-group" id="mfaEnrollQuestionForm">
               <div>
@@ -794,12 +794,12 @@
                 Submit
               </button>
             </div>
-            
+
             <div class="form-group" id="mfaEnrollStatusForm">
               <span id="mfaEnrollStatusMessage"></span>
             </div>
-            
-            
+
+
           </div>
           <div class="modal-footer">
             <button type="button" id="mfaFinishEnrollButton" class="btn btn-sm btn-default">
@@ -823,7 +823,7 @@
               <label for="factorList">Authenticate With:</label>
               <select id="factorList"></select>
             </div>
-            
+
             <!-- sub-form for Okta Verify Push -->
             <div class="form-group" id="mfaPushForm">
               <button type="button" id="sendPushButton" class="btn btn-sm btn-default">
@@ -831,7 +831,7 @@
               </button>
               <a href="#" id="oktaOTPCodeLink">Or Enter Code</a>
             </div>
-              
+
             <!-- sub-form for SMS, voice call and email factors -->
             <div class="form-group" id="mfaOTPForm">
               <span id="mfaRecipient"></span>
@@ -848,7 +848,7 @@
                 Verify
               </button>
             </div>
-            
+
             <!-- security question -->
             <div class="form-group" id="mfaQuestionForm">
               <div>
@@ -861,21 +861,23 @@
                 Verify
               </button>
             </div>
-            
+
             <div class="form-group" id="mfaStatusForm">
               <span id="mfaStatusMessage"></span>
             </div>
-          
+
           </div>
-          
+
           <div class="modal-footer">
-            
+
           </div>
         </div>
       </div>
     </div>
 
     <input type="hidden" id="stateToken"{% if state_token %} value="{{state_token}}"{% endif %} />
+    <input type="hidden" id="showMFAEnroll"{% if state_token %} value="{{show_mfa_enroll}}"{% endif %} />
+    <input type="hidden" id="showBDV"{% if state_token %} value="{{show_bdv}}"{% endif %} />
 
     <!-- JavaScript files placed at the end of the document so the pages load faster -->
     <!-- ================================================== -->
@@ -909,7 +911,7 @@
     <input type="hidden" id="sessionId" />
     <script type="text/javascript">
       //<![CDATA[
-      
+
       var orgUrl = "{{site_config.okta_org_name}}";
       var redirect = "{{site_config.redirect_uri}}";
       var oktaSignIn = new OktaSignIn({
