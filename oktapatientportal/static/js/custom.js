@@ -17,20 +17,20 @@ $(document).ready(function() {
 	$("#setPreRegCredentials").on("click", setPreRegCredentialsClickHandler);
 
 	// MFA verification event handlers
-	$("#factorList").on("change", factorListOnChange);
-	$("#sendOTPButton").on("click", sendOTPClickHandler);
-	$("#sendPushButton").on("click", sendPushClickHandler);
-	$("#oktaOTPCodeLink").on("click", enterOktaOTPClickHandler);
-	$("#mfaVerifyButton").on("click", verifyOTPClickHandler);
-	$("#mfaVerifyAnswerButton").on("click", verifyAnswerClickHandler);
+	$("#factorList").change(factorListOnChange);
+	$("#sendOTPButton").click(sendOTPClickHandler);
+	$("#sendPushButton").click(sendPushClickHandler);
+	$("#oktaOTPCodeLink").click(enterOktaOTPClickHandler);
+	$("#mfaVerifyButton").click(verifyOTPClickHandler);
+	$("#mfaVerifyAnswerButton").click(verifyAnswerClickHandler);
 	hideAllVerifyForms();
 
 	// MFA enrollment event handlers
-	$("#factorEnrollList").on("change", factorEnrollListOnChange);
-	$("#sendEnrollOTPButton").on("click", sendEnrollOTPClickHandler);
-	$("#mfaEnrollVerifyButton").on("click", verifyEnrollOTPClickHandler);
-	$("#mfaEnrollQuestionButton").on("click", enrollQuestionClickHandler);
-	$("#mfaFinishEnrollButton").on("click", finishEnrollClickHandler);
+	$("#factorEnrollList").change(factorEnrollListOnChange);
+	$("#sendEnrollOTPButton").click(sendEnrollOTPClickHandler);
+	$("#mfaEnrollVerifyButton").click(verifyEnrollOTPClickHandler);
+	$("#mfaEnrollQuestionButton").click(enrollQuestionClickHandler);
+	$("#mfaFinishEnrollButton").click(finishEnrollClickHandler);
 	$("#mfaFinishEnrollButton").hide();
 	hideAllEnrollForms();
 
@@ -138,8 +138,8 @@ function callLogin(url) {
         contentType: "application/json; charset=utf-8",
         data: JSON.stringify(payload),
         success: data => {
-            console.log(data);
             var authResponseJson = JSON.parse(data);
+            console.log(authResponseJson);
             var txStatus = authResponseJson.status;
 
             if (txStatus == "SUCCESS") {
@@ -503,7 +503,7 @@ function finishEnrollClickHandler() {
  * MFA verification functions
  */
 function setupFactorList(factors) {
-    $("#factorList").empty().append("<option>Select Factor</option>");
+    //$("#factorList").empty().append("<option>Select Factor</option>");
 
     // build a list of factors for the user to choose from, also map
     // the factors to friendly display names
@@ -546,8 +546,9 @@ function setupFactorList(factors) {
         option += ' data-id="' + factorId + '"';
         option += '>' + factorName + '</option>';
         $("#factorList").append(option);
-        console.log("Added factor " + option);
+        //console.log("Added factor " + option);
     }
+    $("#factorList").change();
 }
 
 function factorListOnChange() {
