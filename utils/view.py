@@ -323,18 +323,18 @@ def create_login_response(user_name, password, session):
         # Look up if user is in  this app/subdomain
         # TODO: Clean this up to use Terraform setting or Group Rule
         user_id = authn_json_response["_embedded"]["user"]["id"]
-        print("user_id: {0}".format(user_id))
+        #print("user_id: {0}".format(user_id))
         # Look up Patient group for this app/subdomain
         patient_group_name = "{0}_{1}_patient".format(
             session["udp_subdomain"],
             session["demo_app_name"]
         )
-        print("patient_group_name: {0}".format(patient_group_name))
+        #print("patient_group_name: {0}".format(patient_group_name))
         patient_group = okta_admin.get_groups_by_name(patient_group_name)[0]
-        print("patient_group: {0}".format(json.dumps(patient_group, indent=4, sort_keys=True)))
+        #print("patient_group: {0}".format(json.dumps(patient_group, indent=4, sort_keys=True)))
 
         user_groups = okta_admin.get_user_groups(user_id)
-        print("user_groups: {0}".format(json.dumps(user_groups, indent=4, sort_keys=True)))
+        #print("user_groups: {0}".format(json.dumps(user_groups, indent=4, sort_keys=True)))
         has_patient_group = False
 
         for group in user_groups:
@@ -345,7 +345,7 @@ def create_login_response(user_name, password, session):
         if not has_patient_group:
             # Assign User to group
             group_assignment_response = okta_admin.assign_user_to_group(patient_group["id"], user_id);
-            print("user_groups: {0}".format(json.dumps(user_groups, indent=4, sort_keys=True)))
+            #print("user_groups: {0}".format(json.dumps(user_groups, indent=4, sort_keys=True)))
 
         session["state"] = str(uuid.uuid4())
         oauth_authorize_url = okta_auth.create_oauth_authorize_url(
@@ -361,6 +361,7 @@ def create_login_response(user_name, password, session):
 
         auth_response["redirectUrl"] = oauth_authorize_url
         auth_response["success"] = True
+        auth_response["status"] = "SUCCESS"
 
         #  print("oauth_authorize_url: {0}".format(oauth_authorize_url))
     elif "errorSummary" in authn_json_response:
