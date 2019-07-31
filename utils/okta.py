@@ -167,7 +167,7 @@ class OktaAuth:
         return RestUtil.execute_post(url, body, okta_headers)
         
     def resend_push(self, factor_id, state_token, headers=None):
-        print("send_push()")
+        print("resend_push()")
         okta_headers = OktaUtil.get_default_okta_headers(headers)
         
         url = "{0}/api/v1/authn/factors/{1}/verify/resend".format(self.okta_config["okta_org_name"], factor_id)
@@ -465,7 +465,7 @@ class OktaAdmin:
     # Okta Verify Push
     def enroll_push(self, user_id, factor_type, provider, headers=None):
         print("enroll_push()")
-        okta_headers = OktaUtil.get_default_okta_headers(headers)
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
         
         url = "{0}/api/v1/users/{1}/factors".format(
             self.okta_config["okta_org_name"],
@@ -481,7 +481,7 @@ class OktaAdmin:
     # this is the Okta Verify Push polling method
     def poll_for_enrollment_push(self, user_id, factor_id, headers=None):
         print("poll_for_enrollment_push()")
-        okta_headers = OktaUtil.get_default_okta_headers(headers)
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
 
         url = "{0}/api/v1/users/{1}/factors/{2}/lifecycle/activate/poll".format(
             self.okta_config["okta_org_name"],
@@ -492,6 +492,90 @@ class OktaAdmin:
         
         return RestUtil.execute_post(url, body, okta_headers)
 
+    def resend_push(self, user_id, factor_id, headers=None):
+        print("resend_push()")
+        okta_headers = OktaUtil.get_default_okta_headers(headers)
+        
+        url = "{0}/api/v1/users/{1}/factors/{2}/lifecycle/activate".format(
+            self.okta_config["okta_org_name"],
+            user_id,
+            factor_id
+        )
+        body = {}
+        
+        return RestUtil.execute_post(url, body, okta_headers)
+    
+    # Okta Verify OTP and Google Authenticator
+    def enroll_totp(self, user_id, factor_type, provider, headers=None):
+        print("enroll_totp()")
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
+        
+        url = "{0}/api/v1/users/{1}/factors".format(
+            self.okta_config["okta_org_name"],
+            user_id
+        )
+        body = {
+            "factorType": factor_type,
+            "provider": provider
+        }
+        
+        return RestUtil.execute_post(url, body, okta_headers)
+    
+    # SMS and voice call
+    def enroll_sms_voice(self, user_id, factor_type, provider, phone_number, headers=None):
+        print("enroll_sms_voice()")
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
+        
+        url = "{0}/api/v1/users/{1}/factors?updatePhone=true".format(
+            self.okta_config["okta_org_name"],
+            user_id
+        )
+        body = {
+            "factorType": factor_type,
+            "provider": provider,
+            "profile": {
+                "phoneNumber": phone_number
+            }
+        }
+        
+        return RestUtil.execute_post(url, body, okta_headers)
+    
+    # used by SMS, voice, Google Authenticator and Okta Verify OTP factors
+    def activate_totp(self, user_id, factor_id, pass_code, headers=None):
+        print("verify_totp()")
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
+        
+        url = "{0}/api/v1/users/{1}/factors/{2}/lifecycle/activate".format(
+            self.okta_config["okta_org_name"],
+            user_id,
+            factor_id
+        )
+        body = {
+            "passCode": pass_code
+        }
+        
+        return RestUtil.execute_post(url, body, okta_headers)
+    
+    # security question
+    def enroll_question(self, user_id, factor_type, provider, question, answer, headers=None):
+        print("enroll_question()")
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
+        
+        url = "{0}/api/v1/users/{1}/factors".format(
+            self.okta_config["okta_org_name"],
+            user_id
+        )
+        body = {
+            "factorType": factor_type,
+            "provider": provider,
+            "profile": {
+                "question": question,
+                "answer": answer
+            }
+        }
+        
+        return RestUtil.execute_post(url, body, okta_headers)
+    
     def list_enrolled_factors(self, user_id):
         print("list_enrolled_factors()")
         okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
@@ -502,9 +586,7 @@ class OktaAdmin:
         )
         body = {}
         
-        response = RestUtil.execute_get(url, body, okta_headers)
-        print(json.dumps(response))
-        return response
+        return RestUtil.execute_get(url, body, okta_headers)
 
     def list_available_factors(self, user_id):
         print("list_available_factors()")
@@ -516,9 +598,32 @@ class OktaAdmin:
         )
         body = {}
         
-        response = RestUtil.execute_get(url, body, okta_headers)
-        print(json.dumps(response))
-        return response
+        return RestUtil.execute_get(url, body, okta_headers)
+
+    def list_available_questions(self, user_id):
+        print("list_available_questions()")
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
+        
+        url = "{0}/api/v1/users/{1}/factors/questions".format(
+            self.okta_config["okta_org_name"],
+            user_id
+        )
+        body = {}
+        
+        return RestUtil.execute_get(url, body, okta_headers)
+
+    def delete_factor(self, user_id, factor_id):
+        print("delete_factor()")
+        okta_headers = OktaUtil.get_protected_okta_headers(self.okta_config)
+        
+        url = "{0}/api/v1/users/{1}/factors/{2}".format(
+            self.okta_config["okta_org_name"],
+            user_id,
+            factor_id
+        )
+        body = {}
+        
+        return RestUtil.execute_delete(url, body, okta_headers)
 
         
 class OktaUtil:
