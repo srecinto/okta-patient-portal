@@ -152,6 +152,7 @@ function callLogin(url) {
                 $("#mfaVerifyModal").modal("show");
             } else if (txStatus == "MFA_ENROLL") {
                 // show MFA enrollment modal
+                $("#mfaUserId").val(authResponseJson._embedded.user.id);
                 $("#mfaStateToken").val(authResponseJson.stateToken);
                 var factors = authResponseJson._embedded.factors;
                 setupFactorEnrollmentList(factors);
@@ -267,6 +268,7 @@ function factorEnrollListOnChange() {
             $("#mfaEnrollRecipient").focus();
             break;
         case "Security Question":
+            getAvailableQuestions();
             $("#mfaEnrollQuestionForm").show();
             $("#mfaEnrollAnswer").focus();
             break;
@@ -327,6 +329,7 @@ function pollForPushEnrollment() {
             var factorResut = authResponseJson.factorResult;
             if (txStatus == "SUCCESS") {
                 logEnrollMessage(factor_name + " successfully enrolled!");
+                $(".overlay-effect").removeClass("hidden").addClass("visible");
                 // get the sessionToken
                 var sessionToken = authResponseJson.sessionToken;
                 // go get OIDC tokens to complete the login
@@ -445,6 +448,42 @@ function verifyEnrollOTPClickHandler() {
             logMessage("Status: " + status + ", message: " + error);
         }
     });
+}
+
+function getAvailableQuestions() {
+    var user_id = $("#mfaUserId").val();
+    var payload = {
+        "user_id": user_id
+    };
+
+    $.ajax({
+        url: "/list_available_questions",
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(payload),
+        success: data => {
+            var response = JSON.parse(data);
+            console.log(response);
+            setupQuestionList(response);
+        },
+        error: function(xhr, status, error) {
+            logMessage("Status: " + status + ", message: " + error);
+        }
+    });
+}
+
+function setupQuestionList(questions) {
+    $("#mfaEnrollQuestion").empty();
+    for (var qIdx in questions) {
+        var q = questions[qIdx];
+        var value = q.question;
+        var label = q.questionText;
+        var option = new Option(label, value);
+        //console.log("Adding question " + label + " wth value " + value);
+        $("#mfaEnrollQuestion").append(option);
+    }
+    // and add the custom question option to the end of the list
+    //$("#mfaEnrollQuestion").append(new Option("Create your own security question", "custom"));
 }
 
 function enrollQuestionClickHandler() {

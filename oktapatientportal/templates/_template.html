@@ -533,13 +533,13 @@
               <div class="form-group row">
                 <label for="regAlt1DOB" class="col-sm-2 col-form-label">Date Of Birth</label>
                 <div class="col-sm-10">
-                  <input type="text" class="form-control" id="regAlt1DOB" placeholder="Date Of Birth"{% if user %} value="{{user.profile.dob}}"{% endif %}>
+                  <input type="date" class="form-control" id="regAlt1DOB" placeholder="Date Of Birth"{% if user %} value="{{user.profile.dob}}"{% endif %}>
                 </div>
               </div>
               <div class="form-group row">
                 <label for="regAlt1DOB" class="col-sm-2 col-form-label">Mobile Number</label>
                 <div class="col-sm-10">
-                  <input type="text" class="form-control" id="regAlt1MobileNumber" placeholder="Mobile Number"{% if user %} value="{{user.profile.mobilePhone}}"{% endif %}>
+                  <input type="tel" class="form-control" id="regAlt1MobileNumber" placeholder="Mobile Number"{% if user %} value="{{user.profile.mobilePhone}}"{% endif %}>
                 </div>
               </div>
             </p>
@@ -715,16 +715,17 @@
     <input type="hidden" id="mfaProvider">
     <input type="hidden" id="mfaFactorName">
     <input type="hidden" id="mfaSessionToken">
+    <input type="hidden" id="mfaUserId">
 
     <div class="modal fade" id="mfaEnrollmentModal" tabindex="-1" role="dialog" aria-labelledby="mfaEnrollLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h4 class="modal-title" id="mfaEnrollLabel">Enroll your Factor</h4>
+            <h4 class="modal-title" id="mfaEnrollLabel">Enroll Your Factor</h4>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
           </div>
+          
           <div class="modal-body">
-
             <div class="form-group">
               <label for="factorEnrollList">Choose a factor:</label>
               <select id="factorEnrollList"></select>
@@ -745,12 +746,16 @@
             </div>
 
             <!-- this holds the QR code for Okta Verify and Google Authenticator enrollment -->
-            <div class="form-group overlay-container" id="mfaEnrollQRCodeForm">
-              <img id="mfaEnrollQRCode">
-              <p>Scan this QR code with your smartphone.</p>
-              <!--<div class="overlay">-->
-              <!--    <i class="fa fa-check green"></i>-->
-              <!--</div>-->
+            <div class="form-group" id="mfaEnrollQRCodeForm">
+              <div class="overlay-container">
+                <img id="mfaEnrollQRCode" class="overlay-image">
+                <div class="overlay-effect hidden">
+                  <div class="overlay-icon">
+                    <i class="fa fa-check green"></i>
+                  </div>
+                </div>
+              </div>
+              <p>Scan this QR code with your smartphone to complete enrollment.</p>
             </div>
 
             <!-- TOTP, SMS, email and voice all use this field -->

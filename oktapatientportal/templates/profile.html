@@ -160,12 +160,16 @@
         </div>
 
         <!-- this holds the QR code for Okta Verify and Google Authenticator enrollment -->
-        <div class="form-group overlay-container" id="_mfaEnrollQRCodeForm">
-          <img id="_mfaEnrollQRCode">
+        <div class="form-group" id="_mfaEnrollQRCodeForm">
+          <div class="overlay-container">
+            <img id="_mfaEnrollQRCode" class="overlay-image">
+            <div class="overlay-effect hidden">
+              <div class="overlay-icon">
+                <i class="fa fa-check green"></i>
+              </div>
+            </div>
+          </div>
           <p>Scan this QR code with your smartphone to complete enrollment.</p>
-          <!--<div class="overlay">-->
-          <!--    <i class="fa fa-check green"></i>-->
-          <!--</div>-->
         </div>
 
         <!-- TOTP, SMS, email and voice all use this field -->

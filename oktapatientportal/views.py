@@ -32,9 +32,9 @@ def index():
     show_mfa_enroll = request.args.get("showMFAEnroll")
     show_bdv = request.args.get("showBDV")
 
-    print("state_token: {0}".format(state_token))
-    print("show_mfa_enroll: {0}".format(state_token))
-    print("show_bdv: {0}".format(state_token))
+    #print("state_token: {0}".format(state_token))
+    #print("show_mfa_enroll: {0}".format(state_token))
+    #print("show_bdv: {0}".format(state_token))
 
     session["current_title"] = "{0} | {1} Home".format(session["base_title"], session["app_title"])
 
@@ -440,7 +440,10 @@ def get_enrolled_factors(user_id):
                 continue
         elif (factorType == "push"):
             factor["name"] = "Okta Verify"
-            factor["profile"] = f["profile"]["name"]
+            if "profile" in f:
+                factor["profile"] = f["profile"]["name"]
+            else:
+                factor["profile"] = None
             factor["sortOrder"] = 10
         elif (factorType == "sms"):
             factor["name"] = "SMS"
@@ -875,7 +878,7 @@ def activate_account(user_id):
 
     user = None
     modal_options = None
-    session["current_title"] = "{0} | {1} Sign In".format(session["base_title"], session["app_title"])
+    #session["current_title"] = "{0} | {1} Sign In".format(session["base_title"], session["app_title"])
 
     response = make_response(
         render_template(
