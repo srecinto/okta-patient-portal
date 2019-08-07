@@ -238,8 +238,9 @@ function _pollForPushEnrollment() {
             var response = JSON.parse(data);
             console.log(response);
             if (response.status == "ACTIVE") {
+                $(".overlay-effect").removeClass("hidden").addClass("visible");
                 _logEnrollMessage(factor_name + " successfully enrolled!");
-                $("#_mfaEnrollQRCodeForm").hide();
+                //$("#_mfaEnrollQRCodeForm").hide();
                 _finishEnrollment();
             } else if (response.factorResult == "WAITING") {
                 _logEnrollMessage("Waiting for enrollment");
@@ -447,7 +448,8 @@ function _getAvailableQuestions() {
         error: function(xhr, status, error) {
             _logMessage("Status: " + status + ", message: " + error);
         }
-    });}
+    });
+}
 
 function _setupQuestionList(questions) {
     $("#_mfaEnrollQuestion").empty();
@@ -460,7 +462,7 @@ function _setupQuestionList(questions) {
         $("#_mfaEnrollQuestion").append(option);
     }
     // and add the custom question option to the end of the list
-    $("#_mfaEnrollQuestion").append(new Option("Create your own security question", "custom"));
+    //$("#_mfaEnrollQuestion").append(new Option("Create your own security question", "custom"));
 }
 
 function _finishEnrollment() {

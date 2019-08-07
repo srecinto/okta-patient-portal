@@ -2,3 +2,50 @@
  * Version: 2.1.2
  * File Description: Place here your custom CSS styles
  */
+
+/* Container needed to position the overlay. Adjust the width as needed */
+.overlay-container {
+    position: relative;
+    width: 100%;
+    max-width: 250px;
+}
+
+/* Make the image responsive */
+.overlay-image {
+    width: 100%;
+    height: auto;
+}
+
+/* The overlay effect (full height and width) - lays on top of the container and over the image */
+.overlay-effect {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    width: 100%;
+}
+
+/* The icon inside the overlay is positioned in the middle vertically and horizontally */
+.overlay-icon {
+    font-size: 100px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.green {
+    color: green;
+}
+
+.hidden {
+    display: none;
+}
+
+.visible {
+    display: block;
+}
