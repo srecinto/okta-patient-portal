@@ -878,7 +878,7 @@ def activate_account(user_id):
 
     user = None
     modal_options = None
-    #session["current_title"] = "{0} | {1} Sign In".format(session["base_title"], session["app_title"])
+    session["current_title"] = "{0} | {1} Sign In".format(session["base_title"], session["app_title"])
 
     response = make_response(
         render_template(
