@@ -17,20 +17,20 @@ $(document).ready(function() {
 	$("#setPreRegCredentials").on("click", setPreRegCredentialsClickHandler);
 
 	// MFA verification event handlers
-	$("#factorList").on("change", factorListOnChange);
-	$("#sendOTPButton").on("click", sendOTPClickHandler);
-	$("#sendPushButton").on("click", sendPushClickHandler);
-	$("#oktaOTPCodeLink").on("click", enterOktaOTPClickHandler);
-	$("#mfaVerifyButton").on("click", verifyOTPClickHandler);
-	$("#mfaVerifyAnswerButton").on("click", verifyAnswerClickHandler);
+	$("#factorList").change(factorListOnChange);
+	$("#sendOTPButton").click(sendOTPClickHandler);
+	$("#sendPushButton").click(sendPushClickHandler);
+	$("#oktaOTPCodeLink").click(enterOktaOTPClickHandler);
+	$("#mfaVerifyButton").click(verifyOTPClickHandler);
+	$("#mfaVerifyAnswerButton").click(verifyAnswerClickHandler);
 	hideAllVerifyForms();
 
 	// MFA enrollment event handlers
-	$("#factorEnrollList").on("change", factorEnrollListOnChange);
-	$("#sendEnrollOTPButton").on("click", sendEnrollOTPClickHandler);
-	$("#mfaEnrollVerifyButton").on("click", verifyEnrollOTPClickHandler);
-	$("#mfaEnrollQuestionButton").on("click", enrollQuestionClickHandler);
-	$("#mfaFinishEnrollButton").on("click", finishEnrollClickHandler);
+	$("#factorEnrollList").change(factorEnrollListOnChange);
+	$("#sendEnrollOTPButton").click(sendEnrollOTPClickHandler);
+	$("#mfaEnrollVerifyButton").click(verifyEnrollOTPClickHandler);
+	$("#mfaEnrollQuestionButton").click(enrollQuestionClickHandler);
+	$("#mfaFinishEnrollButton").click(finishEnrollClickHandler);
 	$("#mfaFinishEnrollButton").hide();
 	hideAllEnrollForms();
 
@@ -74,7 +74,7 @@ $(document).ready(function() {
                 var txStatus = authResponseJson.status;
 
                 if (txStatus == "MFA_ENROLL") {
-                    $("#mfaStateToken").val($("#stateToken").val());
+                    $("#mfaUserId").val(authResponseJson._embedded.user.id);
                     var factors = authResponseJson._embedded.factors;
                     setupFactorEnrollmentList(factors);
                     $("#mfaEnrollmentModal").modal("show");
@@ -127,27 +127,33 @@ function loginClickHandler() {
 }
 
 function callLogin(url) {
+    var payload = {
+        "username": $("#username").val(),
+        "password": $("#password").val()
+    };
+    
     $.ajax({
         url: url,
         type: "POST",
         contentType: "application/json; charset=utf-8",
-        data: JSON.stringify({"username": $("#username").val(), "password": $("#password").val()}),
+        data: JSON.stringify(payload),
         success: data => {
-            console.log(data);
             var authResponseJson = JSON.parse(data);
+            console.log(authResponseJson);
             var txStatus = authResponseJson.status;
 
             if (txStatus == "SUCCESS") {
 				location.href = authResponseJson.redirectUrl;
             } else if (txStatus == "MFA_REQUIRED") {
                 // Add enrolled MFA Options
-                $("#mfaStateToken").val(authResponseJson.stateToken);
+                $("#stateToken").val(authResponseJson.stateToken);
                 var factors = authResponseJson._embedded.factors;
                 setupFactorList(factors);
                 $("#mfaVerifyModal").modal("show");
             } else if (txStatus == "MFA_ENROLL") {
                 // show MFA enrollment modal
-                $("#mfaStateToken").val(authResponseJson.stateToken);
+                $("#mfaUserId").val(authResponseJson._embedded.user.id);
+                $("#stateToken").val(authResponseJson.stateToken);
                 var factors = authResponseJson._embedded.factors;
                 setupFactorEnrollmentList(factors);
                 $("#mfaEnrollmentModal").modal("show");
@@ -262,6 +268,7 @@ function factorEnrollListOnChange() {
             $("#mfaEnrollRecipient").focus();
             break;
         case "Security Question":
+            getAvailableQuestions();
             $("#mfaEnrollQuestionForm").show();
             $("#mfaEnrollAnswer").focus();
             break;
@@ -273,7 +280,7 @@ function logEnrollMessage(message) {
 }
 
 function enrollPushFactor() {
-    var stateToken = $("#mfaStateToken").val();
+    var stateToken = $("#stateToken").val();
     var factorType = $("#mfaFactorType").val();
     var provider = $("#mfaProvider").val();
     var payload = {
@@ -307,7 +314,7 @@ function enrollPushFactor() {
 
 function pollForPushEnrollment() {
     var factor_id = $("#mfaFactorID").val();
-    var state_token = $("#mfaStateToken").val();
+    var state_token = $("#stateToken").val();
     var factor_name = $("#mfaFactorName").val();
 
     $.ajax({
@@ -322,6 +329,7 @@ function pollForPushEnrollment() {
             var factorResut = authResponseJson.factorResult;
             if (txStatus == "SUCCESS") {
                 logEnrollMessage(factor_name + " successfully enrolled!");
+                $(".overlay-effect").removeClass("hidden").addClass("visible");
                 // get the sessionToken
                 var sessionToken = authResponseJson.sessionToken;
                 // go get OIDC tokens to complete the login
@@ -342,7 +350,7 @@ function pollForPushEnrollment() {
 }
 
 function enrollTOTPFactor() {
-    var stateToken = $("#mfaStateToken").val();
+    var stateToken = $("#stateToken").val();
     var factorType = $("#mfaFactorType").val();
     var provider = $("#mfaProvider").val();
     var payload = {
@@ -374,7 +382,7 @@ function enrollTOTPFactor() {
 
 // for SMS and voice
 function sendEnrollOTPClickHandler() {
-    var stateToken = $("#mfaStateToken").val();
+    var stateToken = $("#stateToken").val();
     var factorType = $("#mfaFactorType").val();
     var provider = $("#mfaProvider").val();
     var phoneNumber = $("#mfaEnrollRecipient").val();
@@ -409,7 +417,7 @@ function sendEnrollOTPClickHandler() {
 function verifyEnrollOTPClickHandler() {
     var factor_name = $("#mfaFactorName").val();
     var factorId = $("#mfaFactorID").val();
-    var stateToken = $("#mfaStateToken").val();
+    var stateToken = $("#stateToken").val();
     var pass_code = $("#mfaEnrollPassCode").val();
     var payload = {
         "factor_id": factorId,
@@ -442,9 +450,45 @@ function verifyEnrollOTPClickHandler() {
     });
 }
 
+function getAvailableQuestions() {
+    var user_id = $("#mfaUserId").val();
+    var payload = {
+        "user_id": user_id
+    };
+
+    $.ajax({
+        url: "/list_available_questions",
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(payload),
+        success: data => {
+            var response = JSON.parse(data);
+            console.log(response);
+            setupQuestionList(response);
+        },
+        error: function(xhr, status, error) {
+            logMessage("Status: " + status + ", message: " + error);
+        }
+    });
+}
+
+function setupQuestionList(questions) {
+    $("#mfaEnrollQuestion").empty();
+    for (var qIdx in questions) {
+        var q = questions[qIdx];
+        var value = q.question;
+        var label = q.questionText;
+        var option = new Option(label, value);
+        //console.log("Adding question " + label + " wth value " + value);
+        $("#mfaEnrollQuestion").append(option);
+    }
+    // and add the custom question option to the end of the list
+    //$("#mfaEnrollQuestion").append(new Option("Create your own security question", "custom"));
+}
+
 function enrollQuestionClickHandler() {
     var factor_name = $("#mfaFactorName").val();
-    var stateToken = $("#mfaStateToken").val();
+    var stateToken = $("#stateToken").val();
     var factorType = $("#mfaFactorType").val();
     var provider = $("#mfaProvider").val();
     var question = $("#mfaEnrollQuestion").val();
@@ -498,7 +542,7 @@ function finishEnrollClickHandler() {
  * MFA verification functions
  */
 function setupFactorList(factors) {
-    $("#factorList").empty().append("<option>Select Factor</option>");
+    //$("#factorList").empty().append("<option>Select Factor</option>");
 
     // build a list of factors for the user to choose from, also map
     // the factors to friendly display names
@@ -541,8 +585,9 @@ function setupFactorList(factors) {
         option += ' data-id="' + factorId + '"';
         option += '>' + factorName + '</option>';
         $("#factorList").append(option);
-        console.log("Added factor " + option);
+        //console.log("Added factor " + option);
     }
+    $("#factorList").change();
 }
 
 function factorListOnChange() {
@@ -604,7 +649,7 @@ function logMessage(message) {
 
 function sendPushClickHandler() {
     var factor_id = $("#mfaFactorID").val();
-    var state_token = $("#mfaStateToken").val();
+    var state_token = $("#stateToken").val();
     logMessage("Push notification sent");
 
     $.ajax({
@@ -626,7 +671,7 @@ function sendPushClickHandler() {
 
 function pollForPushVerification() {
     var factor_id = $("#mfaFactorID").val();
-    var state_token = $("#mfaStateToken").val();
+    var state_token = $("#stateToken").val();
 
     $.ajax({
         url: "/poll_for_push_verification",
@@ -664,7 +709,7 @@ function pollForPushVerification() {
 
 function resendPushClickHandler() {
     var factor_id = $("#mfaFactorID").val();
-    var state_token = $("#mfaStateToken").val();
+    var state_token = $("#stateToken").val();
     logMessage("Push notification re-sent");
 
     $.ajax({
@@ -691,7 +736,7 @@ function enterOktaOTPClickHandler() {
 
 function sendOTPClickHandler() {
     var factor_id = $("#mfaFactorID").val();
-    var state_token = $("#mfaStateToken").val();
+    var state_token = $("#stateToken").val();
     $("#mfaPassCode").focus();
     logMessage("A code has been sent to your device");
 
@@ -712,7 +757,7 @@ function sendOTPClickHandler() {
 
 function verifyOTPClickHandler() {
     var factor_id = $("#mfaFactorID").val();
-    var state_token = $("#mfaStateToken").val();
+    var state_token = $("#stateToken").val();
     var pass_code = $("#mfaPassCode").val();
     var payload = {
         "state_token": state_token,
@@ -745,7 +790,7 @@ function verifyOTPClickHandler() {
 
 function verifyAnswerClickHandler() {
     var factor_id = $("#mfaFactorID").val();
-    var state_token = $("#mfaStateToken").val();
+    var state_token = $("#stateToken").val();
     var answer = $("#mfaAnswer").val();
     var payload = {
         "state_token": state_token,
@@ -1232,7 +1277,7 @@ function setPreRegCredentialsClickHandler() {
                 } else if (txStatus == "MFA_ENROLL") {
                     $("#registrationPreRegModal").modal("hide");
                     // show MFA enrollment modal
-                    $("#mfaStateToken").val(responseJson.stateToken);
+                    $("#stateToken").val(responseJson.stateToken);
                     var factors = responseJson._embedded.factors;
                     setupFactorEnrollmentList(factors);
                     $("#mfaEnrollmentModal").modal("show");

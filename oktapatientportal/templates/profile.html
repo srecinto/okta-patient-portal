@@ -1,477 +1,211 @@
-{% extends "_template.html" %}
-{% block title %}{{site_config.current_title}}{% endblock %}
-{% block banner %}
-      <!-- ================ -->
-      <div class="banner clearfix">
-        <div class="container">
-          <div class="row">
-            <div class="col-md-6 form-block p-30 border-clear">
-              <input type="hidden" id="userId" value="{{ user['id'] }}">
-              <h2 class="title">User Profile</h2>
-              
-              <div class="form-group has-feedback row">
-                <label for="login" class="col-md-4 control-label text-md-right col-form-label">User name:</label>
-                <div class="col-md-8" id="login">
-                  {{ user_profile['login'] }}
-                </div>
-              </div>
-    
-              <div class="form-group has-feedback row">
-                <label for="first_name" class="col-md-4 control-label text-md-right col-form-label">First name:</label>
-                <div class="col-md-8">
-                <input type="text" id="first_name" size="40" value="{{ user_profile['firstName'] }}">
-                </div>
-              </div>
-    
-              <div class="form-group has-feedback row">
-                <label for="last_name" class="col-md-4 control-label text-md-right col-form-label">Last name:</label>
-                <div class="col-md-8">
-                <input type="text" id="last_name" size="40" value="{{ user_profile['lastName'] }}">
-                </div>
-              </div>
-    
-              <div class="form-group has-feedback row">
-                <label for="email" class="col-md-4 control-label text-md-right col-form-label">Email:</label>
-                <div class="col-md-8">
-                <input type="email" id="email" size="40" value="{{ user_profile['email'] }}">
-                </div>
-              </div>
-    
-              <div class="form-group has-feedback row">
-                <label for="secondEmail" class="col-md-4 control-label text-md-right col-form-label">Alternate Email:</label>
-                <div class="col-md-8">
-                <input type="email" id="second_email" size="40" value="{{ user_profile['secondEmail'] }}">
-                </div>
-              </div>
-    
-              <!--<div class="form-group has-feedback row">-->
-              <!--  <label for="primary_phone" class="col-md-4 control-label text-md-right col-form-label">Primary Phone:</label>-->
-              <!--  <div class="col-md-8">-->
-              <!--  <input type="tel" id="primary_phone" size="40" value="{{ user_profile['primaryPhone'] }}">-->
-              <!--  </div>-->
-              <!--</div>-->
-              
-              <div class="form-group has-feedback row">
-                <label for="mobile_phone" class="col-md-4 control-label text-md-right col-form-label">Mobile phone:</label>
-                <div class="col-md-8">
-                <input type="tel" id="mobile_phone" size="40" value="{{ user_profile['mobilePhone'] }}">
-                </div>
-              </div>
-              
-              <div class="form-group has-feedback row">
-                <label for="height" class="col-md-4 control-label text-md-right col-form-label">Height:</label>
-                <div class="col-md-8">
-                <input type="text" id="height" size="40" value="{{ app_user['height'] }}">
-                </div>
-              </div>
-              
-              <div class="form-group has-feedback row">
-                <label for="weight" class="col-md-4 control-label text-md-right col-form-label">Weight:</label>
-                <div class="col-md-8">
-                <input type="text" id="weight" size="40" value="{{ app_user['weight'] }}">
-                </div>
-              </div>
-              
-              <div class="form-group has-feedback row">
-                <label for="dob" class="col-md-4 control-label text-md-right col-form-label">Birth date:</label>
-                <div class="col-md-8">
-                  <input type="date" id="dob" size="40" value="{{ app_user['dob'] }}">
-                </div>
-              </div>
-              
-              <div class="form-group has-feedback row">
-                <div class="col-md-4 "></div>
-                <div class="col-md-4">
-                  <button type="button" id="saveUserProfileButton" class="btn btn-sm btn-default">
-                    Save
-                  </button>
-                </div>
-                <div class="col-md-4" id="statusMessage"></div>
-                <div class="col-md-4"></div>
-              </div>
-            
-            </div>
-            
-            <div class="col-md-6 form-block p-30 border-clear">
-              <h2 class="title">Enrolled Factors</h2>
-              <button type="button" id="mfaAddFactorButton" class="btn btn-sm btn-default">
-                Add a new factor
-              </button>
-              
-              {% for factor in factors %}
-              <div class="form-group has-feedback row" data-id="{{ factor['id'] }}" data-provider="{{ factor['provider'] }}">
-                <div class="col-md-8">
-                  {{ factor.name }}<br>
-                  {{ factor.profile }}
-                </div>
-                <div class="col-md-2">
-                  
-                </div>
-                <div class="col-md-1">
-                  <a href="#"><i class="icon without-bg fa fa-cog"></i></a>
-                </div>
-                <div class="col-md-1">
-                  <a href="#"><i class="icon without-bg fa fa-trash"></i></a>
-                </div>
-              </div>
-              {% endfor %}
-            </div>
+{% extends "_template.html" %} {% block title %}{{site_config.current_title}}{% endblock %} {% block banner %}
+<!-- ================ -->
+<div class="banner clearfix">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6 form-block p-30 border-clear">
+        <input type="hidden" id="userId" value="{{ user['id'] }}">
+        <h2 class="title">User Profile</h2>
+
+        <div class="form-group has-feedback row">
+          <label for="login" class="col-md-4 control-label text-md-right col-form-label">User name:</label>
+          <div class="col-md-8" id="login">
+            {{ user_profile['login'] }}
           </div>
         </div>
+
+        <div class="form-group has-feedback row">
+          <label for="first_name" class="col-md-4 control-label text-md-right col-form-label">First name:</label>
+          <div class="col-md-8">
+            <input type="text" id="first_name" size="40" value="{{ user_profile['firstName'] }}">
+          </div>
+        </div>
+
+        <div class="form-group has-feedback row">
+          <label for="last_name" class="col-md-4 control-label text-md-right col-form-label">Last name:</label>
+          <div class="col-md-8">
+            <input type="text" id="last_name" size="40" value="{{ user_profile['lastName'] }}">
+          </div>
+        </div>
+
+        <div class="form-group has-feedback row">
+          <label for="email" class="col-md-4 control-label text-md-right col-form-label">Email:</label>
+          <div class="col-md-8">
+            <input type="email" id="email" size="40" value="{{ user_profile['email'] }}">
+          </div>
+        </div>
+
+        <div class="form-group has-feedback row">
+          <label for="secondEmail" class="col-md-4 control-label text-md-right col-form-label">Alternate Email:</label>
+          <div class="col-md-8">
+            <input type="email" id="second_email" size="40" value="{{ user_profile['secondEmail'] }}">
+          </div>
+        </div>
+
+        <!--<div class="form-group has-feedback row">-->
+        <!--  <label for="primary_phone" class="col-md-4 control-label text-md-right col-form-label">Primary Phone:</label>-->
+        <!--  <div class="col-md-8">-->
+        <!--  <input type="tel" id="primary_phone" size="40" value="{{ user_profile['primaryPhone'] }}">-->
+        <!--  </div>-->
+        <!--</div>-->
+
+        <div class="form-group has-feedback row">
+          <label for="mobile_phone" class="col-md-4 control-label text-md-right col-form-label">Mobile phone:</label>
+          <div class="col-md-8">
+            <input type="tel" id="mobile_phone" size="40" value="{{ user_profile['mobilePhone'] }}">
+          </div>
+        </div>
+
+        <div class="form-group has-feedback row">
+          <label for="height" class="col-md-4 control-label text-md-right col-form-label">Height:</label>
+          <div class="col-md-8">
+            <input type="text" id="height" size="40" value="{{ app_user['height'] }}">
+          </div>
+        </div>
+
+        <div class="form-group has-feedback row">
+          <label for="weight" class="col-md-4 control-label text-md-right col-form-label">Weight:</label>
+          <div class="col-md-8">
+            <input type="text" id="weight" size="40" value="{{ app_user['weight'] }}">
+          </div>
+        </div>
+
+        <div class="form-group has-feedback row">
+          <label for="dob" class="col-md-4 control-label text-md-right col-form-label">Birth date:</label>
+          <div class="col-md-8">
+            <input type="date" id="dob" size="40" value="{{ app_user['dob'] }}">
+          </div>
+        </div>
+
+        <div class="form-group has-feedback row">
+          <div class="col-md-4 "></div>
+          <div class="col-md-4">
+            <button type="button" id="saveUserProfileButton" class="btn btn-sm btn-default">
+              Save
+            </button>
+          </div>
+          <div class="col-md-4" id="statusMessage"></div>
+          <div class="col-md-4"></div>
+        </div>
+
       </div>
+
+      <div class="col-md-6 form-block p-30 border-clear">
+        <h2 class="title">Enrolled Factors</h2>
+        
+        <button type="button" id="_mfaAddFactorButton" class="btn btn-sm btn-default">
+          Add a new factor
+        </button>
+        
+        {% for factor in factors %}
+        <div class="form-group row">
+          <div class="col-md-8">
+            {{ factor.name }}<br> {{ factor.profile }}
+          </div>
+          <div class="col-md-3"></div>
+          <!--<div class="col-md-1">-->
+          <!--  <a href="#" class="clickable editable" data-id="{{ factor['id'] }}"><i class="icon without-bg fa fa-cog"></i></a>-->
+          <!--</div>-->
+          <div class="col-md-1">
+            <a href="#" class="clickable deleteable" data-id="{{ factor['id'] }}">
+              <i class="icon without-bg fa fa-times-circle red"></i>
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+        
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_script %}
+<script type="text/javascript" src="/js/mfa_enrollment.js"></script>
 {% endblock %}
 
 {% block content %}
+<!-- MFA Enrollment -->
+<input type="hidden" id="_mfaFactorID">
+<input type="hidden" id="_mfaFactorType">
+<input type="hidden" id="_mfaProvider">
+<input type="hidden" id="_mfaFactorName">
 
-{% endblock %}
 
-{% block extra_script %}
-<script type="text/javascript">
-//<![CDATA[
-$(document).ready(function() {
-  console.log("Document ready!");
-  
-	// MFA enrollment event handlers
-	$("#factorEnrollList").on("change", factorUserEnrollListOnChange);
-// 	$("#sendEnrollOTPButton").on("click", sendEnrollOTPClickHandler);
-// 	$("#mfaEnrollVerifyButton").on("click", verifyEnrollOTPClickHandler);
-// 	$("#mfaEnrollQuestionButton").on("click", enrollQuestionClickHandler);
-// 	$("#mfaFinishEnrollButton").on("click", finishEnrollClickHandler);
-  $("#mfaAddFactorButton").on("click", mfaAddFactorClickHandler);
-	$("#mfaFinishEnrollButton").hide();
-	hideAllEnrollForms();
+<div class="modal fade" id="_mfaEnrollmentModal" tabindex="-1" role="dialog" aria-labelledby="_mfaEnrollLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="_mfaEnrollLabel">Enroll your Factor</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+      </div>
+      <div class="modal-body">
 
-});
+        <div class="form-group">
+          <label for="_factorEnrollList">Choose a factor:</label>
+          <select id="_factorEnrollList"></select>
+        </div>
 
-function mfaAddFactorClickHandler() {
-  var userId = $("#userId").val();
-  getAvailableFactors(userId);
-}
+        <!-- sub-form for Okta Verify Push -->
+        <div class="form-group" id="_mfaEnrollPushForm">
 
-function getAvailableFactors(user_id) {
-  $.ajax({
-    url: "/get_available_factors/" + user_id,
-    type: "GET",
-    contentType: "application/json; charset=utf-8",
-    success: data => {
-        console.log(data);
-        var responseJson = JSON.parse(data);
-        setupUserFactorList(responseJson);
-        $("#mfaEnrollmentModal").modal("show");
-    },
-    error: function(xhr, status, error) {
-        logMessage("Status: " + status + ", message: " + error);
-    }
-  });
-}
-  
-function setupUserFactorList(factors) {
-  $("#factorEnrollList").empty().append("<option>Select Factor</option>");
-  
-  // make a list of factors to choose from, and also map
-  // to friendly display names
-  var factors_array = [];
-  for (var factorIdx in factors) {
-      var factor = factors[factorIdx];
-      var factorType = factor.factorType;
-      var provider = factor.provider;
-      // default to factorType as the name as a fallback
-      var factorName = factorType;
-      var sortOrder = 100;
+        </div>
 
-      if (factorType == "token:software:totp") {
-          if (provider == "GOOGLE") {
-              factor.factorName = "Google Authenticator";
-              factor.sortOrder = 20;
-          } else if (provider == "OKTA") {
-              // don't list Okta Verify OTP
-              continue;
-          }
-      } else if (factorType == "push") {
-          factor.factorName = "Okta Verify";
-          factor.sortOrder = 10;
-      } else if (factorType == "sms") {
-          factor.factorName = "SMS";
-          factor.sortOrder = 30;
-      } else if (factorType == "call") {
-          factor.factorName = "Voice Call";
-          factor.sortOrder = 40;
-      } else if (factorType == "question") {
-          factor.factorName = "Security Question";
-          factor.sortOrder = 50;
-      }
+        <!-- sub-form for SMS and voice call factors -->
+        <div class="form-group" id="_mfaEnrollOTPForm">
+          <label for="_mfaEnrollRecipient">Enter your phone number:</label>
+          <input type="tel" id="_mfaEnrollRecipient">
+          <button type="button" id="_sendEnrollOTPButton" class="btn btn-sm btn-default">
+            Send SMS
+          </button>
+        </div>
+
+        <!-- this holds the QR code for Okta Verify and Google Authenticator enrollment -->
+        <div class="form-group" id="_mfaEnrollQRCodeForm">
+          <div class="overlay-container">
+            <img id="_mfaEnrollQRCode" class="overlay-image">
+            <div class="overlay-effect hidden">
+              <div class="overlay-icon">
+                <i class="fa fa-check green"></i>
+              </div>
+            </div>
+          </div>
+          <p>Scan this QR code with your smartphone to complete enrollment.</p>
+        </div>
+
+        <!-- TOTP, SMS, email and voice all use this field -->
+        <div class="form-group" id="_mfaEnrollVerifyCodeForm">
+          <label for="_mfaEnrollPassCode">Enter your code:</label>
+          <input type="text" id="_mfaEnrollPassCode">
+          <button type="button" id="_mfaEnrollVerifyButton" class="btn btn-sm btn-default">
+            Submit
+          </button>
+        </div>
+
+        <!-- security question -->
+        <div class="form-group" id="_mfaEnrollQuestionForm">
+          <div>
+            <!--<label for="mfaEnrollQuestion"></label>-->
+            <select id="_mfaEnrollQuestion"></select>
+          </div>
+          <!--<label for="mfaAnswer">Answer:</label>-->
+          <input type="text" id="_mfaEnrollAnswer" size="40">
+          <button type="button" id="_mfaEnrollQuestionButton" class="btn btn-sm btn-default">
+            Submit
+          </button>
+        </div>
+
+        <div class="form-group" id="_mfaEnrollStatusForm">
+          <span id="_mfaEnrollStatusMessage"></span>
+        </div>
+
+      </div>
       
-      factors_array.push(factor);
-  }
-  
-  // now add the sorted array to the select list
-  factors_array.sort(function(a, b) {
-      return a.sortOrder - b.sortOrder;
-  });
-  
-  for (var i = 0; i < factors_array.length; i++) {
-      var factor = factors_array[i];
-      var option = '<option value="' + factor.factorName + '" data-type="' + factor.factorType + '"';
-      option += '" data-provider="' + factor.provider + '"';
-      option += '>' + factor.factorName + '</option>';
-      $("#factorEnrollList").append(option);
-  }
-}
-
-function factorUserEnrollListOnChange() {
-    hideAllEnrollForms();
-    logEnrollMessage("");
-    var factorName = $("#factorEnrollList option:selected").text();
-    var factorType = $("#factorEnrollList option:selected").data("type");
-    var provider = $("#factorEnrollList option:selected").data("provider");
-    
-    $("#mfaFactorName").val(factorName);
-    $("#mfaFactorType").val(factorType);
-    $("#mfaProvider").val(provider);
-
-    switch (factorName) {
-        case "Okta Verify":
-        case "Okta Verify Push":
-            //$("#mfaEnrollPushForm").show();
-            _enrollPushFactor();
-            break;
-        //case "Okta Verify OTP":
-        case "Google Authenticator":
-            $("#mfaEnrollVerifyCodeForm").show();
-            _enrollTOTPFactor();
-            $("#mfaEnrollPassCode").focus();
-            break;
-        case "SMS":
-            $("#mfaEnrollOTPForm").show();
-            $("#sendEnrollOTPButton").text("Send SMS");
-            $("#mfaEnrollRecipient").focus();
-            break;
-        case "Voice Call":
-            $("#mfaEnrollOTPForm").show();
-            $("#sendEnrollOTPButton").text("Call Me");
-            $("#mfaEnrollRecipient").focus();
-            break;
-        case "Security Question":
-            $("#mfaEnrollQuestionForm").show();
-            $("#mfaEnrollAnswer").focus();
-            break;
-    }
-}
-
-function _enrollPushFactor() {
-    var user_id = $("#userId").val();
-    var factorType = $("#mfaFactorType").val();
-    var provider = $("#mfaProvider").val();
-    var payload = {
-        "user_id": user_id,
-        "factor_type": factorType,
-        "provider": provider
-    };
-    
-    $.ajax({
-        url: "/enroll_push",
-        type: "POST",
-        contentType: "application/json; charset=utf-8",
-        data: JSON.stringify(payload),
-        success: data => {
-            console.log(data);
-            var responseJson = JSON.parse(data);
-            var factorId = responseJson.id;
-            var qrCode = responseJson._embedded.activation._links.qrcode.href;
-            $("#mfaFactorID").val(factorId);
-            $("#mfaEnrollQRCode").attr("src", qrCode);
-            $("#mfaEnrollQRCodeForm").show();
-            
-            // start polling for a response
-            setTimeout(_pollForPushEnrollment, 3000);
-        },
-        error: function(xhr, status, error) {
-            logMessage("Status: " + status + ", message: " + error);
-        }
-    });
-}
-
-function _pollForPushEnrollment() {
-    var user_id = $("#userId").val();
-    var factor_id = $("#mfaFactorID").val();
-    var factor_name = $("#mfaFactorName").val();
-    var payload = {
-      "user_id": user_id,
-      "factor_id": factor_id
-    };
-    
-    $.ajax({
-        url: "/poll_for_push_enrollment",
-        type: "POST",
-        contentType: "application/json; charset=utf-8",
-        data: JSON.stringify(payload),
-        success: data => {
-            console.log(data);
-            var responseJson = JSON.parse(data);
-            var txStatus = responseJson.status;
-            var factorResut = responseJson.factorResult;
-            if (txStatus == "SUCCESS") {
-                logEnrollMessage(factor_name + " successfully enrolled!");
-                finishEnrollment();
-            } else if (factorResut == "WAITING") {
-                logEnrollMessage("Waiting for enrollment");
-                setTimeout(_pollForPushEnrollment, 3000);
-            } else if (factorResut == "TIMEOUT") {
-                logEnrollMessage("Your push notification has timed out");
-                //$("#sendPushButton").text("Resend Push");
-                //$("#sendPushButton").on("click", resendPushClickHandler);
-            }
-        },
-        error: function(xhr, status, error) {
-            logMessage("Status: " + status + ", message: " + error);
-        }
-    });
-}
-
-function _enrollTOTPFactor() {
-    var factorType = $("#mfaFactorType").val();
-    var provider = $("#mfaProvider").val();
-    var payload = {
-        "factor_type": factorType,
-        "provider": provider
-    };
-    //logEnrollMessage("Enrolling");
-    
-    $.ajax({
-        url: "/enroll_totp",
-        type: "POST",
-        contentType: "application/json; charset=utf-8",
-        data: JSON.stringify(payload),
-        success: data => {
-            console.log(data);
-            var responseJson = JSON.parse(data);
-            var factorId = responseJson._embedded.factor.id;
-            var qrCode = responseJson._embedded.activation._links.qrcode.href;
-            $("#mfaFactorID").val(factorId);
-            $("#mfaEnrollQRCode").attr("src", qrCode);
-            $("#mfaEnrollQRCodeForm").show();
-        },
-        error: function(xhr, status, error) {
-            logMessage("Status: " + status + ", message: " + error);
-        }
-    });
-}
-
-// for SMS and voice
-function sendEnrollOTPClickHandler() {
-    var stateToken = $("#mfaStateToken").val();
-    var factorType = $("#mfaFactorType").val();
-    var provider = $("#mfaProvider").val();
-    var phoneNumber = $("#mfaEnrollRecipient").val();
-    var payload = {
-        "state_token": stateToken,
-        "factor_type": factorType,
-        "provider": provider,
-        "phone_number": phoneNumber
-    };
-    
-    $("#mfaEnrollVerifyCodeForm").show();
-    $("#mfaEnrollPassCode").focus();
-    logEnrollMessage("A code has been sent to your device");
-    
-    $.ajax({
-        url: "/enroll_sms_voice",
-        type: "POST",
-        contentType: "application/json; charset=utf-8",
-        data: JSON.stringify(payload),
-        success: data => {
-            console.log(data);
-            var authResponseJson = JSON.parse(data);
-            var factorId = authResponseJson._embedded.factor.id;
-            $("#mfaFactorID").val(factorId);
-        },
-        error: function(xhr, status, error) {
-            logMessage("Status: " + status + ", message: " + error);
-        }
-    });
-}
-
-function verifyEnrollOTPClickHandler() {
-    var factor_name = $("#mfaFactorName").val();
-    var factorId = $("#mfaFactorID").val();
-    var stateToken = $("#mfaStateToken").val();
-    var pass_code = $("#mfaEnrollPassCode").val();
-    var payload = {
-        "factor_id": factorId,
-        "state_token": stateToken,
-        "pass_code": pass_code
-    };
-    console.log(payload);
-    
-    $.ajax({
-        url: "/activate_totp",
-        type: "POST",
-        contentType: "application/json; charset=utf-8",
-        data: JSON.stringify(payload),
-        success: data => {
-            console.log(data);
-            var authResponseJson = JSON.parse(data);
-            if (authResponseJson.errorCode) {
-                logEnrollMessage(authResponseJson.errorSummary);
-            } else if (authResponseJson.status == "SUCCESS") {
-                logEnrollMessage(factor_name + " successfully enrolled!");
-                // get the sessionToken
-                var sessionToken = authResponseJson.sessionToken;
-                // go get OIDC tokens to complete the login
-                saveSessionToken(sessionToken);
-            }
-        },
-        error: function(xhr, status, error) {
-            logMessage("Status: " + status + ", message: " + error);
-        }
-    });
-}
-
-function enrollQuestionClickHandler() {
-    var factor_name = $("#mfaFactorName").val();
-    var stateToken = $("#mfaStateToken").val();
-    var factorType = $("#mfaFactorType").val();
-    var provider = $("#mfaProvider").val();
-    var question = $("#mfaEnrollQuestion").val();
-    var answer = $("#mfaEnrollAnswer").val();
-    var payload = {
-        "state_token": stateToken,
-        "factor_type": factorType,
-        "provider": provider,
-        "question": question,
-        "answer": answer
-    };
-    
-    $.ajax({
-        url: "/enroll_question",
-        type: "POST",
-        contentType: "application/json; charset=utf-8",
-        data: JSON.stringify(payload),
-        success: data => {
-            console.log(data);
-            var authResponseJson = JSON.parse(data);
-            if (authResponseJson.status == "SUCCESS") {
-                logEnrollMessage(factor_name + " successfully enrolled!");
-                saveSessionToken(authResponseJson.sessionToken);
-            }
-        },
-        error: function(xhr, status, error) {
-            logMessage("Status: " + status + ", message: " + error);
-        }
-    });
-}
-
-function finishEnrollment() {
-    $("#mfaFinishEnrollButton").show();
-    setTimeout(function() {
-        logEnrollMessage("");
-    }, 5000);
-}
-
-function finishEnrollClickHandler() {
-    var sessionToken = $("#mfaSessionToken").val();
-    processLogin(sessionToken);
-}
-//]]>
-</script>
+      <div class="modal-footer">
+        <button type="button" id="_mfaFinishEnrollButton" class="btn btn-sm btn-default">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
