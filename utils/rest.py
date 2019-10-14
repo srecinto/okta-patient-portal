@@ -20,7 +20,17 @@ class RestUtil:
 
     @staticmethod
     def execute_get(url, body=None, headers=None):
-        rest_response = requests.get(url, headers=headers, json=body)
+        print("#####")
+        print("url: {}".format(url))
+        print("header: {}".format(headers))
+        print("body: {}".format(body))
+        try:
+            # rest_response = requests.get(url, headers=headers, json=body)
+            rest_response = requests.request("GET", url, headers=headers)
+            rest_response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            print("Exception excute_get(): {}".format(e))
+            raise
         return RestUtil.handle_response_as_json(rest_response)
 
     @staticmethod
