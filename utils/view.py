@@ -219,7 +219,7 @@ def get_modal_options(okta_user_id):
     okta_admin = OktaAdmin(session)
     user = okta_admin.get_user(okta_user_id)
     # print("user: {0}".format(json.dumps(user, indent=4, sort_keys=True)))
-    curent_application = okta_admin.get_user_application_by_current_client_id(user["id"])
+    curent_application = okta_admin.get_user_application_by_current_client_id(okta_user_id)
     # print("curent_application: {0}".format(json.dumps(curent_application, indent=4, sort_keys=True)))
     # print("user: {0}".format(json.dumps(user, indent=4, sort_keys=True)))
     #  Apply Rules based on user and app combo
@@ -379,7 +379,7 @@ def safe_assign_config_item_to_session(key, collection, session):
 
 def get_factor_name(factorType, provider):
     factor_name = factorType
-    
+
     if (factorType == "token:software:totp"):
         if (provider == "GOOGLE"):
             factor_name = "Google Authenticator"
@@ -391,5 +391,5 @@ def get_factor_name(factorType, provider):
         factor_name = "Voice Call"
     elif (factorType == "question"):
         factor_name = "Security Question"
-    
+
     return factor_name

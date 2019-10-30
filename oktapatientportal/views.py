@@ -32,9 +32,9 @@ def index():
     show_mfa_enroll = request.args.get("showMFAEnroll")
     show_bdv = request.args.get("showBDV")
 
-    print("state_token: {0}".format(state_token))
-    print("show_mfa_enroll: {0}".format(state_token))
-    print("show_bdv: {0}".format(state_token))
+    #print("state_token: {0}".format(state_token))
+    #print("show_mfa_enroll: {0}".format(state_token))
+    #print("show_bdv: {0}".format(state_token))
 
     session["current_title"] = "{0} | {1} Home".format(session["base_title"], session["app_title"])
 
@@ -354,7 +354,7 @@ def resend_push():
 
     body = request.get_json()
     factor_id = body["factor_id"]
-    
+
     if "state_token" in body:
         okta_auth = OktaAuth(session)
         state_token = body["state_token"]
@@ -363,7 +363,7 @@ def resend_push():
         okta_admin = OktaAdmin(session)
         user_id = body["user_id"]
         response = okta_admin.resend_push(user_id, factor_id)
-        
+
     return json.dumps(response)
 
 @app.route("/verify_answer", methods=["POST"])
@@ -440,7 +440,10 @@ def get_enrolled_factors(user_id):
                 continue
         elif (factorType == "push"):
             factor["name"] = "Okta Verify"
-            factor["profile"] = f["profile"]["name"]
+            if "profile" in f:
+                factor["profile"] = f["profile"]["name"]
+            else:
+                factor["profile"] = None
             factor["sortOrder"] = 10
         elif (factorType == "sms"):
             factor["name"] = "SMS"
@@ -471,12 +474,12 @@ def get_available_factors(user_id):
         if f["status"] == "NOT_SETUP":
             factorType = f["factorType"]
             provider = f["provider"]
-            
+
             try:
                 phone_number = f["_embedded"]["phones"][0]["profile"]["phoneNumber"]
             except:
                 phone_number = None
-            
+
             factor = {
                 "factorType": factorType,
                 "provider": provider,
@@ -545,7 +548,7 @@ def poll_for_push_enrollment():
 @app.route("/enroll_totp", methods=["POST"])
 def enroll_totp():
     print("enroll_totp()")
-    
+
     body = request.get_json()
     factor_type = body["factor_type"]
     provider = body["provider"]
@@ -564,12 +567,12 @@ def enroll_totp():
 @app.route("/enroll_sms_voice", methods=["POST"])
 def enroll_sms_voice():
     print("enroll_sms_voice()")
-    
+
     body = request.get_json()
     factor_type = body["factor_type"]
     provider = body["provider"]
     phone_number = body["phone_number"]
-    
+
     if "state_token" in body:
         okta_auth = OktaAuth(session)
         state_token = body["state_token"]
@@ -578,7 +581,7 @@ def enroll_sms_voice():
         okta_admin = OktaAdmin(session)
         user_id = body["user_id"]
         response = okta_admin.enroll_sms_voice(user_id, factor_type, provider, phone_number)
-        
+
     return json.dumps(response)
 
 @app.route("/enroll_question", methods=["POST"])
@@ -599,18 +602,18 @@ def enroll_question():
         okta_admin = OktaAdmin(session)
         user_id = body["user_id"]
         response = okta_admin.enroll_question(user_id, factor_type, provider, question, answer)
-        
+
     return json.dumps(response)
 
 @app.route("/list_available_questions", methods=["POST"])
 def list_available_questions():
     print("list_available_questions()")
     okta_admin = OktaAdmin(session)
-    
+
     body = request.get_json()
     user_id = body["user_id"]
     response = okta_admin.list_available_questions(user_id)
-    
+
     return json.dumps(response)
 
 @app.route("/activate_totp", methods=["POST"])
@@ -620,7 +623,7 @@ def activate_totp():
     body = request.get_json()
     factor_id = body["factor_id"]
     pass_code = body["pass_code"]
-    
+
     if "state_token" in body:
         okta_auth = OktaAuth(session)
         state_token = body["state_token"]
@@ -629,7 +632,7 @@ def activate_totp():
         okta_admin = OktaAdmin(session)
         user_id = body["user_id"]
         response = okta_admin.activate_totp(user_id, factor_id, pass_code)
-        
+
     return json.dumps(response)
 
 @app.route("/reset_factor/<user_id>/<factor_id>", methods=["GET"])
@@ -637,9 +640,9 @@ def reset_factor(user_id, factor_id):
     print("reset_factor()")
     okta_admin = OktaAdmin(session)
     response = okta_admin.delete_factor(user_id, factor_id)
-    
+
     return json.dumps(response)
-    
+
 """
 end MFA enrollment routes
 """
@@ -682,57 +685,71 @@ def register_basic():
     }
 
     okta_admin = OktaAdmin(session)
-    patient_group = okta_admin.get_groups_by_name(
-        "{0}_{1}_patient".format(
-            session["udp_subdomain"],
-            session["demo_app_name"]))[0]  # Default to first found group by name
+    group_name_lookup = "{0}_{1}_patient".format(
+                            session["udp_subdomain"],
+                            session["demo_app_name"])
+    print("group_name_lookup: {0}".format(group_name_lookup))
 
-    user = {
-        "profile": {
-            "firstName": "NOT_SET",
-            "lastName": "NOT_SET",
-            "email": login_form_data["username"],
-            "login": session["login_id_prefix"] + login_form_data["username"]
-        },
-        "credentials": {
-            "password": {"value": login_form_data["password"]}
-        },
-        "groupIds": [
-            patient_group["id"]
-        ]
-    }
-    print("user: {0}".format(json.dumps(user, indent=4, sort_keys=True)))
-    created_user = okta_admin.create_user(user)
-    print("created_user: {0}".format(json.dumps(created_user, indent=4, sort_keys=True)))
+    patient_groups_response = okta_admin.get_groups_by_name(group_name_lookup)
+    print("patient_groups_response: {0}".format(json.dumps(patient_groups_response, indent=4, sort_keys=True)))
 
-    if "errorSummary" in created_user:
-        register_basic_response["errorMessage"] = created_user["errorSummary"]
-        if "errorCauses" in created_user:
+    if "errorSummary" in patient_groups_response:
+        register_basic_response["errorMessage"] = patient_groups_response["errorSummary"]
+        if "errorCauses" in patient_groups_response:
             register_basic_response["errorMessages"] = []
-            for error_cause in created_user["errorCauses"]:
+            for error_cause in patient_groups_response["errorCauses"]:
                 register_basic_response["errorMessages"].append({
                     "errorMessage": error_cause["errorSummary"]
                 })
-
     else:
-        #  Send activation email
-        recipients = [{"address": {"email": created_user["profile"]["email"]}}]
-        substitution = {
-            "activation_email": created_user["profile"]["email"],
-            "activation_key": created_user["id"],
-            "udp_subdomain": session["udp_subdomain"],
-            "udp_app_name": session["demo_app_name"],
-            "domain": session["remaining_domain"],
-            "logo_url": session["app_logo"]
+        patient_group = patient_groups_response[0]  # Default to first found group by name
+
+        user = {
+            "profile": {
+                "firstName": "NOT_SET",
+                "lastName": "NOT_SET",
+                "email": login_form_data["username"],
+                "login": session["login_id_prefix"] + login_form_data["username"]
+            },
+            "credentials": {
+                "password": {"value": login_form_data["password"]}
+            },
+            "groupIds": [
+                patient_group["id"]
+            ]
         }
+        print("user: {0}".format(json.dumps(user, indent=4, sort_keys=True)))
+        created_user = okta_admin.create_user(user)
+        print("created_user: {0}".format(json.dumps(created_user, indent=4, sort_keys=True)))
 
-        send_mail(
-            session["spark_post_activate_template_id"],
-            recipients,
-            session["spark_post_api_key"],
-            substitution)
+        if "errorSummary" in created_user:
+            register_basic_response["errorMessage"] = created_user["errorSummary"]
+            if "errorCauses" in created_user:
+                register_basic_response["errorMessages"] = []
+                for error_cause in created_user["errorCauses"]:
+                    register_basic_response["errorMessages"].append({
+                        "errorMessage": error_cause["errorSummary"]
+                    })
 
-        register_basic_response["success"] = True
+        else:
+            #  Send activation email
+            recipients = [{"address": {"email": created_user["profile"]["email"]}}]
+            substitution = {
+                "activation_email": created_user["profile"]["email"],
+                "activation_key": created_user["id"],
+                "udp_subdomain": session["udp_subdomain"],
+                "udp_app_name": session["demo_app_name"],
+                "domain": session["remaining_domain"],
+                "logo_url": session["app_logo"]
+            }
+
+            send_mail(
+                session["spark_post_activate_template_id"],
+                recipients,
+                session["spark_post_api_key"],
+                substitution)
+
+            register_basic_response["success"] = True
 
     return json.dumps(register_basic_response)
 
