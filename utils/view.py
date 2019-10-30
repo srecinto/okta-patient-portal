@@ -379,7 +379,7 @@ def safe_assign_config_item_to_session(key, collection, session):
 
 def get_factor_name(factorType, provider):
     factor_name = factorType
-    
+
     if (factorType == "token:software:totp"):
         if (provider == "GOOGLE"):
             factor_name = "Google Authenticator"
@@ -391,5 +391,5 @@ def get_factor_name(factorType, provider):
         factor_name = "Voice Call"
     elif (factorType == "question"):
         factor_name = "Security Question"
-    
+
     return factor_name
