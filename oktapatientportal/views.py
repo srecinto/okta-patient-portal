@@ -750,6 +750,7 @@ def register_basic():
                 substitution)
 
             register_basic_response["success"] = True
+            register_basic_response["userId"] = created_user["id"]
 
     return json.dumps(register_basic_response)
 
