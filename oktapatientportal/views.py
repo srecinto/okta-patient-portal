@@ -183,10 +183,13 @@ def oidc():
     """ handler for the oidc call back of the app """
     print("oidc()")
     response = None
-    #  print(request.form)
+    print(request.form)
+    has_app_level_mfa_policy = False
 
     if "error" in request.form:
         print("ERROR: {0}, MESSAGE: {1}".format(request.form["error"], request.form["error_description"]))
+        if ("The client specified not to prompt, but the client app requires re-authentication or MFA." == request.form["error_description"]):
+            has_app_level_mfa_policy = True
 
     # if session["state"] == request.form["state"]:
     if "code" in request.form:
@@ -210,16 +213,29 @@ def oidc():
         response.set_cookie('id_token', oauth_token["id_token"])
     elif "error" in request.form:
         # Error occured with Accessing the patient portal
-        response = make_response(
-            render_template(
-                "error.html",
-                site_config=session,
-                error_message="Failed to Authenticate.  Check to make sure the user has patient access to the application. Error: {0} - {1}".format(
-                    request.form["error"],
-                    request.form["error_description"]
-                    )
+
+        if has_app_level_mfa_policy:
+            response = make_response(
+                render_template(
+                    "error.html",
+                    site_config=session,
+                    error_message="Failed to Authenticate.  Please remove App Level MFA Policy and use a Global MFA Policy. Error: {0} - {1}".format(
+                        request.form["error"],
+                        request.form["error_description"]
+                        )
+                )
             )
-        )
+        else:
+            response = make_response(
+                render_template(
+                    "error.html",
+                    site_config=session,
+                    error_message="Failed to Authenticate.  Check to make sure the user has patient access to the application. Error: {0} - {1}".format(
+                        request.form["error"],
+                        request.form["error_description"]
+                        )
+                )
+            )
     else:
         # catch all error
         response = make_response(
