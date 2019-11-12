@@ -236,6 +236,7 @@ def oidc():
 
 
 @app.route('/login', methods=["POST"])
+@apply_remote_config
 def login():
     """ Handle either full form post redirect or a json response with redirect url """
     print("login()")
@@ -245,6 +246,7 @@ def login():
 
 
 @app.route('/login/<session_id>', methods=["POST"])
+@apply_remote_config
 def login_clear_session(session_id=None):
     """ Handle either full form post redirect or a json response with redirect url """
     print("login_clear_session()")
@@ -258,6 +260,7 @@ def login_clear_session(session_id=None):
 
 
 @app.route('/login-token/<token>', methods=["POST"])
+@apply_remote_config
 def login_token(token):
     """ Handle either full form post redirect or a json response with redirect url """
     print("login_token()")
@@ -283,6 +286,7 @@ def login_token(token):
 
 
 @app.route("/logout", methods=["GET"])
+@apply_remote_config
 def logout():
     print("logout()")
     app_base_url = request.url_root
