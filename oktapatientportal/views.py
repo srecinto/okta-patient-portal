@@ -887,6 +887,7 @@ def activate(user_id, okta_session_id):
 
 
 @app.route("/activate-account/<user_id>", methods=["GET"])
+@apply_remote_config
 def activate_account(user_id):
     print("activate_account()")
     print("user_id: {0}".format(user_id))
