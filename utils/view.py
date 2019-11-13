@@ -6,7 +6,7 @@ import os
 from oktapatientportal import default_settings
 
 from functools import wraps
-from flask import request, session, make_response, redirect
+from flask import request, session, make_response, redirect, render_template
 
 from utils.rest import RestUtil
 from utils.okta import OktaAuth, OktaAdmin
@@ -75,6 +75,15 @@ def apply_remote_config(f):
                 session["is_config_set"] = True
             else:
                 print("Failed to load remote config from: {0}".format(well_known_default_settings_url))
+                response = make_response(
+                    render_template(
+                        "error.html",
+                    site_config=session,
+                    error_message="Subdomain '{0}' is not configured.  Check to make sure it is correct.".format(session["udp_subdomain"])
+                    )
+                )
+
+                return response
 
             print("Session Dump: {0}".format(session))
 
@@ -155,7 +164,7 @@ def map_config(config, session):
     safe_assign_config_item_to_session("spark_post_activate_template_id", config["settings"], session)
     safe_assign_config_item_to_session("login_id_prefix", config["settings"], session)
 
-    # Override the REdirect URI with the environment variable
+    # Override the Redirect URI with the environment variable
     session["redirect_uri"] = os.getenv("OKTA_OIDC_REDIRECT_URI", session["redirect_uri"])
 
 
