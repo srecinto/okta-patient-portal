@@ -921,7 +921,7 @@
           smsRecovery: true,
           callRecovery: true,
           deviceFingerprinting: true,
-          //idpDiscovery: true
+          idpDiscovery: true
         },
         helpLinks: {
           help: "/help",
@@ -946,6 +946,12 @@
             console.log("Session Active");
             //console.log(res);
             $("#sessionId").val(res.id);
+
+            var getNewTokenUrl = "{{getNewTokenUrl|safe}}";
+
+            if (getNewTokenUrl != "") {
+              location.href=getNewTokenUrl;
+            }
 
             if($("#okta-login-full-container")) {
               $("#okta-login-full-container").html("<a href=\"/logout\">Sign Out</a> of the exsisting session.");

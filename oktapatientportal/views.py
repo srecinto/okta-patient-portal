@@ -11,6 +11,7 @@ from datetime import datetime
 from utils.okta import OktaAuth, OktaAdmin
 from utils.view import apply_remote_config, handle_invalid_tokens, send_mail, create_login_response
 from utils.view import get_claims_from_token, authenticated, get_modal_options, get_factor_name
+from utils.view import get_oauth_authorize_url
 
 
 @app.route('/<path:filename>')
@@ -31,6 +32,7 @@ def index():
     state_token = request.args.get("stateToken")
     show_mfa_enroll = request.args.get("showMFAEnroll")
     show_bdv = request.args.get("showBDV")
+    getNewTokenUrl = ""
 
     #print("state_token: {0}".format(state_token))
     #print("show_mfa_enroll: {0}".format(state_token))
@@ -54,6 +56,9 @@ def index():
                 # print("user: {0}".format(user))
                 modal_options = get_modal_options(id_token_claims["sub"])
 
+    if not user:
+        getNewTokenUrl = get_oauth_authorize_url()
+
     response = make_response(
         render_template(
             "index.html",
@@ -63,7 +68,8 @@ def index():
             state_token=state_token,
             show_mfa_enroll=show_mfa_enroll,
             show_bdv=show_bdv,
-            okta_widget_container_id="okta-login-container"
+            okta_widget_container_id="okta-login-container",
+            getNewTokenUrl=getNewTokenUrl
         )
     )
 
@@ -102,7 +108,8 @@ def get_profile():
             app_user=app_user_profile,
             factors=factors,
             claims=id_token_claims,
-            okta_widget_container_id="okta-login-container"
+            okta_widget_container_id="okta-login-container",
+            getNewTokenUrl=""
         )
     )
 
@@ -141,7 +148,8 @@ def login_form():
             user=user,
             modal_options=modal_options,
             state_token=state_token,
-            okta_widget_container_id="okta-login-full-container"
+            okta_widget_container_id="okta-login-full-container",
+            getNewTokenUrl=""
         )
     )
 
@@ -169,7 +177,8 @@ def help():
             user=user,
             modal_options=modal_options,
             state_token=state_token,
-            okta_widget_container_id="okta-login-full-container"
+            okta_widget_container_id="okta-login-full-container",
+            getNewTokenUrl=""
         )
     )
 
@@ -286,16 +295,7 @@ def login_token(token):
     if token:
         okta_auth = OktaAuth(session)
         session["state"] = str(uuid.uuid4())
-        redirect_url = okta_auth.create_oauth_authorize_url(
-            response_type="code",
-            state=session["state"],
-            auth_options={
-                "response_mode": "form_post",
-                "prompt": "none",
-                "scope": "openid profile email",
-                "sessionToken": token,
-            }
-        )
+        redirect_url = get_oauth_authorize_url(token)
         # print("redirect_url: {0}".format(redirect_url))
 
     return make_response(redirect(redirect_url))
@@ -407,16 +407,7 @@ def get_authorize_url():
     body = request.get_json()
     session_token = body["session_token"]
     session["state"] = str(uuid.uuid4())
-    oauth_authorize_url = okta_auth.create_oauth_authorize_url(
-        response_type="code",
-        state=session["state"],
-        auth_options={
-            "response_mode": "form_post",
-            "prompt": "none",
-            "scope": "openid profile email",
-            "sessionToken": session_token
-        }
-    )
+    oauth_authorize_url = get_oauth_authorize_url(session_token)
 
     response = {
         "authorize_url": oauth_authorize_url
@@ -922,7 +913,8 @@ def activate_account(user_id):
             site_config=session,
             user=user,
             modal_options=modal_options,
-            user_id=user_id
+            user_id=user_id,
+            getNewTokenUrl=""
         )
     )
 
