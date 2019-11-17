@@ -338,18 +338,21 @@ def create_login_response(user_name, password, session):
             session["udp_subdomain"],
             session["demo_app_name"]
         )
-        #print("patient_group_name: {0}".format(patient_group_name))
-        patient_group = okta_admin.get_groups_by_name(patient_group_name)[0]
-        #print("patient_group: {0}".format(json.dumps(patient_group, indent=4, sort_keys=True)))
-
-        user_groups = okta_admin.get_user_groups(user_id)
-        #print("user_groups: {0}".format(json.dumps(user_groups, indent=4, sort_keys=True)))
+        print("patient_group_name: {0}".format(patient_group_name))
+        patient_groups = okta_admin.get_groups_by_name(patient_group_name)
         has_patient_group = False
 
-        for group in user_groups:
-            if patient_group["id"] == group["id"]:
-                has_patient_group = True
-                break
+        if len(patient_groups != 0):
+            patient_group = okta_admin.get_groups_by_name(patient_group_name)[0]
+            #print("patient_group: {0}".format(json.dumps(patient_group, indent=4, sort_keys=True)))
+
+            user_groups = okta_admin.get_user_groups(user_id)
+            #print("user_groups: {0}".format(json.dumps(user_groups, indent=4, sort_keys=True)))
+
+            for group in user_groups:
+                if patient_group["id"] == group["id"]:
+                    has_patient_group = True
+                    break
 
         if not has_patient_group:
             # Assign User to group
@@ -402,3 +405,28 @@ def get_factor_name(factorType, provider):
         factor_name = "Security Question"
 
     return factor_name
+
+
+def get_oauth_authorize_url(okta_session_token=None):
+    print("get_oauth_authorize_url()")
+    okta_auth = OktaAuth(session)
+
+    auth_options = {
+        "response_mode": "form_post",
+        "prompt": "none",
+        "scope": "openid profile email"
+    }
+
+    if "state" not in session:
+        session["state"] = str(uuid.uuid4())
+
+    if okta_session_token:
+        auth_options["sessionToken"] = okta_session_token
+
+    oauth_authorize_url = okta_auth.create_oauth_authorize_url(
+            response_type="code",
+            state=session["state"],
+            auth_options=auth_options
+        )
+
+    return oauth_authorize_url
