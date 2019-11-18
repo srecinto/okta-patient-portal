@@ -342,7 +342,7 @@ def create_login_response(user_name, password, session):
         patient_groups = okta_admin.get_groups_by_name(patient_group_name)
         has_patient_group = False
 
-        if len(patient_groups != 0):
+        if len(patient_groups)  != 0:
             patient_group = okta_admin.get_groups_by_name(patient_group_name)[0]
             #print("patient_group: {0}".format(json.dumps(patient_group, indent=4, sort_keys=True)))
 
