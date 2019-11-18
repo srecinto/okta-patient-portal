@@ -965,6 +965,11 @@
                 if (res.status === 'SUCCESS') {
                   console.log("data: %s", JSON.stringify(res));
                 }
+                else if (res.status === 'IDP_DISCOVERY') {
+                  console.log(res);
+                  res.idpDiscovery.redirectToIdp('/a/app/request/context');
+                  return;
+                }
               }
             );
           }
