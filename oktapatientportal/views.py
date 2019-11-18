@@ -867,11 +867,16 @@ def register_alt():
 def activate(user_id, okta_session_id):
     print("activate(user_id, okta_session_id)")
 
+    activation_response = {}
     auth_response = make_response(redirect("/"))
 
     okta_admin = OktaAdmin(session)
-    activation_response = okta_admin.activate_user(user_id, send_email=False)
-    print("activation_response: {0}".format(json.dumps(activation_response, indent=4, sort_keys=True)))
+
+    user = okta_admin.get_user(user_id)
+
+    if user:
+        activation_response = okta_admin.activate_user(user_id, send_email=False)
+        print("activation_response: {0}".format(json.dumps(activation_response, indent=4, sort_keys=True)))
 
     if "okta_session_id":
         print("Clearing exsisting session")
