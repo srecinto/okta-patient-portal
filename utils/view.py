@@ -46,7 +46,7 @@ def apply_remote_config(f):
             well_known_default_settings_url = get_configs_url(session["udp_subdomain"], session["demo_app_name"])
             print("well_known_default_settings_url: {0}".format(well_known_default_settings_url))
 
-            config_json = RestUtil.execute_get(well_known_default_settings_url, {}, json_headers)
+            config_json = RestUtil.execute_get(well_known_default_settings_url, json_headers)
             print("config_json: {0}".format(json.dumps(config_json, indent=4, sort_keys=True)))
 
             # If invalid response, default to default / environment setting
@@ -60,7 +60,7 @@ def apply_remote_config(f):
                     subdomain_config_url = subdomain_config_url.format(udp_subdomain=session["udp_subdomain"])
                     # print("subdomain_config_url: {0}".format(subdomain_config_url))
                     # print("json_headers: {0}".format(json_headers))
-                    subdomain_config_json = RestUtil.execute_get(subdomain_config_url, {}, json_headers)
+                    subdomain_config_json = RestUtil.execute_get(subdomain_config_url, json_headers)
                     print("subdomain_config_json: {0}".format(json.dumps(subdomain_config_json, indent=4, sort_keys=True)))
                     if "okta_api_token" in subdomain_config_json:
                         session["okta_api_token"] = subdomain_config_json["okta_api_token"]

@@ -19,8 +19,8 @@ class RestUtil:
         return RestUtil.handle_response_as_json(rest_response)
 
     @staticmethod
-    def execute_get(url, body=None, headers=None):
-        rest_response = requests.get(url, headers=headers, json=body)
+    def execute_get(url, headers=None):
+        rest_response = requests.get(url, headers=headers)
         return RestUtil.handle_response_as_json(rest_response)
 
     @staticmethod
