@@ -48,16 +48,10 @@
 
     <!-- Latest CDN production Javascript and CSS -->
     <script
-      src="https://ok1static.oktacdn.com/assets/js/sdk/okta-signin-widget/2.16.0/js/okta-sign-in.min.js"
+      src="https://global.oktacdn.com/okta-signin-widget/3.4.2/js/okta-sign-in.min.js"
       type="text/javascript"></script>
     <link
-      href="https://ok1static.oktacdn.com/assets/js/sdk/okta-signin-widget/2.16.0/css/okta-sign-in.min.css"
-      type="text/css"
-      rel="stylesheet"/>
-
-    <!-- Theme file: Customize or replace this file if you want to override our default styles -->
-    <link
-      href="https://ok1static.oktacdn.com/assets/js/sdk/okta-signin-widget/2.16.0/css/okta-theme.css"
+      href="https://global.oktacdn.com/okta-signin-widget/3.4.2/css/okta-sign-in.min.css"
       type="text/css"
       rel="stylesheet"/>
 
@@ -921,7 +915,10 @@
           smsRecovery: true,
           callRecovery: true,
           deviceFingerprinting: true,
-          idpDiscovery: true
+          idpDiscovery: true,
+        },
+        idpDiscovery: {
+          requestContext: "/home/bookmark/0oaqh3gs7dY8I83os0h7/1280"
         },
         helpLinks: {
           help: "/help",
@@ -939,7 +936,8 @@
 
 
 
-        oktaSignIn.session.get(function (res) {
+        oktaSignIn.authClient.session.get()
+          .then(function (res) {
           // Session exists, show logged in state.
           if (res.status === 'ACTIVE') {
             // showApp()
@@ -967,12 +965,16 @@
                 }
                 else if (res.status === 'IDP_DISCOVERY') {
                   console.log(res);
-                  res.idpDiscovery.redirectToIdp('/a/app/request/context');
+                  res.idpDiscovery.redirectToIdp();
                   return;
                 }
               }
             );
           }
+        })
+        .catch(function(err) {
+          console.log("FAIL");
+          console.log(err);
         });
 
       });
