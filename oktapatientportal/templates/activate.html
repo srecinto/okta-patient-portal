@@ -39,46 +39,35 @@
 //<![CDATA[
 $(document).ready(function() {
     console.log("Ready!!!");
-    /*
-    $.get({
-        url: "{{site_config.okta_org_name}}/api/v1/sessions/me",
-        xhrFields: { withCredentials: true },
-        crossDomain: true,
-        success: data => {
-            console.log("data: %s", JSON.stringify(data));
 
-            if (data.id) {
-                location.href = "/activate/{{user_id}}/" + data.id;
-            } else {
-                console.log("No active session");
+    oktaSignIn.authClient.session.get()
+      .then(function(session) {
+        // Session exists, show logged in state.
+        if (session.status === 'ACTIVE') {
+          // showApp()
+          console.log("Session Active");
+          oktaSignIn.authClient.closeSession()
+            .then(() => {
+                // The user is now logged out.
                 location.href = "/activate/{{user_id}}";
-            }
-        },
-        error: () => {
-          console.log("No active session");
+            })
+            .catch(e => {
+                if (e.xhr && e.xhr.status === 429) {
+                    // Too many requests
+                    console.log("Failed to close the session (if it exsists) otherwise fine");
+                    console.log(err);
+                }
+            })
+
+        } else if (session.status === 'INACTIVE') {
+          console.log("Session Not Active");
           location.href = "/activate/{{user_id}}";
         }
-    });*/
-
-    oktaSignIn.authClient.session.get(function (res) {
-      // Session exists, show logged in state.
-      if (res.status === 'ACTIVE') {
-        // showApp()
-        console.log("Session Active");
-        oktaSignIn.authClient.session.close(function (err) {
-          if (err) {
-            // The user has not been logged out, perform some error handling here.
-            console.log("Failed to close the session (if it exsists) otherwise fine");
-            console.log(err);
-          }
-          // The user is now logged out.
-            location.href = "/activate/{{user_id}}";
-        });
-      } else if (res.status === 'INACTIVE') {
-        console.log("Session Not Active");
-        location.href = "/activate/{{user_id}}";
-      }
-	});
+      })
+      .catch(function(err) {
+        console.log("Failed to retrive session: ");
+        console.log(err);
+      });
 });
 //]]>
 </script>
