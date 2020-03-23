@@ -105,12 +105,12 @@ function loginClickHandler() {
 	    url = "/login/" + $("#sessionId").val();
 	}
 
-	oktaSignIn.session.get(function (res) {
+	oktaSignIn.authClient.session.get(function (res) {
       // Session exists, show logged in state.
       if (res.status === 'ACTIVE') {
         // showApp()
         console.log("Session Active");
-        oktaSignIn.session.close(function (err) {
+        oktaSignIn.authClient.session.close(function (err) {
           if (err) {
             // The user has not been logged out, perform some error handling here.
             console.log("Failed to close the session (if it exsists) otherwise fine");
@@ -131,7 +131,7 @@ function callLogin(url) {
         "username": $("#username").val(),
         "password": $("#password").val()
     };
-    
+
     $.ajax({
         url: url,
         type: "POST",
@@ -972,12 +972,12 @@ function registerUserClickHandler() {
     	    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Processing...'
     	);
 
-    	oktaSignIn.session.get(function (res) {
+    	oktaSignIn.authClient.session.get(function (res) {
           // Session exists, show logged in state.
           if (res.status === 'ACTIVE') {
             // showApp()
             console.log("Session Active");
-            oktaSignIn.session.close(function (err) {
+            oktaSignIn.authClient.session.close(function (err) {
               if (err) {
                 // The user has not been logged out, perform some error handling here.
                 console.log("Failed to close the session (if it exsists) otherwise fine");
