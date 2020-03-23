@@ -105,25 +105,34 @@ function loginClickHandler() {
 	    url = "/login/" + $("#sessionId").val();
 	}
 
-	oktaSignIn.authClient.session.get(function (res) {
-      // Session exists, show logged in state.
-      if (res.status === 'ACTIVE') {
-        // showApp()
-        console.log("Session Active");
-        oktaSignIn.authClient.session.close(function (err) {
-          if (err) {
-            // The user has not been logged out, perform some error handling here.
-            console.log("Failed to close the session (if it exsists) otherwise fine");
+	oktaSignIn.authClient.session.get()
+        .then(function(session) {
+              // Session exists, show logged in state.
+              if (session.status === 'ACTIVE') {
+                // showApp()
+                console.log("Session Active");
+
+                oktaSignIn.authClient.closeSession()
+                  .then(() => {
+                      // The user is now logged out.
+                      callLogin(url);
+                  })
+                  .catch(e => {
+                      if (e.xhr && e.xhr.status === 429) {
+                          // Too many requests
+                          console.log("Failed to close the session (if it exsists) otherwise fine");
+                          console.log(err);
+                      }
+                  })
+              } else if (session.status === 'INACTIVE') {
+                console.log("Session Not Active");
+                callLogin(url);
+              }
+	    })
+	    .catch(function(err) {
+            console.log("Failed to retrive session: ");
             console.log(err);
-          }
-          // The user is now logged out.
-            callLogin(url);
         });
-      } else if (res.status === 'INACTIVE') {
-        console.log("Session Not Active");
-        callLogin(url);
-      }
-	});
 }
 
 function callLogin(url) {
@@ -972,25 +981,29 @@ function registerUserClickHandler() {
     	    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Processing...'
     	);
 
-    	oktaSignIn.authClient.session.get(function (res) {
-          // Session exists, show logged in state.
-          if (res.status === 'ACTIVE') {
-            // showApp()
-            console.log("Session Active");
-            oktaSignIn.authClient.session.close(function (err) {
-              if (err) {
-                // The user has not been logged out, perform some error handling here.
-                console.log("Failed to close the session (if it exsists) otherwise fine");
-                console.log(err);
+    	oktaSignIn.authClient.session.get()
+    	    .then(function(session) {
+              // Session exists, show logged in state.
+              if (session.status === 'ACTIVE') {
+                // showApp()
+                console.log("Session Active");
+                oktaSignIn.authClient.closeSession()
+                    .then(() => {
+                        invokeRegisterBasic()
+                    })
+                    .catch(err => {
+                        console.log("Failed to close the session (if it exsists) otherwise fine");
+                        console.log(err);
+                    });
+              } else if (session.status === 'INACTIVE') {
+                console.log("Session Not Active");
+                invokeRegisterBasic();
               }
-              // The user is now logged out.
-                invokeRegisterBasic()
+        	})
+        	.catch(function(err) {
+                console.log("Failed to retrive session: ");
+                console.log(err);
             });
-          } else if (res.status === 'INACTIVE') {
-            console.log("Session Not Active");
-            invokeRegisterBasic();
-          }
-    	});
     } else {
         alert(errorMessage);
     }
