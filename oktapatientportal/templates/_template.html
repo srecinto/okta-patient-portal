@@ -918,7 +918,7 @@
           idpDiscovery: true,
         },
         idpDiscovery: {
-          requestContext: "https://129d0ea5cbda4893ad55597390c93a07.vfs.cloud9.us-east-1.amazonaws.com/"
+          requestContext: "/home/bookmark/0oaqh3gs7dY8I83os0h7/1280"
         },
         helpLinks: {
           help: "/help",
@@ -965,7 +965,7 @@
                 }
                 else if (res.status === 'IDP_DISCOVERY') {
                   console.log(res);
-                  res.idpDiscovery.redirectToIdp('/a/app/request/context');
+                  res.idpDiscovery.redirectToIdp();
                   return;
                 }
               }
