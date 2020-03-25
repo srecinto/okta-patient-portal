@@ -1163,7 +1163,11 @@ function submitRegistrationAlt1ClickHandler() {
                 var responseJson = JSON.parse(data);
 
                 if(responseJson.success) {
-                	$("#userNameLabel").html(responseJson.user.profile.firstName + " " + responseJson.user.profile.lastName);
+                    if(responseJson.user.profile) {
+                	    $("#userNameLabel").html(responseJson.user.profile.firstName + " " + responseJson.user.profile.lastName);
+                    } else if(responseJson.app_user.profile) {
+                        $("#userNameLabel").html(responseJson.app_user.profile.firstName + " " + responseJson.app_user.profile.lastName);
+                    }
                 	$("#registrationAlt1Modal").modal("hide");
                 	$("#finalRegistrationCompleteModal").modal("show");
                 } else {
