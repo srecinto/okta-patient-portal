@@ -1166,7 +1166,7 @@ function submitRegistrationAlt1ClickHandler() {
                     if(responseJson.user.profile) {
                 	    $("#userNameLabel").html(responseJson.user.profile.firstName + " " + responseJson.user.profile.lastName);
                     } else if(responseJson.app_user.profile) {
-                        $("#userNameLabel").html(responseJson.app_user.profile.firstName + " " + responseJson.app_user.profile.lastName);
+                        $("#userNameLabel").html(responseJson.app_user.profile.name);
                     }
                 	$("#registrationAlt1Modal").modal("hide");
                 	$("#finalRegistrationCompleteModal").modal("show");
