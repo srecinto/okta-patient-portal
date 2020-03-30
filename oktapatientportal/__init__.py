@@ -1,7 +1,7 @@
 import os
 
 from flask import Flask
-from flask_sslify import SSLify
+# from flask_sslify import SSLify
 
 default_settings = {
     "client_id": os.getenv("OKTA_CLIENT_ID", "-Client Id in Okta App-"),
@@ -33,7 +33,7 @@ default_settings = {
 app = Flask(__name__)
 app.config["SECRET_KEY"] = default_settings["app_secret_key"]
 
-sslify = SSLify(app, permanent=True, subdomains=True)
+# sslify = SSLify(app, permanent=True, subdomains=True)
 
 # This must go last to avoid the circular dependency issue
 
